@@ -1,0 +1,510 @@
+{
+  "$schema": "https://sonos.svrooij.io/schema/documentation.json",
+  "language": "EN",
+  "license": "MIT",
+  "services": {
+    "AlarmClockService": {
+      "description": "Control the sonos alarms and times",
+      "actions": {
+        "CreateAlarm": {
+          "description": "Create a single alarm, all properties are required",
+          "params": {
+            "StartLocalTime": "The start time as `hh:mm:ss`",
+            "Duration": "The duration as `hh:mm:ss`",
+            "Recurrence": "Repeat this alarm on",
+            "Enabled": "Alarm enabled after creation",
+            "RoomUUID": "The UUID of the speaker you want this alarm for",
+            "ProgramURI": "The sound uri",
+            "ProgramMetaData": "The sound metadata, can be empty string",
+            "PlayMode": "Alarm play mode",
+            "Volume": "Volume between 0 and 100",
+            "IncludeLinkedZones": "Should grouped players also play the alarm?",
+            "AssignedID": "The ID of the new alarm"
+          },
+          "sample": {
+            "StartLocalTime": "07:00:00",
+            "Duration": "00:30:00",
+            "Recurrence": "DAILY",
+            "Enabled": "1",
+            "RoomUUID": "RINCON_000E58FE3AEA01400",
+            "ProgramURI": "x-rincon-buzzer:0",
+            "ProgramMetaData": "",
+            "PlayMode": "NORMAL",
+            "Volume": "20",
+            "IncludeLinkedZones": "1",
+            "AssignedID": "1"
+          }
+        },
+        "DestroyAlarm": {
+          "description": "Delete an alarm",
+          "params": {
+            "ID": "The Alarm ID from ListAlarms"
+          }
+        },
+        "ListAlarms": {
+          "description": "Get the AlarmList as XML",
+          "params": {
+            "CurrentAlarmList": "xml string, see remarks"
+          },
+          "remarks": "Some libraries also provide a ListAndParseAlarms where the alarm list xml is parsed"
+        },
+        "UpdateAlarm": {
+          "description": "Update an alarm, all parameters are required.",
+          "params": {
+            "ID": "The ID of the alarm see ListAlarms",
+            "StartLocalTime": "The start time as `hh:mm:ss`",
+            "Duration": "The duration as `hh:mm:ss`",
+            "Recurrence": "Repeat this alarm on",
+            "Enabled": "Alarm enabled after creation",
+            "RoomUUID": "The UUID of the speaker you want this alarm for",
+            "ProgramURI": "The sound uri",
+            "ProgramMetaData": "The sound metadata, can be empty string",
+            "PlayMode": "Alarm play mode",
+            "Volume": "Volume between 0 and 100",
+            "IncludeLinkedZones": "Should grouped players also play the alarm?"
+          },
+          "remarks": "Some libraries support PatchAlarm where you can update a single parameter"
+        }
+      },
+      "errors": [{ "code": 801, "description": "Duplicate alarm time" }]
+    },
+    "AudioInService": {
+      "description": "Control line in"
+    },
+    "AVTransportService": {
+      "description": "Service that controls stuff related to transport (play/pause/next/special URLs)",
+      "actions": {
+        "AddURIToQueue": {
+          "description": "Adds songs to the SONOS queue",
+          "remarks": "In NORMAL play mode the songs are added prior to the specified `DesiredFirstTrackNumberEnqueued`.",
+          "params": {
+            "DesiredFirstTrackNumberEnqueued": "use `0` to add at the end or `1` to insert at the beginning"
+          }
+        },
+        "BecomeCoordinatorOfStandaloneGroup": {
+          "description": "Leave the current group and revert to a single player."
+        },
+        "ConfigureSleepTimer": {
+          "description": "Stop playing after set sleep timer or cancel",
+          "remarks":"Send to non-coordinator returns error code 800",
+          "params": {
+            "NewSleepTimerDuration": "Time to stop after, as `hh:mm:ss` or empty string to cancel"
+          }
+        },
+        "DelegateGroupCoordinationTo": {
+          "description": "Delegates the coordinator role to another player in the same group",
+          "remarks":"Send to non-coordinator has no results - should be avoided.",
+          "params": {
+            "NewCoordinator": "uuid of the new coordinator - must be in same group",
+            "RejoinGroup": "Should former coordinator rejoin the group?"
+          }
+        },
+        "GetCrossfadeMode": {
+          "description": "Get crossfade mode",
+          "remarks":"Send to non-coordinator may return wrong value as only the coordinator value in a group"
+        },
+        "GetCurrentTransportActions": {
+          "description": "Get current transport actions such as Set, Stop, Pause, Play, X_DLNA_SeekTime, Next, X_DLNA_SeekTrackNr",
+          "remarks":"Send to non-coordinator returns only `Start` and `Stop` since it cannot control the stream."
+        },
+        "GetMediaInfo": {
+          "description": "Get information about the current playing media (queue)"
+        },
+        "GetPositionInfo": {
+          "description": "Get information about current position (position in queue and time in current song)"
+        },
+        "GetRemainingSleepTimerDuration": {
+          "description": "Get time left on sleeptimer.",
+          "remarks":"Send to non-coordinator returns error code 800",
+          "params": {
+            "RemainingSleepTimerDuration": "Format hh:mm:ss or empty string if not set"
+          }
+        },
+        "GetTransportInfo": {
+          "description": "Get current transport status, speed and state such as PLAYING, STOPPED, PLAYING, PAUSED_PLAYBACK, TRANSITIONING, NO_MEDIA_PRESENT",
+          "remarks":"Send to non-coordinator always returns PLAYING"
+        },
+        "GetTransportSettings": {
+          "description": "Get transport settings",
+          "remarks":"Send to non-coordinator returns the settings of it's queue"
+        },
+        "Next": {
+          "description": "Go to next song",
+          "remarks": "Possibly not supported at the moment see GetCurrentTransportActions"
+        },
+        "Pause": {
+          "description": "Pause playback"
+        },
+        "Play": {
+          "description": "Start playing the set TransportURI",
+          "params": {
+            "Speed": "Play speed usually 1, can be a fraction of 1"
+          }
+        },
+        "Previous": {
+          "description": "Go to previous song",
+          "remarks": "Possibly not supported at the moment see GetCurrentTransportActions"
+        },
+        "RemoveAllTracksFromQueue": {
+          "description": "Flushes the SONOS queue.",
+          "remarks":"If queue is already empty it throw error 804. Send to non-coordinator returns error code 800."
+        },
+        "RemoveTrackRangeFromQueue": {
+          "description": "Removes the specified range of songs from the SONOS queue.",
+          "params": {
+            "UpdateID": "Leave blank",
+            "StartingIndex": "between 1 and queue-length"
+          }
+        },
+        "SaveQueue": {
+          "description": "Saves the current SONOS queue as a SONOS playlist and outputs objectID",
+          "remarks":"Send to non-coordinator returns error code 800",
+          "params": {
+            "Title": "SONOS playlist title", 
+            "ObjectID": "Leave blank"
+          }
+        },
+        "Seek": {
+          "description": "Seek track in queue, time delta or absolute time in song",
+          "remarks":"Returns error code 701 in case that content does not support Seek or send to non-coordinator",
+          "params": {
+            "Unit": "What to seek",
+            "Target": "Position of track in queue (start at 1) or `hh:mm:ss` for `REL_TIME` or `+/-hh:mm:ss` for `TIME_DELTA`"
+          }
+        },
+        "SetAVTransportURI": {
+          "description": "Set the transport URI to a song, a stream, the queue, another player-rincon and a lot more",
+          "remarks":"If set to another player RINCON, the player is grouped with that one.",
+          "params": {
+            "CurrentURI": "The new TransportURI - its a special SONOS format",
+            "CurrentURIMetaData": "Track Metadata, see MetadataHelper.GuessTrack to guess based on track uri"
+          }
+        },
+        "SetCrossfadeMode": {
+          "description": "Set crossfade mode",
+          "remarks":"Send to non-coordinator returns error code 800. Same for content, which does not support crossfade mode."
+        },
+        "SetPlayMode": {
+          "description": "Set the PlayMode",
+          "remarks":"Send to non-coordinator returns error code 712. If SONOS queue is not activated returns error code 712.",
+          "params": {
+            "NewPlayMode": "New playmode"
+          }
+        },
+        "SnoozeAlarm": {
+          "description": "Snooze the current alarm for some time.",
+          "params": {
+            "Duration": "Snooze time as `hh:mm:ss`, 10 minutes = 00:10:00"
+          }
+        },
+        "Stop": {
+          "description": "Stop playback"
+        }
+      },
+      "errors": [
+        { "code": 701, "description": "Transition not available" },
+        { "code": 702, "description": "No content" },
+        { "code": 703, "description": "Read error" },
+        { "code": 704, "description": "Format not supported for playback" },
+        { "code": 705, "description": "Transport is locked" },
+        { "code": 706, "description": "Write error" },
+        { "code": 707, "description": "Media protected or not writeable" },
+        { "code": 708, "description": "Format not supported for recording" },
+        { "code": 709, "description": "Media is full" },
+        { "code": 710, "description": "Seek mode not supported" },
+        { "code": 711, "description": "Illegal seek target" },
+        { "code": 712, "description": "Play mode not supported" },
+        { "code": 713, "description": "Record quality not supported" },
+        { "code": 714, "description": "Illegal MIME-Type" },
+        { "code": 715, "description": "Content busy" },
+        { "code": 716, "description": "Resource not found" },
+        { "code": 717, "description": "Play speed not supported" },
+        { "code": 718, "description": "Invalid InstanceID" },
+        { "code": 737, "description": "No dns configured" },
+        { "code": 738, "description": "Bad domain" },
+        { "code": 739, "description": "Server error" },
+        { "code": 800, "description": "Command not supported or not a coordinator" }
+      ]
+    },
+    "ConnectionManagerService": {
+      "description": "Services related to connections and protocols"
+    },
+    "ContentDirectoryService": {
+      "description": "Browse for local content",
+      "actions": {
+        "Browse": {
+          "description": "Browse for content: Music library (A), share(S:), Sonos playlists(SQ:), Sonos favorites(FV:2), radio stations(R:0/0), radio shows(R:0/1), queue(Q:)). Recommendation: Send one request, check the `TotalMatches` and - if necessary - do additional requests with higher `StartingIndex`. In case of duplicates only the first is returned! Example: albums with same title, even if artists are different",
+          "params": {
+            "ObjectID": "The search query, (`A:ARTIST` / `A:ALBUMARTIST` / `A:ALBUM` / `A:GENRE` / `A:COMPOSER` / `A:TRACKS` / `A:PLAYLISTS` / `FV:2` / `Q:`/ `R:0/0` / `R:0/1` / `S:` / `SQ:`) with optionally `:search+query` behind it.",
+            "BrowseFlag": "How to browse",
+            "Filter": "Which fields should be returned `*` for all.",
+            "StartingIndex": "Paging, where to start, usually 0",
+            "RequestedCount": "Paging, number of items, maximum is 1,000. This parameter does NOT restrict the number of items being searched (filter) but only the number being returned. Using 0 is equivalent to 1,000",
+            "SortCriteria": "Sort the results based on metadata fields. `+upnp:artist,+dc:title` for sorting on artist then on title.",
+            "Result": "Encoded DIDL-Lite XML. See remark (2)"
+          },
+          "remarks": "(1) If the title contains an apostrophe the returned uri will contain a `&apos;`. (2) Some libraries support a BrowseAndParse, so you don't have to parse the xml."
+        },
+        "GetAlbumArtistDisplayOption": {
+          "description": "Get the current album art display option such as `WMP`, `ITUNES` or `NONE`"
+        },
+        "RefreshShareIndex": {
+          "description": "Updates the music library (share) index",
+          "params": {
+            "AlbumArtistDisplayOption": "`WMP`, `ITUNES` or `NONE`"
+          }
+        }
+      },
+      "errors": [
+        { "code": 701, "description": "No such object" },
+        { "code": 702, "description": "Invalid CurrentTagValue" },
+        { "code": 703, "description": "Invalid NewTagValue" },
+        { "code": 704, "description": "Required tag" },
+        { "code": 705, "description": "Read-only tag" },
+        { "code": 706, "description": "Parameter mismatch" },
+        { "code": 708, "description": "Invalid search criteria" },
+        { "code": 709, "description": "Invalid sort criteria" },
+        { "code": 710, "description": "No such container" },
+        { "code": 711, "description": "Restricted object" },
+        { "code": 712, "description": "Bad metadata" },
+        { "code": 713, "description": "Restricted parent object" },
+        { "code": 714, "description": "No such source resource" },
+        { "code": 715, "description": "Resource access denied" },
+        { "code": 716, "description": "Transfer busy" },
+        { "code": 717, "description": "No such file transfer" },
+        { "code": 718, "description": "No such destination resource" },
+        { "code": 719, "description": "Destination resource access denied" },
+        { "code": 720, "description": "Cannot process the request" }
+      ]
+    },
+    "DevicePropertiesService": {
+      "description": "Modify device properties, like LED status and stereo pairs",
+      "actions": {
+        "AddHTSatellite": {
+          "description": "Adds satellites and/or a sub woofer to a (main) player. The satellites become hidden. The main player RINCON_* is mandatory. RR: right - rear, LF: left - front, SW: subwoofer",
+          "params": {
+            "HTSatChanMapSet": "example: `RINCON_000PPP1400:LF,RF;RINCON_000RRR1400:RR;RINCON_000SSS1400:LR;RINCON_000QQQ1400:SW`"
+          },
+          "remarks": "Not all speakers support satellites or sub woofer. Satellites should be of same type (e.g. Play:1)"
+        },
+        "GetButtonLockState": {
+          "description": "Get the current button lock state"
+        },
+        "GetLEDState": {
+          "description": "Get the current LED state"
+        },
+        "GetZoneInfo": {
+          "description": "Get information about this specific speaker",
+          "params": {
+            "HTAudioIn": "SPDIF input, `0` not connected / `2` stereo / `7` Dolby 2.0 / `18` dolby 5.1 / `21` not listening / `22` silence"
+          }
+        },
+        "CreateStereoPair": {
+          "description": "Create a stereo pair (left, right speakers), right one becomes hidden",
+          "params": {
+            "ChannelMapSet": "example: `RINCON_B8E9375831C001400:LF,LF;RINCON_000E58FE3AEA01400:RF,RF`"
+          },
+          "remarks": "Not all speakers support StereoPairs"
+        },
+        "RemoveHTSatellite": {
+          "description": "Removes a satellite or a sub woofer from (main) player. The satellite becomes visible.",
+          "params": {
+            "SatRoomUUID": "example: `RINCON_000RRR1400`"
+          },
+          "remarks": "Not all speakers support satellites or sub woofer. Multiples RINCON_* are not allowed."
+        },
+        "SeparateStereoPair": {
+          "description": "Separate a stereo pair",
+          "params": {
+            "ChannelMapSet": "example: `RINCON_B8E9375831C001400:LF,LF;RINCON_000E58FE3AEA01400:RF,RF`"
+          },
+          "remarks": "Not all speakers support StereoPairs"
+        },
+        "SetButtonLockState": {
+          "description": "Set the button lock state"
+        },
+        "SetLEDState": {
+          "description": "Set the LED state"
+        }
+      }
+    },
+    "GroupManagementService": {
+      "description": "Services related to groups"
+    },
+    "GroupRenderingControlService": {
+      "description": "Volume related controls for groups",
+      "actions": {
+        "GetGroupMute": {
+          "description": "Get the group mute state.",
+          "remarks": "Should be send to coordinator only"
+        },
+        "GetGroupVolume": {
+          "description": "Get the group volume.",
+          "remarks": "Should be send to coordinator only"
+        },
+        "SetGroupMute": {
+          "description": "(Un-/)Mute the entire group",
+          "remarks": "Should be send to coordinator only"
+        },
+        "SetGroupVolume": {
+          "description": "Change group volume. Players volume will be changed proportionally based on last snapshot",
+          "remarks": "Should be send to coordinator only",
+          "params": {
+            "DesiredVolume": "New volume between 0 and 100"
+          }
+        },
+        "SetRelativeGroupVolume": {
+          "description": "Relatively change group volume - returns final group volume. Players volume will be changed proportionally based on last snapshot",
+          "remarks": "Should be send to coordinator only",
+          "params": {
+            "Adjustment": "Number between -100 and +100"
+          }
+        }, 
+        "SnapshotGroupVolume": {
+          "description": "Creates a new group volume snapshot,  the volume ratio between all players. It is used by SetGroupVolume and SetRelativeGroupVolume",
+          "remarks": "Should be send to coordinator only"
+        }
+      },
+      "errors": [
+        { "code": 701, "description": "Player isn't the coordinator" }
+      ]
+    },
+    "HTControlService": {
+      "description": "Service related to the TV remote control"
+    },
+    "MusicServicesService": {
+      "description": "Access to external music services, like Spotify or Youtube Music",
+      "actions": {
+        "ListAvailableServices": {
+          "description": "Load music service list as xml",
+          "remarks": "Some libraries also support ListAndParseAvailableServices"
+        }
+      }
+    },
+    "QueueService": {
+      "description": "Modify and browse queues"
+    },
+    "QPlayService": {
+      "description": "Services related to Chinese Tencent Qplay service"
+    },
+    "RenderingControlService": {
+      "description": "Volume related controls",
+      "actions": {
+        "GetBass": {
+          "description": "Get bass level between -10 and 10"
+        },
+        "GetEQ": {
+          "description": "Get equalizer value",
+          "params": {
+            "EQType": "Allowed values `DialogLevel` (bool) / `MusicSurroundLevel` (-15/+15) /  `NightMode` (bool) / `SubGain` (-10/+10) / `SurroundEnable` (bool) / `SurroundLevel` (-15/+15) / `SurroundMode` (0 = ambient, 1 = full) / `HeightChannelLevel` (-10/+10)",
+            "CurrentValue": "Booleans return `1` / `0`, rest number as specified"
+          },
+          "remarks": "Not all EQ types are available on every speaker"
+        },
+        "GetLoudness": {
+          "description": "Whether or not Loudness is on"
+        },
+        "GetTreble": {
+          "description": "Get treble",
+          "params": {
+            "CurrentTreble": "Number between -10 and 10"
+          }
+        },
+        "GetVolume": {
+          "description": "Get volume",
+          "params": {
+            "CurrentVolume": "Number between 0 and 100"
+          }
+        },
+        "SetBass": {
+          "description": "Set bass level, between -10 and 10"
+        },
+        "SetEQ": {
+          "description": "Set equalizer value for different types",
+          "params": {
+            "EQType": "Allowed values `DialogLevel` (bool) / `MusicSurroundLevel` (-15/+15) /  `NightMode` (bool) / `SubGain` (-10/+10) / `SurroundEnable` (bool) / `SurroundLevel` (-15/+15) / `SurroundMode` (0 = ambient, 1 = full) / `HeightChannelLevel` (-10/+10)",
+            "DesiredValue": "Booleans required `1` for true or `0` for false, rest number as specified"
+          },
+          "remarks": "Not supported by all speakers, TV related"
+        },
+        "SetLoudness": {
+          "description": "Set loudness on / off"
+        },
+        "SetTreble": {
+          "description": "Set treble level",
+          "params": {
+            "DesiredTreble": "between -10 and 10"
+          }
+        }
+      },
+      "variables": [
+        {
+          "name": "HeightChannelLevel",
+          "dataType": "ui4"
+        }
+      ]
+    },
+    "SystemPropertiesService": {
+      "description": "Manage system-wide settings, mainly account stuff",
+      "actions": {
+        "GetString": {
+          "description": "Get a saved string.",
+          "params": {
+            "VariableName": "The key for this variable"
+          },
+          "remarks": "Strings are saved in the system with SetString, every speaker should return the same data. Will error when not existing"
+        },
+        "Remove": {
+          "description": "Remove a saved string",
+          "params": {
+            "VariableName": "The key for this variable"
+          },
+          "remarks": "Not sure what happens if you call this with a VariableName that doesn't exists."
+        },
+        "SetString": {
+          "description": "Save a string in the system",
+          "params": {
+            "VariableName": "The key for this variable, use something unique"
+          },
+          "remarks": "Strings are saved in the system, retrieve values with GetString."
+        }
+      }
+    },
+    "ZoneGroupTopologyService": {
+      "description": "Zone config stuff, eg getting all the configured sonos zones",
+      "actions": {
+        "GetZoneGroupAttributes": {
+          "description": "Get information about the current Zone"
+        },
+        "GetZoneGroupState": {
+          "description": "Get all the Sonos groups, (as XML)",
+          "params": {
+            "ZoneGroupState": "xml string, see remarks"
+          },
+          "remarks": "Some libraries also support GetParsedZoneGroupState that parses the xml for you."
+        }
+      }
+    }
+  },
+  "errors": [
+    { "code": 400, "description": "Bad request" },
+    { "code": 401, "description": "Invalid action" },
+    { "code": 402, "description": "Invalid args" },
+    { "code": 404, "description": "Invalid var" },
+    { "code": 412, "description": "Precondition failed" },
+    { "code": 501, "description": "Action failed" },
+    { "code": 600, "description": "Argument value invalid" },
+    { "code": 601, "description": "Argument value out of range" },
+    { "code": 602, "description": "Optional action not implemented" },
+    { "code": 603, "description": "Out of memory" },
+    { "code": 604, "description": "Human intervention required" },
+    { "code": 605, "description": "String argument too long" },
+    { "code": 606, "description": "Action not authorized" },
+    { "code": 607, "description": "Signature failure" },
+    { "code": 608, "description": "Signature missing" },
+    { "code": 609, "description": "Not encrypted" },
+    { "code": 610, "description": "Invalid sequence" },
+    { "code": 611, "description": "Invalid control URL" },
+    { "code": 612, "description": "No such session" }
+  ]
+}

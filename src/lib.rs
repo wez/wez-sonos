@@ -1,0 +1,206 @@
+use crate::upnp::DeviceSpec;
+use instant_xml::FromXmlOwned;
+use instant_xml::ToXml;
+use reqwest::StatusCode;
+use reqwest::Url;
+use ssdp_client::URN;
+use thiserror::Error;
+
+mod discovery;
+mod generated;
+mod upnp;
+
+pub use discovery::discover;
+pub use generated::*;
+
+pub type Result<T> = std::result::Result<T, Error>;
+
+#[derive(Debug, Error)]
+pub enum Error {
+    #[error("SSDP Error: {0}")]
+    Ssdp(#[from] ssdp_client::Error),
+    #[error("XML Error: {0}")]
+    Xml(#[from] instant_xml::Error),
+    #[error("XML Error: {error:#} while parsing {text}")]
+    XmlParse {
+        error: instant_xml::Error,
+        text: String,
+    },
+    #[error("Json Error: {0}")]
+    Json(#[from] serde_json::Error),
+    #[error("Service {0:?} is not supported by this device")]
+    UnsupportedService(URN),
+    #[error("Invalid URI: {0:#?}")]
+    InvalidUri(#[from] url::ParseError),
+    #[error("Reqwest Error: {0:#?}")]
+    Reqwest(#[from] reqwest::Error),
+    #[error("Failed Request: {status:?} {body}")]
+    FailedRequest { status: StatusCode, body: String },
+}
+
+#[derive(Debug)]
+pub struct SonosDevice {
+    url: Url,
+    device: DeviceSpec,
+}
+
+impl SonosDevice {
+    pub async fn from_url(url: Url) -> Result<Self> {
+        let response = reqwest::get(url.clone()).await?;
+
+        let status = response.status();
+        if !status.is_success() {
+            let body = match response.bytes().await {
+                Ok(bytes) => String::from_utf8_lossy(&bytes).to_string(),
+                Err(err) => format!("Failed to retrieve body from failed request: {err:#}"),
+            };
+
+            return Err(Error::FailedRequest { status, body });
+        }
+
+        let body = response.text().await?;
+        let device = DeviceSpec::parse_xml(&body)?;
+
+        Ok(Self { url, device })
+    }
+}
+
+pub const SOAP_ENCODING: &str = "http://schemas.xmlsoap.org/soap/encoding/";
+pub const SOAP_ENVELOPE: &str = "http://schemas.xmlsoap.org/soap/envelope/";
+
+mod soap {
+    use super::{SOAP_ENVELOPE};
+    use instant_xml::ToXml;
+
+    #[derive(Debug, Eq, PartialEq, ToXml)]
+    pub struct Unit;
+
+    #[derive(Debug, Eq, PartialEq, ToXml)]
+    #[xml(rename="s:Envelope", ns("", s = SOAP_ENVELOPE))]
+    pub struct Envelope<T: ToXml> {
+        #[xml(attribute, rename = "s:encodingStyle")]
+        pub encoding_style: &'static str,
+        pub body: Body<T>,
+    }
+
+    #[derive(Debug, Eq, PartialEq, ToXml)]
+    #[xml(rename = "s:Body")]
+    pub struct Body<T: ToXml> {
+        pub payload: T,
+    }
+}
+
+mod soap_resp {
+    use super::{SOAP_ENVELOPE};
+    use instant_xml::FromXml;
+
+    #[derive(Debug, Eq, PartialEq, FromXml)]
+    #[xml(ns(SOAP_ENVELOPE))]
+    pub struct Envelope<T> {
+        #[xml(rename = "encodingStyle", attribute, ns(SOAP_ENVELOPE))]
+        pub encoding_style: String,
+        pub body: Body<T>,
+    }
+
+    #[derive(Debug, Eq, PartialEq, FromXml)]
+    #[xml(ns(SOAP_ENVELOPE))]
+    pub struct Body<T> {
+        pub payload: T,
+    }
+}
+
+impl SonosDevice {
+    pub fn device_spec(&self) -> &DeviceSpec {
+        &self.device
+    }
+
+    pub async fn action<REQ: ToXml, RESP>(
+        &self,
+        service: &URN,
+        action: &str,
+        payload: REQ,
+    ) -> Result<RESP>
+    where
+        RESP: FromXmlOwned + std::fmt::Debug,
+    {
+        let service = self
+            .device
+            .get_service(service)
+            .ok_or_else(|| Error::UnsupportedService(service.clone()))?;
+
+        let envelope = soap::Envelope {
+            encoding_style: SOAP_ENCODING,
+            body: soap::Body { payload },
+        };
+
+        let body = instant_xml::to_string(&envelope)?;
+        log::trace!("Sending: {body}");
+
+        let soap_action = format!("\"{}#{}\"", *service.service_type, action);
+        let url = service.control_url(&self.url);
+
+        let response = reqwest::Client::new()
+            .post(url)
+            .header("CONTENT-TYPE", "text/xml; charset=\"utf-8\"")
+            .header("SOAPAction", soap_action)
+            .body::<String>(body.into())
+            .send()
+            .await?;
+
+        let status = response.status();
+        if !status.is_success() {
+            let body = match response.bytes().await {
+                Ok(bytes) => String::from_utf8_lossy(&bytes).to_string(),
+                Err(err) => format!("Failed to retrieve body from failed request: {err:#}"),
+            };
+
+            return Err(Error::FailedRequest { status, body });
+        }
+
+        let body = response.text().await?;
+        log::trace!("Got response: {body}");
+
+        let envelope: soap_resp::Envelope<RESP> = instant_xml::from_str(&body)?;
+
+        Ok(envelope.body.payload)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_xml() {
+        use crate::av_transport::StopRequest;
+        let stop = StopRequest { instance_id: 32 };
+        assert_eq!(
+            instant_xml::to_string(&stop).unwrap(),
+            "<u:Stop xmlns:u=\"urn:schemas-upnp-org:service:AVTransport:1\"><InstanceID>32</InstanceID></u:Stop>"
+        );
+    }
+
+    #[test]
+    fn test_soap_envelope() {
+        use crate::av_transport::StopRequest;
+
+        let action = soap::Envelope {
+            encoding_style: soap::SOAP_ENCODING,
+            body: soap::Body {
+                payload: StopRequest { instance_id: 0 },
+            },
+        };
+
+        assert_eq!(
+            instant_xml::to_string(&action).unwrap(),
+            "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" \
+                s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\
+                <s:Body>\
+                <u:Stop xmlns:u=\"urn:schemas-upnp-org:service:AVTransport:1\">\
+                <InstanceID>0</InstanceID>\
+                </u:Stop>\
+                </s:Body>\
+                </s:Envelope>"
+        );
+    }
+}
