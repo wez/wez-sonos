@@ -6,11 +6,13 @@ use reqwest::Url;
 use std::net::Ipv4Addr;
 use thiserror::Error;
 
+mod didl;
 mod discovery;
 mod generated;
 mod upnp;
 mod zone;
 
+pub use didl::*;
 pub use discovery::*;
 pub use generated::*;
 pub use zone::*;
@@ -115,13 +117,19 @@ impl SonosDevice {
         .await
     }
 
-    pub async fn set_av_transport_uri(&self, uri: &str, metadata: &str) -> Result<()> {
+    pub async fn set_av_transport_uri(
+        &self,
+        uri: &str,
+        metadata: Option<TrackMetaData>,
+    ) -> Result<()> {
         <Self as AVTransport>::set_av_transport_uri(
             self,
             av_transport::SetAvTransportUriRequest {
                 instance_id: 0,
                 current_uri: uri.to_string(),
-                current_uri_meta_data: metadata.to_string(),
+                current_uri_meta_data: metadata
+                    .map(|m| m.to_didl_string())
+                    .unwrap_or_else(String::new),
             },
         )
         .await
@@ -130,14 +138,16 @@ impl SonosDevice {
     pub async fn queue_prepend(
         &self,
         uri: &str,
-        metadata: &str,
+        metadata: Option<TrackMetaData>,
     ) -> Result<av_transport::AddUriToQueueResponse> {
         <Self as AVTransport>::add_uri_to_queue(
             self,
             av_transport::AddUriToQueueRequest {
                 instance_id: 0,
                 enqueued_uri: uri.to_string(),
-                enqueued_uri_meta_data: metadata.to_string(),
+                enqueued_uri_meta_data: metadata
+                    .map(|m| m.to_didl_string())
+                    .unwrap_or_else(String::new),
                 desired_first_track_number_enqueued: 0,
                 enqueue_as_next: true,
             },
@@ -148,14 +158,16 @@ impl SonosDevice {
     pub async fn queue_append(
         &self,
         uri: &str,
-        metadata: &str,
+        metadata: Option<TrackMetaData>,
     ) -> Result<av_transport::AddUriToQueueResponse> {
         <Self as AVTransport>::add_uri_to_queue(
             self,
             av_transport::AddUriToQueueRequest {
                 instance_id: 0,
                 enqueued_uri: uri.to_string(),
-                enqueued_uri_meta_data: metadata.to_string(),
+                enqueued_uri_meta_data: metadata
+                    .map(|m| m.to_didl_string())
+                    .unwrap_or_else(String::new),
                 desired_first_track_number_enqueued: 0,
                 enqueue_as_next: false,
             },
