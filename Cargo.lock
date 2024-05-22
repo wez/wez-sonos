@@ -804,21 +804,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "sonos"
-version = "0.1.0"
-dependencies = [
- "env_logger",
- "futures-util",
- "instant-xml",
- "k9",
- "log",
- "reqwest",
- "thiserror",
- "tokio",
- "url",
-]
-
-[[package]]
 name = "syn"
 version = "2.0.65"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1091,6 +1076,21 @@ checksum = "77afa9a11836342370f4817622a2f0f418b134426d91a82dfb48f532d2ec13ef"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "wez-sonos"
+version = "0.1.0"
+dependencies = [
+ "env_logger",
+ "futures-util",
+ "instant-xml",
+ "k9",
+ "log",
+ "reqwest",
+ "thiserror",
+ "tokio",
+ "url",
 ]
 
 [[package]]

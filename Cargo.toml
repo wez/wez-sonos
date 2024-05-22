@@ -1,7 +1,10 @@
 [package]
-name = "sonos"
+name = "wez-sonos"
 version = "0.1.0"
 edition = "2021"
+
+[lib]
+name = "sonos"
 
 [dependencies]
 futures-util = "0.3.30"
