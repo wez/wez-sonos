@@ -25,7 +25,7 @@ impl VersionedService {
             .get(&param.param.related_state_variable_name)
         {
             Some(sv) => {
-                if let Some(Value::Array(allowed)) = &sv.allowed_values {
+                if let Some(Value::Array(_)) = &sv.allowed_values {
                     // Use an enum
                     let enum_name = param
                         .param
@@ -362,6 +362,11 @@ use instant_xml::{{FromXml, ToXml}};
                     }
                     writeln!(&mut types, "  {variant},").ok();
                 }
+                writeln!(&mut types, "
+/// Allows passing a value that was not known at the
+/// time that this crate was generated from the available
+/// device descriptions").ok();
+                writeln!(&mut types, "  Unspecified(String),").ok();
                 writeln!(&mut types, "}}\n").ok();
 
                 writeln!(&mut types, "impl ToString for {enum_name} {{").ok();
@@ -377,6 +382,7 @@ use instant_xml::{{FromXml, ToXml}};
                     .ok();
                 }
 
+                writeln!(&mut types, "  {enum_name}::Unspecified(s) => s.to_string(),").ok();
                 writeln!(&mut types, "}}").ok();
                 writeln!(&mut types, "}}\n").ok();
                 writeln!(&mut types, "}}\n").ok();
@@ -392,7 +398,7 @@ use instant_xml::{{FromXml, ToXml}};
                 }
                 writeln!(
                     &mut types,
-                    "_ => Err(crate::Error::InvalidEnumVariantValue),"
+                    "s => Ok({enum_name}::Unspecified(s.to_string())),"
                 )
                 .ok();
 

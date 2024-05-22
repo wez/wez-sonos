@@ -704,6 +704,11 @@ pub enum SeekMode {
     TrackNr,
     RelTime,
     TimeDelta,
+
+    /// Allows passing a value that was not known at the
+    /// time that this crate was generated from the available
+    /// device descriptions
+    Unspecified(String),
 }
 
 impl ToString for SeekMode {
@@ -712,6 +717,7 @@ impl ToString for SeekMode {
             SeekMode::TrackNr => "TRACK_NR".to_string(),
             SeekMode::RelTime => "REL_TIME".to_string(),
             SeekMode::TimeDelta => "TIME_DELTA".to_string(),
+            SeekMode::Unspecified(s) => s.to_string(),
         }
     }
 }
@@ -723,7 +729,7 @@ impl FromStr for SeekMode {
             "TRACK_NR" => Ok(SeekMode::TrackNr),
             "REL_TIME" => Ok(SeekMode::RelTime),
             "TIME_DELTA" => Ok(SeekMode::TimeDelta),
-            _ => Err(crate::Error::InvalidEnumVariantValue),
+            s => Ok(SeekMode::Unspecified(s.to_string())),
         }
     }
 }
@@ -787,6 +793,11 @@ pub enum CurrentPlayMode {
     ShuffleNorepeat,
     Shuffle,
     ShuffleRepeatOne,
+
+    /// Allows passing a value that was not known at the
+    /// time that this crate was generated from the available
+    /// device descriptions
+    Unspecified(String),
 }
 
 impl ToString for CurrentPlayMode {
@@ -798,6 +809,7 @@ impl ToString for CurrentPlayMode {
             CurrentPlayMode::ShuffleNorepeat => "SHUFFLE_NOREPEAT".to_string(),
             CurrentPlayMode::Shuffle => "SHUFFLE".to_string(),
             CurrentPlayMode::ShuffleRepeatOne => "SHUFFLE_REPEAT_ONE".to_string(),
+            CurrentPlayMode::Unspecified(s) => s.to_string(),
         }
     }
 }
@@ -812,7 +824,7 @@ impl FromStr for CurrentPlayMode {
             "SHUFFLE_NOREPEAT" => Ok(CurrentPlayMode::ShuffleNorepeat),
             "SHUFFLE" => Ok(CurrentPlayMode::Shuffle),
             "SHUFFLE_REPEAT_ONE" => Ok(CurrentPlayMode::ShuffleRepeatOne),
-            _ => Err(crate::Error::InvalidEnumVariantValue),
+            s => Ok(CurrentPlayMode::Unspecified(s.to_string())),
         }
     }
 }
@@ -872,6 +884,11 @@ pub enum PlaybackStorageMedium {
     #[default]
     None,
     Network,
+
+    /// Allows passing a value that was not known at the
+    /// time that this crate was generated from the available
+    /// device descriptions
+    Unspecified(String),
 }
 
 impl ToString for PlaybackStorageMedium {
@@ -879,6 +896,7 @@ impl ToString for PlaybackStorageMedium {
         match self {
             PlaybackStorageMedium::None => "NONE".to_string(),
             PlaybackStorageMedium::Network => "NETWORK".to_string(),
+            PlaybackStorageMedium::Unspecified(s) => s.to_string(),
         }
     }
 }
@@ -889,7 +907,7 @@ impl FromStr for PlaybackStorageMedium {
         match s {
             "NONE" => Ok(PlaybackStorageMedium::None),
             "NETWORK" => Ok(PlaybackStorageMedium::Network),
-            _ => Err(crate::Error::InvalidEnumVariantValue),
+            s => Ok(PlaybackStorageMedium::Unspecified(s.to_string())),
         }
     }
 }
@@ -951,6 +969,11 @@ pub enum TransportState {
     Playing,
     PausedPlayback,
     Transitioning,
+
+    /// Allows passing a value that was not known at the
+    /// time that this crate was generated from the available
+    /// device descriptions
+    Unspecified(String),
 }
 
 impl ToString for TransportState {
@@ -960,6 +983,7 @@ impl ToString for TransportState {
             TransportState::Playing => "PLAYING".to_string(),
             TransportState::PausedPlayback => "PAUSED_PLAYBACK".to_string(),
             TransportState::Transitioning => "TRANSITIONING".to_string(),
+            TransportState::Unspecified(s) => s.to_string(),
         }
     }
 }
@@ -972,7 +996,7 @@ impl FromStr for TransportState {
             "PLAYING" => Ok(TransportState::Playing),
             "PAUSED_PLAYBACK" => Ok(TransportState::PausedPlayback),
             "TRANSITIONING" => Ok(TransportState::Transitioning),
-            _ => Err(crate::Error::InvalidEnumVariantValue),
+            s => Ok(TransportState::Unspecified(s.to_string())),
         }
     }
 }
@@ -1265,6 +1289,11 @@ pub enum AlarmPlayMode {
     RepeatAll,
     ShuffleNorepeat,
     Shuffle,
+
+    /// Allows passing a value that was not known at the
+    /// time that this crate was generated from the available
+    /// device descriptions
+    Unspecified(String),
 }
 
 impl ToString for AlarmPlayMode {
@@ -1274,6 +1303,7 @@ impl ToString for AlarmPlayMode {
             AlarmPlayMode::RepeatAll => "REPEAT_ALL".to_string(),
             AlarmPlayMode::ShuffleNorepeat => "SHUFFLE_NOREPEAT".to_string(),
             AlarmPlayMode::Shuffle => "SHUFFLE".to_string(),
+            AlarmPlayMode::Unspecified(s) => s.to_string(),
         }
     }
 }
@@ -1286,7 +1316,7 @@ impl FromStr for AlarmPlayMode {
             "REPEAT_ALL" => Ok(AlarmPlayMode::RepeatAll),
             "SHUFFLE_NOREPEAT" => Ok(AlarmPlayMode::ShuffleNorepeat),
             "SHUFFLE" => Ok(AlarmPlayMode::Shuffle),
-            _ => Err(crate::Error::InvalidEnumVariantValue),
+            s => Ok(AlarmPlayMode::Unspecified(s.to_string())),
         }
     }
 }
@@ -1348,6 +1378,11 @@ pub enum Recurrence {
     Weekdays,
     Weekends,
     Daily,
+
+    /// Allows passing a value that was not known at the
+    /// time that this crate was generated from the available
+    /// device descriptions
+    Unspecified(String),
 }
 
 impl ToString for Recurrence {
@@ -1357,6 +1392,7 @@ impl ToString for Recurrence {
             Recurrence::Weekdays => "WEEKDAYS".to_string(),
             Recurrence::Weekends => "WEEKENDS".to_string(),
             Recurrence::Daily => "DAILY".to_string(),
+            Recurrence::Unspecified(s) => s.to_string(),
         }
     }
 }
@@ -1369,7 +1405,7 @@ impl FromStr for Recurrence {
             "WEEKDAYS" => Ok(Recurrence::Weekdays),
             "WEEKENDS" => Ok(Recurrence::Weekends),
             "DAILY" => Ok(Recurrence::Daily),
-            _ => Err(crate::Error::InvalidEnumVariantValue),
+            s => Ok(Recurrence::Unspecified(s.to_string())),
         }
     }
 }
@@ -1556,6 +1592,11 @@ pub enum ConnectionStatus {
     InsufficientBandwidth,
     UnreliableChannel,
     Unknown,
+
+    /// Allows passing a value that was not known at the
+    /// time that this crate was generated from the available
+    /// device descriptions
+    Unspecified(String),
 }
 
 impl ToString for ConnectionStatus {
@@ -1566,6 +1607,7 @@ impl ToString for ConnectionStatus {
             ConnectionStatus::InsufficientBandwidth => "InsufficientBandwidth".to_string(),
             ConnectionStatus::UnreliableChannel => "UnreliableChannel".to_string(),
             ConnectionStatus::Unknown => "Unknown".to_string(),
+            ConnectionStatus::Unspecified(s) => s.to_string(),
         }
     }
 }
@@ -1579,7 +1621,7 @@ impl FromStr for ConnectionStatus {
             "InsufficientBandwidth" => Ok(ConnectionStatus::InsufficientBandwidth),
             "UnreliableChannel" => Ok(ConnectionStatus::UnreliableChannel),
             "Unknown" => Ok(ConnectionStatus::Unknown),
-            _ => Err(crate::Error::InvalidEnumVariantValue),
+            s => Ok(ConnectionStatus::Unspecified(s.to_string())),
         }
     }
 }
@@ -1639,6 +1681,11 @@ pub enum Direction {
     #[default]
     Input,
     Output,
+
+    /// Allows passing a value that was not known at the
+    /// time that this crate was generated from the available
+    /// device descriptions
+    Unspecified(String),
 }
 
 impl ToString for Direction {
@@ -1646,6 +1693,7 @@ impl ToString for Direction {
         match self {
             Direction::Input => "Input".to_string(),
             Direction::Output => "Output".to_string(),
+            Direction::Unspecified(s) => s.to_string(),
         }
     }
 }
@@ -1656,7 +1704,7 @@ impl FromStr for Direction {
         match s {
             "Input" => Ok(Direction::Input),
             "Output" => Ok(Direction::Output),
-            _ => Err(crate::Error::InvalidEnumVariantValue),
+            s => Ok(Direction::Unspecified(s.to_string())),
         }
     }
 }
@@ -1904,6 +1952,11 @@ pub enum BrowseFlag {
     #[default]
     BrowseMetadata,
     BrowseDirectChildren,
+
+    /// Allows passing a value that was not known at the
+    /// time that this crate was generated from the available
+    /// device descriptions
+    Unspecified(String),
 }
 
 impl ToString for BrowseFlag {
@@ -1911,6 +1964,7 @@ impl ToString for BrowseFlag {
         match self {
             BrowseFlag::BrowseMetadata => "BrowseMetadata".to_string(),
             BrowseFlag::BrowseDirectChildren => "BrowseDirectChildren".to_string(),
+            BrowseFlag::Unspecified(s) => s.to_string(),
         }
     }
 }
@@ -1921,7 +1975,7 @@ impl FromStr for BrowseFlag {
         match s {
             "BrowseMetadata" => Ok(BrowseFlag::BrowseMetadata),
             "BrowseDirectChildren" => Ok(BrowseFlag::BrowseDirectChildren),
-            _ => Err(crate::Error::InvalidEnumVariantValue),
+            s => Ok(BrowseFlag::Unspecified(s.to_string())),
         }
     }
 }
@@ -2280,6 +2334,11 @@ pub enum ButtonLockState {
     #[default]
     On,
     Off,
+
+    /// Allows passing a value that was not known at the
+    /// time that this crate was generated from the available
+    /// device descriptions
+    Unspecified(String),
 }
 
 impl ToString for ButtonLockState {
@@ -2287,6 +2346,7 @@ impl ToString for ButtonLockState {
         match self {
             ButtonLockState::On => "On".to_string(),
             ButtonLockState::Off => "Off".to_string(),
+            ButtonLockState::Unspecified(s) => s.to_string(),
         }
     }
 }
@@ -2297,7 +2357,7 @@ impl FromStr for ButtonLockState {
         match s {
             "On" => Ok(ButtonLockState::On),
             "Off" => Ok(ButtonLockState::Off),
-            _ => Err(crate::Error::InvalidEnumVariantValue),
+            s => Ok(ButtonLockState::Unspecified(s.to_string())),
         }
     }
 }
@@ -2357,6 +2417,11 @@ pub enum LEDState {
     #[default]
     On,
     Off,
+
+    /// Allows passing a value that was not known at the
+    /// time that this crate was generated from the available
+    /// device descriptions
+    Unspecified(String),
 }
 
 impl ToString for LEDState {
@@ -2364,6 +2429,7 @@ impl ToString for LEDState {
         match self {
             LEDState::On => "On".to_string(),
             LEDState::Off => "Off".to_string(),
+            LEDState::Unspecified(s) => s.to_string(),
         }
     }
 }
@@ -2374,7 +2440,7 @@ impl FromStr for LEDState {
         match s {
             "On" => Ok(LEDState::On),
             "Off" => Ok(LEDState::Off),
-            _ => Err(crate::Error::InvalidEnumVariantValue),
+            s => Ok(LEDState::Unspecified(s.to_string())),
         }
     }
 }
@@ -2638,6 +2704,11 @@ pub enum IRRepeaterState {
     On,
     Off,
     Disabled,
+
+    /// Allows passing a value that was not known at the
+    /// time that this crate was generated from the available
+    /// device descriptions
+    Unspecified(String),
 }
 
 impl ToString for IRRepeaterState {
@@ -2646,6 +2717,7 @@ impl ToString for IRRepeaterState {
             IRRepeaterState::On => "On".to_string(),
             IRRepeaterState::Off => "Off".to_string(),
             IRRepeaterState::Disabled => "Disabled".to_string(),
+            IRRepeaterState::Unspecified(s) => s.to_string(),
         }
     }
 }
@@ -2657,7 +2729,7 @@ impl FromStr for IRRepeaterState {
             "On" => Ok(IRRepeaterState::On),
             "Off" => Ok(IRRepeaterState::Off),
             "Disabled" => Ok(IRRepeaterState::Disabled),
-            _ => Err(crate::Error::InvalidEnumVariantValue),
+            s => Ok(IRRepeaterState::Unspecified(s.to_string())),
         }
     }
 }
@@ -2717,6 +2789,11 @@ pub enum LEDFeedbackState {
     #[default]
     On,
     Off,
+
+    /// Allows passing a value that was not known at the
+    /// time that this crate was generated from the available
+    /// device descriptions
+    Unspecified(String),
 }
 
 impl ToString for LEDFeedbackState {
@@ -2724,6 +2801,7 @@ impl ToString for LEDFeedbackState {
         match self {
             LEDFeedbackState::On => "On".to_string(),
             LEDFeedbackState::Off => "Off".to_string(),
+            LEDFeedbackState::Unspecified(s) => s.to_string(),
         }
     }
 }
@@ -2734,7 +2812,7 @@ impl FromStr for LEDFeedbackState {
         match s {
             "On" => Ok(LEDFeedbackState::On),
             "Off" => Ok(LEDFeedbackState::Off),
-            _ => Err(crate::Error::InvalidEnumVariantValue),
+            s => Ok(LEDFeedbackState::Unspecified(s.to_string())),
         }
     }
 }
@@ -3487,6 +3565,11 @@ pub enum Channel {
     Master,
     Lf,
     Rf,
+
+    /// Allows passing a value that was not known at the
+    /// time that this crate was generated from the available
+    /// device descriptions
+    Unspecified(String),
 }
 
 impl ToString for Channel {
@@ -3495,6 +3578,7 @@ impl ToString for Channel {
             Channel::Master => "Master".to_string(),
             Channel::Lf => "LF".to_string(),
             Channel::Rf => "RF".to_string(),
+            Channel::Unspecified(s) => s.to_string(),
         }
     }
 }
@@ -3506,7 +3590,7 @@ impl FromStr for Channel {
             "Master" => Ok(Channel::Master),
             "LF" => Ok(Channel::Lf),
             "RF" => Ok(Channel::Rf),
-            _ => Err(crate::Error::InvalidEnumVariantValue),
+            s => Ok(Channel::Unspecified(s.to_string())),
         }
     }
 }
@@ -3568,6 +3652,11 @@ pub enum MuteChannel {
     Lf,
     Rf,
     SpeakerOnly,
+
+    /// Allows passing a value that was not known at the
+    /// time that this crate was generated from the available
+    /// device descriptions
+    Unspecified(String),
 }
 
 impl ToString for MuteChannel {
@@ -3577,6 +3666,7 @@ impl ToString for MuteChannel {
             MuteChannel::Lf => "LF".to_string(),
             MuteChannel::Rf => "RF".to_string(),
             MuteChannel::SpeakerOnly => "SpeakerOnly".to_string(),
+            MuteChannel::Unspecified(s) => s.to_string(),
         }
     }
 }
@@ -3589,7 +3679,7 @@ impl FromStr for MuteChannel {
             "LF" => Ok(MuteChannel::Lf),
             "RF" => Ok(MuteChannel::Rf),
             "SpeakerOnly" => Ok(MuteChannel::SpeakerOnly),
-            _ => Err(crate::Error::InvalidEnumVariantValue),
+            s => Ok(MuteChannel::Unspecified(s.to_string())),
         }
     }
 }
@@ -3650,6 +3740,11 @@ pub enum RampType {
     SleepTimerRampType,
     AlarmRampType,
     AutoplayRampType,
+
+    /// Allows passing a value that was not known at the
+    /// time that this crate was generated from the available
+    /// device descriptions
+    Unspecified(String),
 }
 
 impl ToString for RampType {
@@ -3658,6 +3753,7 @@ impl ToString for RampType {
             RampType::SleepTimerRampType => "SLEEP_TIMER_RAMP_TYPE".to_string(),
             RampType::AlarmRampType => "ALARM_RAMP_TYPE".to_string(),
             RampType::AutoplayRampType => "AUTOPLAY_RAMP_TYPE".to_string(),
+            RampType::Unspecified(s) => s.to_string(),
         }
     }
 }
@@ -3669,7 +3765,7 @@ impl FromStr for RampType {
             "SLEEP_TIMER_RAMP_TYPE" => Ok(RampType::SleepTimerRampType),
             "ALARM_RAMP_TYPE" => Ok(RampType::AlarmRampType),
             "AUTOPLAY_RAMP_TYPE" => Ok(RampType::AutoplayRampType),
-            _ => Err(crate::Error::InvalidEnumVariantValue),
+            s => Ok(RampType::Unspecified(s.to_string())),
         }
     }
 }
@@ -4122,6 +4218,11 @@ pub enum UnresponsiveDeviceActionType {
     Remove,
     TopologyMonitorProbe,
     VerifyThenRemoveSystemwide,
+
+    /// Allows passing a value that was not known at the
+    /// time that this crate was generated from the available
+    /// device descriptions
+    Unspecified(String),
 }
 
 impl ToString for UnresponsiveDeviceActionType {
@@ -4134,6 +4235,7 @@ impl ToString for UnresponsiveDeviceActionType {
             UnresponsiveDeviceActionType::VerifyThenRemoveSystemwide => {
                 "VerifyThenRemoveSystemwide".to_string()
             }
+            UnresponsiveDeviceActionType::Unspecified(s) => s.to_string(),
         }
     }
 }
@@ -4147,7 +4249,7 @@ impl FromStr for UnresponsiveDeviceActionType {
             "VerifyThenRemoveSystemwide" => {
                 Ok(UnresponsiveDeviceActionType::VerifyThenRemoveSystemwide)
             }
-            _ => Err(crate::Error::InvalidEnumVariantValue),
+            s => Ok(UnresponsiveDeviceActionType::Unspecified(s.to_string())),
         }
     }
 }
@@ -4207,6 +4309,11 @@ pub enum UpdateType {
     #[default]
     All,
     Software,
+
+    /// Allows passing a value that was not known at the
+    /// time that this crate was generated from the available
+    /// device descriptions
+    Unspecified(String),
 }
 
 impl ToString for UpdateType {
@@ -4214,6 +4321,7 @@ impl ToString for UpdateType {
         match self {
             UpdateType::All => "All".to_string(),
             UpdateType::Software => "Software".to_string(),
+            UpdateType::Unspecified(s) => s.to_string(),
         }
     }
 }
@@ -4224,7 +4332,7 @@ impl FromStr for UpdateType {
         match s {
             "All" => Ok(UpdateType::All),
             "Software" => Ok(UpdateType::Software),
-            _ => Err(crate::Error::InvalidEnumVariantValue),
+            s => Ok(UpdateType::Unspecified(s.to_string())),
         }
     }
 }
