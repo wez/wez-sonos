@@ -174,6 +174,27 @@ impl SonosDevice {
         )
         .await
     }
+
+    pub async fn queue_browse(
+        &self,
+        starting_index: u32,
+        requested_count: u32,
+    ) -> Result<Vec<TrackMetaData>> {
+        let result = <Self as Queue>::browse(
+            self,
+            queue::BrowseRequest {
+                queue_id: 0,
+                starting_index,
+                requested_count,
+            },
+        )
+        .await?;
+
+        match result.result {
+            Some(xml) => TrackMetaData::from_didl_str(&xml),
+            None => Ok(vec![]),
+        }
+    }
 }
 
 const SOAP_ENCODING: &str = "http://schemas.xmlsoap.org/soap/encoding/";
@@ -221,7 +242,7 @@ mod soap_resp {
 }
 
 /// Special case for decoding (), as instant_xml considers the empty
-/// body in the soap_resp::Body<T> case to be an error
+/// body in the `soap_resp::Body<T>` case to be an error
 mod soap_empty_resp {
     use super::SOAP_ENVELOPE;
     use instant_xml::FromXml;

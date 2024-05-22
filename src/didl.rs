@@ -2,11 +2,14 @@ use crate::Result;
 use instant_xml::{FromXml, ToXml};
 use std::time::Duration;
 
-pub const XMLNS_DIDL_LITE: &str = "urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/";
-pub const XMLNS_DC_ELEMENTS: &str = "http://purl.org/dc/elements/1.1/";
-pub const XMLNS_UPNP: &str = "urn:schemas-upnp-org:metadata-1-0/upnp/";
-pub const XMLNS_RINCONN: &str = "urn:schemas-rinconnetworks-com:metadata-1-0/";
+const XMLNS_DIDL_LITE: &str = "urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/";
+const XMLNS_DC_ELEMENTS: &str = "http://purl.org/dc/elements/1.1/";
+const XMLNS_UPNP: &str = "urn:schemas-upnp-org:metadata-1-0/upnp/";
+const XMLNS_RINCONN: &str = "urn:schemas-rinconnetworks-com:metadata-1-0/";
 
+/// Represents DIDL-Lite information but in a more ergonomic form.
+/// This type can be converted to/from the corresponding DIDL-Lite
+/// xml form.
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct TrackMetaData {
     pub title: String,
@@ -62,7 +65,7 @@ fn hms_to_duration(hms: &str) -> Duration {
 impl TrackMetaData {
     pub fn to_didl_string(&self) -> String {
         let didl = DidlLite {
-            item: UpnpItem {
+            item: vec![UpnpItem {
                 id: "-1".to_string(),
                 parent_id: "-1".to_string(),
                 restricted: true,
@@ -88,38 +91,41 @@ impl TrackMetaData {
                     .map(|album_title| AlbumTitle { album_title }),
                 creator: self.creator.clone().map(|artist| Creator { artist }),
                 class: Some(ObjectClass::MusicTrack),
-            },
+            }],
         };
         instant_xml::to_string(&didl).expect("infallible xml encode!?")
     }
 
-    pub fn from_didl_str(didl: &str) -> Result<Self> {
+    pub fn from_didl_str(didl: &str) -> Result<Vec<Self>> {
         let didl: DidlLite = instant_xml::from_str(didl)?;
-        let item = didl.item;
-        Ok(Self {
-            class: item.class.unwrap_or_default(),
-            album: item.album_title.map(|a| a.album_title),
-            creator: item.creator.map(|a| a.artist),
-            art_url: item.album_art.map(|a| a.uri),
-            title: item.title.map(|a| a.title).unwrap_or_else(String::new),
-            duration: item.res.as_ref().map(|r| hms_to_duration(&r.duration)),
-            url: item
-                .res
-                .as_ref()
-                .map(|r| r.url.to_string())
-                .unwrap_or_else(String::new),
-            mime_type: item.res.as_ref().and_then(|r| {
-                let fields: Vec<&str> = r.protocol_info.split(':').collect();
-                fields.get(2).map(|mime_type| mime_type.to_string())
-            }),
-        })
+        let mut result = vec![];
+        for item in didl.item {
+            result.push(Self {
+                class: item.class.unwrap_or_default(),
+                album: item.album_title.map(|a| a.album_title),
+                creator: item.creator.map(|a| a.artist),
+                art_url: item.album_art.map(|a| a.uri),
+                title: item.title.map(|a| a.title).unwrap_or_else(String::new),
+                duration: item.res.as_ref().map(|r| hms_to_duration(&r.duration)),
+                url: item
+                    .res
+                    .as_ref()
+                    .map(|r| r.url.to_string())
+                    .unwrap_or_else(String::new),
+                mime_type: item.res.as_ref().and_then(|r| {
+                    let fields: Vec<&str> = r.protocol_info.split(':').collect();
+                    fields.get(2).map(|mime_type| mime_type.to_string())
+                }),
+            });
+        }
+        Ok(result)
     }
 }
 
 #[derive(Debug, FromXml, ToXml)]
 #[xml(rename="DIDL-Lite", ns(XMLNS_DIDL_LITE, dc=XMLNS_DC_ELEMENTS, upnp=XMLNS_UPNP, r=XMLNS_RINCONN))]
 pub struct DidlLite {
-    pub item: UpnpItem,
+    pub item: Vec<UpnpItem>,
 }
 
 #[derive(Debug, FromXml, ToXml)]
