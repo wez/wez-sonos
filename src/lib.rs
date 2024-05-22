@@ -3,7 +3,6 @@ use instant_xml::FromXmlOwned;
 use instant_xml::ToXml;
 use reqwest::StatusCode;
 use reqwest::Url;
-use ssdp_client::URN;
 use std::net::Ipv4Addr;
 use thiserror::Error;
 
@@ -20,8 +19,6 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Debug, Error)]
 pub enum Error {
-    #[error("SSDP Error: {0}")]
-    Ssdp(#[from] ssdp_client::Error),
     #[error("XML Error: {0}")]
     Xml(#[from] instant_xml::Error),
     #[error("XML Error: {error:#} while parsing {text}")]
@@ -30,7 +27,7 @@ pub enum Error {
         text: String,
     },
     #[error("Service {0:?} is not supported by this device")]
-    UnsupportedService(URN),
+    UnsupportedService(String),
     #[error("Invalid URI: {0:#?}")]
     InvalidUri(#[from] url::ParseError),
     #[error("Reqwest Error: {0:#?}")]
@@ -39,6 +36,8 @@ pub enum Error {
     FailedRequest { status: StatusCode, body: String },
     #[error("Device has no name!?")]
     NoName,
+    #[error("I/O Error: {0:#}")]
+    Io(#[from] std::io::Error),
 }
 
 #[derive(Debug)]
@@ -136,7 +135,7 @@ impl SonosDevice {
     /// implemented by the various service traits instead of this.
     pub async fn action<REQ: ToXml, RESP>(
         &self,
-        service: &URN,
+        service: &str,
         action: &str,
         payload: REQ,
     ) -> Result<RESP>
@@ -146,7 +145,7 @@ impl SonosDevice {
         let service = self
             .device
             .get_service(service)
-            .ok_or_else(|| Error::UnsupportedService(service.clone()))?;
+            .ok_or_else(|| Error::UnsupportedService(service.to_string()))?;
 
         let envelope = soap::Envelope {
             encoding_style: SOAP_ENCODING,
@@ -156,7 +155,7 @@ impl SonosDevice {
         let body = instant_xml::to_string(&envelope)?;
         log::trace!("Sending: {body}");
 
-        let soap_action = format!("\"{}#{}\"", *service.service_type, action);
+        let soap_action = format!("\"{}#{action}\"", service.service_type);
         let url = service.control_url(&self.url);
 
         let response = reqwest::Client::new()

@@ -8,7 +8,7 @@ futures-util = "0.3.30"
 instant-xml = "0.4.0"
 log = "0.4.21"
 reqwest = { version = "0.12.4", default-features = false }
-ssdp-client = "2.0.0"
+tokio = { version = "1.37.0", features = ["net"] }
 thiserror = "1.0.61"
 url = "2.5.0"
 

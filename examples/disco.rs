@@ -1,15 +1,11 @@
-use futures_util::TryStreamExt;
 use sonos::prelude::*;
 
 #[tokio::main]
 async fn main() -> sonos::Result<()> {
     env_logger::init();
 
-    let devices = sonos::discover(std::time::Duration::from_secs(15)).await?;
-
-    futures_util::pin_mut!(devices);
-
-    while let Some(device) = devices.try_next().await? {
+    let mut disco = sonos::discover(std::time::Duration::from_secs(15)).await?;
+    while let Some(device) = disco.recv().await {
         match device.name().await {
             Ok(name) => {
                 println!("{name}");

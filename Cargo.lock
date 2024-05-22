@@ -261,22 +261,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "genawaiter"
-version = "0.99.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c86bd0361bcbde39b13475e6e36cb24c329964aa2611be285289d1e4b751c1a0"
-dependencies = [
- "futures-core",
- "genawaiter-macro",
-]
-
-[[package]]
-name = "genawaiter-macro"
-version = "0.99.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b32dfe1fdfc0bbde1f22a5da25355514b5e450c33a6af6770884c8750aedfbc"
-
-[[package]]
 name = "gimli"
 version = "0.28.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -829,22 +813,9 @@ dependencies = [
  "k9",
  "log",
  "reqwest",
- "ssdp-client",
  "thiserror",
  "tokio",
  "url",
-]
-
-[[package]]
-name = "ssdp-client"
-version = "2.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6de407095e6b99d74bef5a000d6acd6754da7119c9b6a09978fe1486ecc7abdd"
-dependencies = [
- "futures-core",
- "genawaiter",
- "log",
- "tokio",
 ]
 
 [[package]]

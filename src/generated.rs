@@ -6,16 +6,12 @@ use crate::SonosDevice;
 /// Request and Response types for the `AVTransport` service.
 pub mod av_transport {
     use instant_xml::{FromXml, ToXml};
-    use ssdp_client::URN;
 
-    /// URN for calling the `AVTransport` service.
+    /// URN for the `AVTransport` service.
     /// `urn:schemas-upnp-org:service:AVTransport:1`
-    pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "AVTransport", 1);
-    /// XML Namespace for the `AVTransport` service.
-    /// `urn:schemas-upnp-org:service:AVTransport:1`
-    pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:AVTransport:1";
+    pub const SERVICE_TYPE: &str = "urn:schemas-upnp-org:service:AVTransport:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "AddMultipleURIsToQueue", ns(SERVICE_NS))]
+    #[xml(rename = "AddMultipleURIsToQueue", ns(SERVICE_TYPE))]
     pub struct AddMultipleUrisToQueueRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -37,7 +33,7 @@ pub mod av_transport {
         pub enqueue_as_next: bool,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "AddMultipleURIsToQueueResponse", ns(SERVICE_NS))]
+    #[xml(rename = "AddMultipleURIsToQueueResponse", ns(SERVICE_TYPE))]
     pub struct AddMultipleUrisToQueueResponse {
         #[xml(rename = "FirstTrackNumberEnqueued", ns(""))]
         pub first_track_number_enqueued: Option<u32>,
@@ -49,7 +45,7 @@ pub mod av_transport {
         pub new_update_id: Option<u32>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "AddURIToQueue", ns(SERVICE_NS))]
+    #[xml(rename = "AddURIToQueue", ns(SERVICE_TYPE))]
     pub struct AddUriToQueueRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -63,7 +59,7 @@ pub mod av_transport {
         pub enqueue_as_next: bool,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "AddURIToQueueResponse", ns(SERVICE_NS))]
+    #[xml(rename = "AddURIToQueueResponse", ns(SERVICE_TYPE))]
     pub struct AddUriToQueueResponse {
         #[xml(rename = "FirstTrackNumberEnqueued", ns(""))]
         pub first_track_number_enqueued: Option<u32>,
@@ -73,7 +69,7 @@ pub mod av_transport {
         pub new_queue_length: Option<u32>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "AddURIToSavedQueue", ns(SERVICE_NS))]
+    #[xml(rename = "AddURIToSavedQueue", ns(SERVICE_TYPE))]
     pub struct AddUriToSavedQueueRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -89,7 +85,7 @@ pub mod av_transport {
         pub add_at_index: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "AddURIToSavedQueueResponse", ns(SERVICE_NS))]
+    #[xml(rename = "AddURIToSavedQueueResponse", ns(SERVICE_TYPE))]
     pub struct AddUriToSavedQueueResponse {
         #[xml(rename = "NumTracksAdded", ns(""))]
         pub num_tracks_added: Option<u32>,
@@ -99,19 +95,22 @@ pub mod av_transport {
         pub new_update_id: Option<u32>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "BackupQueue", ns(SERVICE_NS))]
+    #[xml(rename = "BackupQueue", ns(SERVICE_TYPE))]
     pub struct BackupQueueRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "BecomeCoordinatorOfStandaloneGroup", ns(SERVICE_NS))]
+    #[xml(rename = "BecomeCoordinatorOfStandaloneGroup", ns(SERVICE_TYPE))]
     pub struct BecomeCoordinatorOfStandaloneGroupRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "BecomeCoordinatorOfStandaloneGroupResponse", ns(SERVICE_NS))]
+    #[xml(
+        rename = "BecomeCoordinatorOfStandaloneGroupResponse",
+        ns(SERVICE_TYPE)
+    )]
     pub struct BecomeCoordinatorOfStandaloneGroupResponse {
         #[xml(rename = "DelegatedGroupCoordinatorID", ns(""))]
         pub delegated_group_coordinator_id: Option<String>,
@@ -119,7 +118,7 @@ pub mod av_transport {
         pub new_group_id: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "BecomeGroupCoordinator", ns(SERVICE_NS))]
+    #[xml(rename = "BecomeGroupCoordinator", ns(SERVICE_TYPE))]
     pub struct BecomeGroupCoordinatorRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -147,7 +146,7 @@ pub mod av_transport {
         pub current_vli_state: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "BecomeGroupCoordinatorAndSource", ns(SERVICE_NS))]
+    #[xml(rename = "BecomeGroupCoordinatorAndSource", ns(SERVICE_TYPE))]
     pub struct BecomeGroupCoordinatorAndSourceRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -177,7 +176,7 @@ pub mod av_transport {
         pub resume_playback: bool,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "ChangeCoordinator", ns(SERVICE_NS))]
+    #[xml(rename = "ChangeCoordinator", ns(SERVICE_TYPE))]
     pub struct ChangeCoordinatorRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -191,7 +190,7 @@ pub mod av_transport {
         pub current_av_transport_uri: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "ChangeTransportSettings", ns(SERVICE_NS))]
+    #[xml(rename = "ChangeTransportSettings", ns(SERVICE_TYPE))]
     pub struct ChangeTransportSettingsRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -201,7 +200,7 @@ pub mod av_transport {
         pub current_av_transport_uri: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "ConfigureSleepTimer", ns(SERVICE_NS))]
+    #[xml(rename = "ConfigureSleepTimer", ns(SERVICE_TYPE))]
     pub struct ConfigureSleepTimerRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -209,7 +208,7 @@ pub mod av_transport {
         pub new_sleep_timer_duration: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "CreateSavedQueue", ns(SERVICE_NS))]
+    #[xml(rename = "CreateSavedQueue", ns(SERVICE_TYPE))]
     pub struct CreateSavedQueueRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -221,7 +220,7 @@ pub mod av_transport {
         pub enqueued_uri_meta_data: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "CreateSavedQueueResponse", ns(SERVICE_NS))]
+    #[xml(rename = "CreateSavedQueueResponse", ns(SERVICE_TYPE))]
     pub struct CreateSavedQueueResponse {
         #[xml(rename = "NumTracksAdded", ns(""))]
         pub num_tracks_added: Option<u32>,
@@ -233,7 +232,7 @@ pub mod av_transport {
         pub new_update_id: Option<u32>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "DelegateGroupCoordinationTo", ns(SERVICE_NS))]
+    #[xml(rename = "DelegateGroupCoordinationTo", ns(SERVICE_TYPE))]
     pub struct DelegateGroupCoordinationToRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -243,43 +242,43 @@ pub mod av_transport {
         pub rejoin_group: bool,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "EndDirectControlSession", ns(SERVICE_NS))]
+    #[xml(rename = "EndDirectControlSession", ns(SERVICE_TYPE))]
     pub struct EndDirectControlSessionRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetCrossfadeMode", ns(SERVICE_NS))]
+    #[xml(rename = "GetCrossfadeMode", ns(SERVICE_TYPE))]
     pub struct GetCrossfadeModeRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetCrossfadeModeResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetCrossfadeModeResponse", ns(SERVICE_TYPE))]
     pub struct GetCrossfadeModeResponse {
         #[xml(rename = "CrossfadeMode", ns(""))]
         pub crossfade_mode: Option<bool>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetCurrentTransportActions", ns(SERVICE_NS))]
+    #[xml(rename = "GetCurrentTransportActions", ns(SERVICE_TYPE))]
     pub struct GetCurrentTransportActionsRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetCurrentTransportActionsResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetCurrentTransportActionsResponse", ns(SERVICE_TYPE))]
     pub struct GetCurrentTransportActionsResponse {
         #[xml(rename = "Actions", ns(""))]
         pub actions: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetDeviceCapabilities", ns(SERVICE_NS))]
+    #[xml(rename = "GetDeviceCapabilities", ns(SERVICE_TYPE))]
     pub struct GetDeviceCapabilitiesRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetDeviceCapabilitiesResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetDeviceCapabilitiesResponse", ns(SERVICE_TYPE))]
     pub struct GetDeviceCapabilitiesResponse {
         #[xml(rename = "PlayMedia", ns(""))]
         pub play_media: Option<String>,
@@ -289,13 +288,13 @@ pub mod av_transport {
         pub rec_quality_modes: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetMediaInfo", ns(SERVICE_NS))]
+    #[xml(rename = "GetMediaInfo", ns(SERVICE_TYPE))]
     pub struct GetMediaInfoRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetMediaInfoResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetMediaInfoResponse", ns(SERVICE_TYPE))]
     pub struct GetMediaInfoResponse {
         #[xml(rename = "NrTracks", ns(""))]
         pub nr_tracks: Option<u32>,
@@ -317,13 +316,13 @@ pub mod av_transport {
         pub write_status: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetPositionInfo", ns(SERVICE_NS))]
+    #[xml(rename = "GetPositionInfo", ns(SERVICE_TYPE))]
     pub struct GetPositionInfoRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetPositionInfoResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetPositionInfoResponse", ns(SERVICE_TYPE))]
     pub struct GetPositionInfoResponse {
         #[xml(rename = "Track", ns(""))]
         pub track: Option<u32>,
@@ -343,13 +342,13 @@ pub mod av_transport {
         pub abs_count: Option<i32>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetRemainingSleepTimerDuration", ns(SERVICE_NS))]
+    #[xml(rename = "GetRemainingSleepTimerDuration", ns(SERVICE_TYPE))]
     pub struct GetRemainingSleepTimerDurationRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetRemainingSleepTimerDurationResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetRemainingSleepTimerDurationResponse", ns(SERVICE_TYPE))]
     pub struct GetRemainingSleepTimerDurationResponse {
         #[xml(rename = "RemainingSleepTimerDuration", ns(""))]
         pub remaining_sleep_timer_duration: Option<String>,
@@ -357,13 +356,13 @@ pub mod av_transport {
         pub current_sleep_timer_generation: Option<u32>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetRunningAlarmProperties", ns(SERVICE_NS))]
+    #[xml(rename = "GetRunningAlarmProperties", ns(SERVICE_TYPE))]
     pub struct GetRunningAlarmPropertiesRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetRunningAlarmPropertiesResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetRunningAlarmPropertiesResponse", ns(SERVICE_TYPE))]
     pub struct GetRunningAlarmPropertiesResponse {
         #[xml(rename = "AlarmID", ns(""))]
         pub alarm_id: Option<u32>,
@@ -373,13 +372,13 @@ pub mod av_transport {
         pub logged_start_time: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetTransportInfo", ns(SERVICE_NS))]
+    #[xml(rename = "GetTransportInfo", ns(SERVICE_TYPE))]
     pub struct GetTransportInfoRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetTransportInfoResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetTransportInfoResponse", ns(SERVICE_TYPE))]
     pub struct GetTransportInfoResponse {
         #[xml(rename = "CurrentTransportState", ns(""))]
         pub current_transport_state: Option<String>,
@@ -389,13 +388,13 @@ pub mod av_transport {
         pub current_speed: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetTransportSettings", ns(SERVICE_NS))]
+    #[xml(rename = "GetTransportSettings", ns(SERVICE_TYPE))]
     pub struct GetTransportSettingsRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetTransportSettingsResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetTransportSettingsResponse", ns(SERVICE_TYPE))]
     pub struct GetTransportSettingsResponse {
         #[xml(rename = "PlayMode", ns(""))]
         pub play_mode: Option<String>,
@@ -403,13 +402,13 @@ pub mod av_transport {
         pub rec_quality_mode: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "Next", ns(SERVICE_NS))]
+    #[xml(rename = "Next", ns(SERVICE_TYPE))]
     pub struct NextRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "NotifyDeletedURI", ns(SERVICE_NS))]
+    #[xml(rename = "NotifyDeletedURI", ns(SERVICE_TYPE))]
     pub struct NotifyDeletedUriRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -417,13 +416,13 @@ pub mod av_transport {
         pub deleted_uri: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "Pause", ns(SERVICE_NS))]
+    #[xml(rename = "Pause", ns(SERVICE_TYPE))]
     pub struct PauseRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "Play", ns(SERVICE_NS))]
+    #[xml(rename = "Play", ns(SERVICE_TYPE))]
     pub struct PlayRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -431,19 +430,19 @@ pub mod av_transport {
         pub speed: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "Previous", ns(SERVICE_NS))]
+    #[xml(rename = "Previous", ns(SERVICE_TYPE))]
     pub struct PreviousRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "RemoveAllTracksFromQueue", ns(SERVICE_NS))]
+    #[xml(rename = "RemoveAllTracksFromQueue", ns(SERVICE_TYPE))]
     pub struct RemoveAllTracksFromQueueRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "RemoveTrackFromQueue", ns(SERVICE_NS))]
+    #[xml(rename = "RemoveTrackFromQueue", ns(SERVICE_TYPE))]
     pub struct RemoveTrackFromQueueRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -453,7 +452,7 @@ pub mod av_transport {
         pub update_id: u32,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "RemoveTrackRangeFromQueue", ns(SERVICE_NS))]
+    #[xml(rename = "RemoveTrackRangeFromQueue", ns(SERVICE_TYPE))]
     pub struct RemoveTrackRangeFromQueueRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -465,13 +464,13 @@ pub mod av_transport {
         pub number_of_tracks: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "RemoveTrackRangeFromQueueResponse", ns(SERVICE_NS))]
+    #[xml(rename = "RemoveTrackRangeFromQueueResponse", ns(SERVICE_TYPE))]
     pub struct RemoveTrackRangeFromQueueResponse {
         #[xml(rename = "NewUpdateID", ns(""))]
         pub new_update_id: Option<u32>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "ReorderTracksInQueue", ns(SERVICE_NS))]
+    #[xml(rename = "ReorderTracksInQueue", ns(SERVICE_TYPE))]
     pub struct ReorderTracksInQueueRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -485,7 +484,7 @@ pub mod av_transport {
         pub update_id: u32,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "ReorderTracksInSavedQueue", ns(SERVICE_NS))]
+    #[xml(rename = "ReorderTracksInSavedQueue", ns(SERVICE_TYPE))]
     pub struct ReorderTracksInSavedQueueRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -499,7 +498,7 @@ pub mod av_transport {
         pub new_position_list: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "ReorderTracksInSavedQueueResponse", ns(SERVICE_NS))]
+    #[xml(rename = "ReorderTracksInSavedQueueResponse", ns(SERVICE_TYPE))]
     pub struct ReorderTracksInSavedQueueResponse {
         #[xml(rename = "QueueLengthChange", ns(""))]
         pub queue_length_change: Option<i32>,
@@ -509,7 +508,7 @@ pub mod av_transport {
         pub new_update_id: Option<u32>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "RunAlarm", ns(SERVICE_NS))]
+    #[xml(rename = "RunAlarm", ns(SERVICE_TYPE))]
     pub struct RunAlarmRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -531,7 +530,7 @@ pub mod av_transport {
         pub include_linked_zones: bool,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SaveQueue", ns(SERVICE_NS))]
+    #[xml(rename = "SaveQueue", ns(SERVICE_TYPE))]
     pub struct SaveQueueRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -541,13 +540,13 @@ pub mod av_transport {
         pub object_id: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "SaveQueueResponse", ns(SERVICE_NS))]
+    #[xml(rename = "SaveQueueResponse", ns(SERVICE_TYPE))]
     pub struct SaveQueueResponse {
         #[xml(rename = "AssignedObjectID", ns(""))]
         pub assigned_object_id: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "Seek", ns(SERVICE_NS))]
+    #[xml(rename = "Seek", ns(SERVICE_TYPE))]
     pub struct SeekRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -557,7 +556,7 @@ pub mod av_transport {
         pub target: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetAVTransportURI", ns(SERVICE_NS))]
+    #[xml(rename = "SetAVTransportURI", ns(SERVICE_TYPE))]
     pub struct SetAvTransportUriRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -567,7 +566,7 @@ pub mod av_transport {
         pub current_uri_meta_data: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetCrossfadeMode", ns(SERVICE_NS))]
+    #[xml(rename = "SetCrossfadeMode", ns(SERVICE_TYPE))]
     pub struct SetCrossfadeModeRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -575,7 +574,7 @@ pub mod av_transport {
         pub crossfade_mode: bool,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetNextAVTransportURI", ns(SERVICE_NS))]
+    #[xml(rename = "SetNextAVTransportURI", ns(SERVICE_TYPE))]
     pub struct SetNextAvTransportUriRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -585,7 +584,7 @@ pub mod av_transport {
         pub next_uri_meta_data: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetPlayMode", ns(SERVICE_NS))]
+    #[xml(rename = "SetPlayMode", ns(SERVICE_TYPE))]
     pub struct SetPlayModeRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -593,7 +592,7 @@ pub mod av_transport {
         pub new_play_mode: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SnoozeAlarm", ns(SERVICE_NS))]
+    #[xml(rename = "SnoozeAlarm", ns(SERVICE_TYPE))]
     pub struct SnoozeAlarmRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -601,7 +600,7 @@ pub mod av_transport {
         pub duration: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "StartAutoplay", ns(SERVICE_NS))]
+    #[xml(rename = "StartAutoplay", ns(SERVICE_TYPE))]
     pub struct StartAutoplayRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -617,7 +616,7 @@ pub mod av_transport {
         pub reset_volume_after: bool,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "Stop", ns(SERVICE_NS))]
+    #[xml(rename = "Stop", ns(SERVICE_TYPE))]
     pub struct StopRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -626,16 +625,12 @@ pub mod av_transport {
 /// Request and Response types for the `AlarmClock` service.
 pub mod alarm_clock {
     use instant_xml::{FromXml, ToXml};
-    use ssdp_client::URN;
 
-    /// URN for calling the `AlarmClock` service.
+    /// URN for the `AlarmClock` service.
     /// `urn:schemas-upnp-org:service:AlarmClock:1`
-    pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "AlarmClock", 1);
-    /// XML Namespace for the `AlarmClock` service.
-    /// `urn:schemas-upnp-org:service:AlarmClock:1`
-    pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:AlarmClock:1";
+    pub const SERVICE_TYPE: &str = "urn:schemas-upnp-org:service:AlarmClock:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "CreateAlarm", ns(SERVICE_NS))]
+    #[xml(rename = "CreateAlarm", ns(SERVICE_TYPE))]
     pub struct CreateAlarmRequest {
         #[xml(rename = "StartLocalTime", ns(""))]
         pub start_local_time: String,
@@ -659,25 +654,25 @@ pub mod alarm_clock {
         pub include_linked_zones: bool,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "CreateAlarmResponse", ns(SERVICE_NS))]
+    #[xml(rename = "CreateAlarmResponse", ns(SERVICE_TYPE))]
     pub struct CreateAlarmResponse {
         #[xml(rename = "AssignedID", ns(""))]
         pub assigned_id: Option<u32>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "DestroyAlarm", ns(SERVICE_NS))]
+    #[xml(rename = "DestroyAlarm", ns(SERVICE_TYPE))]
     pub struct DestroyAlarmRequest {
         #[xml(rename = "ID", ns(""))]
         pub id: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetDailyIndexRefreshTimeResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetDailyIndexRefreshTimeResponse", ns(SERVICE_TYPE))]
     pub struct GetDailyIndexRefreshTimeResponse {
         #[xml(rename = "CurrentDailyIndexRefreshTime", ns(""))]
         pub current_daily_index_refresh_time: Option<String>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetFormatResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetFormatResponse", ns(SERVICE_TYPE))]
     pub struct GetFormatResponse {
         #[xml(rename = "CurrentTimeFormat", ns(""))]
         pub current_time_format: Option<String>,
@@ -685,19 +680,19 @@ pub mod alarm_clock {
         pub current_date_format: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetHouseholdTimeAtStamp", ns(SERVICE_NS))]
+    #[xml(rename = "GetHouseholdTimeAtStamp", ns(SERVICE_TYPE))]
     pub struct GetHouseholdTimeAtStampRequest {
         #[xml(rename = "TimeStamp", ns(""))]
         pub time_stamp: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetHouseholdTimeAtStampResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetHouseholdTimeAtStampResponse", ns(SERVICE_TYPE))]
     pub struct GetHouseholdTimeAtStampResponse {
         #[xml(rename = "HouseholdUTCTime", ns(""))]
         pub household_utc_time: Option<String>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetTimeNowResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetTimeNowResponse", ns(SERVICE_TYPE))]
     pub struct GetTimeNowResponse {
         #[xml(rename = "CurrentUTCTime", ns(""))]
         pub current_utc_time: Option<String>,
@@ -709,13 +704,13 @@ pub mod alarm_clock {
         pub current_time_generation: Option<u32>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetTimeServerResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetTimeServerResponse", ns(SERVICE_TYPE))]
     pub struct GetTimeServerResponse {
         #[xml(rename = "CurrentTimeServer", ns(""))]
         pub current_time_server: Option<String>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetTimeZoneResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetTimeZoneResponse", ns(SERVICE_TYPE))]
     pub struct GetTimeZoneResponse {
         #[xml(rename = "Index", ns(""))]
         pub index: Option<i32>,
@@ -723,7 +718,7 @@ pub mod alarm_clock {
         pub auto_adjust_dst: Option<bool>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetTimeZoneAndRuleResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetTimeZoneAndRuleResponse", ns(SERVICE_TYPE))]
     pub struct GetTimeZoneAndRuleResponse {
         #[xml(rename = "Index", ns(""))]
         pub index: Option<i32>,
@@ -733,19 +728,19 @@ pub mod alarm_clock {
         pub current_time_zone: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetTimeZoneRule", ns(SERVICE_NS))]
+    #[xml(rename = "GetTimeZoneRule", ns(SERVICE_TYPE))]
     pub struct GetTimeZoneRuleRequest {
         #[xml(rename = "Index", ns(""))]
         pub index: i32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetTimeZoneRuleResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetTimeZoneRuleResponse", ns(SERVICE_TYPE))]
     pub struct GetTimeZoneRuleResponse {
         #[xml(rename = "TimeZone", ns(""))]
         pub time_zone: Option<String>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "ListAlarmsResponse", ns(SERVICE_NS))]
+    #[xml(rename = "ListAlarmsResponse", ns(SERVICE_TYPE))]
     pub struct ListAlarmsResponse {
         #[xml(rename = "CurrentAlarmList", ns(""))]
         pub current_alarm_list: Option<String>,
@@ -753,13 +748,13 @@ pub mod alarm_clock {
         pub current_alarm_list_version: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetDailyIndexRefreshTime", ns(SERVICE_NS))]
+    #[xml(rename = "SetDailyIndexRefreshTime", ns(SERVICE_TYPE))]
     pub struct SetDailyIndexRefreshTimeRequest {
         #[xml(rename = "DesiredDailyIndexRefreshTime", ns(""))]
         pub desired_daily_index_refresh_time: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetFormat", ns(SERVICE_NS))]
+    #[xml(rename = "SetFormat", ns(SERVICE_TYPE))]
     pub struct SetFormatRequest {
         #[xml(rename = "DesiredTimeFormat", ns(""))]
         pub desired_time_format: String,
@@ -767,7 +762,7 @@ pub mod alarm_clock {
         pub desired_date_format: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetTimeNow", ns(SERVICE_NS))]
+    #[xml(rename = "SetTimeNow", ns(SERVICE_TYPE))]
     pub struct SetTimeNowRequest {
         #[xml(rename = "DesiredTime", ns(""))]
         pub desired_time: String,
@@ -775,13 +770,13 @@ pub mod alarm_clock {
         pub time_zone_for_desired_time: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetTimeServer", ns(SERVICE_NS))]
+    #[xml(rename = "SetTimeServer", ns(SERVICE_TYPE))]
     pub struct SetTimeServerRequest {
         #[xml(rename = "DesiredTimeServer", ns(""))]
         pub desired_time_server: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetTimeZone", ns(SERVICE_NS))]
+    #[xml(rename = "SetTimeZone", ns(SERVICE_TYPE))]
     pub struct SetTimeZoneRequest {
         #[xml(rename = "Index", ns(""))]
         pub index: i32,
@@ -789,7 +784,7 @@ pub mod alarm_clock {
         pub auto_adjust_dst: bool,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "UpdateAlarm", ns(SERVICE_NS))]
+    #[xml(rename = "UpdateAlarm", ns(SERVICE_TYPE))]
     pub struct UpdateAlarmRequest {
         #[xml(rename = "ID", ns(""))]
         pub id: u32,
@@ -818,16 +813,12 @@ pub mod alarm_clock {
 /// Request and Response types for the `AudioIn` service.
 pub mod audio_in {
     use instant_xml::{FromXml, ToXml};
-    use ssdp_client::URN;
 
-    /// URN for calling the `AudioIn` service.
+    /// URN for the `AudioIn` service.
     /// `urn:schemas-upnp-org:service:AudioIn:1`
-    pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "AudioIn", 1);
-    /// XML Namespace for the `AudioIn` service.
-    /// `urn:schemas-upnp-org:service:AudioIn:1`
-    pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:AudioIn:1";
+    pub const SERVICE_TYPE: &str = "urn:schemas-upnp-org:service:AudioIn:1";
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetAudioInputAttributesResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetAudioInputAttributesResponse", ns(SERVICE_TYPE))]
     pub struct GetAudioInputAttributesResponse {
         #[xml(rename = "CurrentName", ns(""))]
         pub current_name: Option<String>,
@@ -835,7 +826,7 @@ pub mod audio_in {
         pub current_icon: Option<String>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetLineInLevelResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetLineInLevelResponse", ns(SERVICE_TYPE))]
     pub struct GetLineInLevelResponse {
         #[xml(rename = "CurrentLeftLineInLevel", ns(""))]
         pub current_left_line_in_level: Option<i32>,
@@ -843,13 +834,13 @@ pub mod audio_in {
         pub current_right_line_in_level: Option<i32>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SelectAudio", ns(SERVICE_NS))]
+    #[xml(rename = "SelectAudio", ns(SERVICE_TYPE))]
     pub struct SelectAudioRequest {
         #[xml(rename = "ObjectID", ns(""))]
         pub object_id: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetAudioInputAttributes", ns(SERVICE_NS))]
+    #[xml(rename = "SetAudioInputAttributes", ns(SERVICE_TYPE))]
     pub struct SetAudioInputAttributesRequest {
         #[xml(rename = "DesiredName", ns(""))]
         pub desired_name: String,
@@ -857,7 +848,7 @@ pub mod audio_in {
         pub desired_icon: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetLineInLevel", ns(SERVICE_NS))]
+    #[xml(rename = "SetLineInLevel", ns(SERVICE_TYPE))]
     pub struct SetLineInLevelRequest {
         #[xml(rename = "DesiredLeftLineInLevel", ns(""))]
         pub desired_left_line_in_level: i32,
@@ -865,19 +856,19 @@ pub mod audio_in {
         pub desired_right_line_in_level: i32,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "StartTransmissionToGroup", ns(SERVICE_NS))]
+    #[xml(rename = "StartTransmissionToGroup", ns(SERVICE_TYPE))]
     pub struct StartTransmissionToGroupRequest {
         #[xml(rename = "CoordinatorID", ns(""))]
         pub coordinator_id: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "StartTransmissionToGroupResponse", ns(SERVICE_NS))]
+    #[xml(rename = "StartTransmissionToGroupResponse", ns(SERVICE_TYPE))]
     pub struct StartTransmissionToGroupResponse {
         #[xml(rename = "CurrentTransportSettings", ns(""))]
         pub current_transport_settings: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "StopTransmissionToGroup", ns(SERVICE_NS))]
+    #[xml(rename = "StopTransmissionToGroup", ns(SERVICE_TYPE))]
     pub struct StopTransmissionToGroupRequest {
         #[xml(rename = "CoordinatorID", ns(""))]
         pub coordinator_id: String,
@@ -886,28 +877,24 @@ pub mod audio_in {
 /// Request and Response types for the `ConnectionManager` service.
 pub mod connection_manager {
     use instant_xml::{FromXml, ToXml};
-    use ssdp_client::URN;
 
-    /// URN for calling the `ConnectionManager` service.
+    /// URN for the `ConnectionManager` service.
     /// `urn:schemas-upnp-org:service:ConnectionManager:1`
-    pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "ConnectionManager", 1);
-    /// XML Namespace for the `ConnectionManager` service.
-    /// `urn:schemas-upnp-org:service:ConnectionManager:1`
-    pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:ConnectionManager:1";
+    pub const SERVICE_TYPE: &str = "urn:schemas-upnp-org:service:ConnectionManager:1";
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetCurrentConnectionIDsResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetCurrentConnectionIDsResponse", ns(SERVICE_TYPE))]
     pub struct GetCurrentConnectionIdsResponse {
         #[xml(rename = "ConnectionIDs", ns(""))]
         pub connection_ids: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetCurrentConnectionInfo", ns(SERVICE_NS))]
+    #[xml(rename = "GetCurrentConnectionInfo", ns(SERVICE_TYPE))]
     pub struct GetCurrentConnectionInfoRequest {
         #[xml(rename = "ConnectionID", ns(""))]
         pub connection_id: i32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetCurrentConnectionInfoResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetCurrentConnectionInfoResponse", ns(SERVICE_TYPE))]
     pub struct GetCurrentConnectionInfoResponse {
         #[xml(rename = "RcsID", ns(""))]
         pub rcs_id: Option<i32>,
@@ -925,7 +912,7 @@ pub mod connection_manager {
         pub status: Option<String>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetProtocolInfoResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetProtocolInfoResponse", ns(SERVICE_TYPE))]
     pub struct GetProtocolInfoResponse {
         #[xml(rename = "Source", ns(""))]
         pub source: Option<String>,
@@ -936,16 +923,12 @@ pub mod connection_manager {
 /// Request and Response types for the `ContentDirectory` service.
 pub mod content_directory {
     use instant_xml::{FromXml, ToXml};
-    use ssdp_client::URN;
 
-    /// URN for calling the `ContentDirectory` service.
+    /// URN for the `ContentDirectory` service.
     /// `urn:schemas-upnp-org:service:ContentDirectory:1`
-    pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "ContentDirectory", 1);
-    /// XML Namespace for the `ContentDirectory` service.
-    /// `urn:schemas-upnp-org:service:ContentDirectory:1`
-    pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:ContentDirectory:1";
+    pub const SERVICE_TYPE: &str = "urn:schemas-upnp-org:service:ContentDirectory:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "Browse", ns(SERVICE_NS))]
+    #[xml(rename = "Browse", ns(SERVICE_TYPE))]
     pub struct BrowseRequest {
         #[xml(rename = "ObjectID", ns(""))]
         pub object_id: String,
@@ -961,7 +944,7 @@ pub mod content_directory {
         pub sort_criteria: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "BrowseResponse", ns(SERVICE_NS))]
+    #[xml(rename = "BrowseResponse", ns(SERVICE_TYPE))]
     pub struct BrowseResponse {
         #[xml(rename = "Result", ns(""))]
         pub result: Option<String>,
@@ -973,7 +956,7 @@ pub mod content_directory {
         pub update_id: Option<u32>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "CreateObject", ns(SERVICE_NS))]
+    #[xml(rename = "CreateObject", ns(SERVICE_TYPE))]
     pub struct CreateObjectRequest {
         #[xml(rename = "ContainerID", ns(""))]
         pub container_id: String,
@@ -981,7 +964,7 @@ pub mod content_directory {
         pub elements: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "CreateObjectResponse", ns(SERVICE_NS))]
+    #[xml(rename = "CreateObjectResponse", ns(SERVICE_TYPE))]
     pub struct CreateObjectResponse {
         #[xml(rename = "ObjectID", ns(""))]
         pub object_id: Option<String>,
@@ -989,13 +972,13 @@ pub mod content_directory {
         pub result: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "DestroyObject", ns(SERVICE_NS))]
+    #[xml(rename = "DestroyObject", ns(SERVICE_TYPE))]
     pub struct DestroyObjectRequest {
         #[xml(rename = "ObjectID", ns(""))]
         pub object_id: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "FindPrefix", ns(SERVICE_NS))]
+    #[xml(rename = "FindPrefix", ns(SERVICE_TYPE))]
     pub struct FindPrefixRequest {
         #[xml(rename = "ObjectID", ns(""))]
         pub object_id: String,
@@ -1003,7 +986,7 @@ pub mod content_directory {
         pub prefix: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "FindPrefixResponse", ns(SERVICE_NS))]
+    #[xml(rename = "FindPrefixResponse", ns(SERVICE_TYPE))]
     pub struct FindPrefixResponse {
         #[xml(rename = "StartingIndex", ns(""))]
         pub starting_index: Option<u32>,
@@ -1011,19 +994,19 @@ pub mod content_directory {
         pub update_id: Option<u32>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetAlbumArtistDisplayOptionResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetAlbumArtistDisplayOptionResponse", ns(SERVICE_TYPE))]
     pub struct GetAlbumArtistDisplayOptionResponse {
         #[xml(rename = "AlbumArtistDisplayOption", ns(""))]
         pub album_artist_display_option: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetAllPrefixLocations", ns(SERVICE_NS))]
+    #[xml(rename = "GetAllPrefixLocations", ns(SERVICE_TYPE))]
     pub struct GetAllPrefixLocationsRequest {
         #[xml(rename = "ObjectID", ns(""))]
         pub object_id: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetAllPrefixLocationsResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetAllPrefixLocationsResponse", ns(SERVICE_TYPE))]
     pub struct GetAllPrefixLocationsResponse {
         #[xml(rename = "TotalPrefixes", ns(""))]
         pub total_prefixes: Option<u32>,
@@ -1033,61 +1016,61 @@ pub mod content_directory {
         pub update_id: Option<u32>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetBrowseableResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetBrowseableResponse", ns(SERVICE_TYPE))]
     pub struct GetBrowseableResponse {
         #[xml(rename = "IsBrowseable", ns(""))]
         pub is_browseable: Option<bool>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetLastIndexChangeResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetLastIndexChangeResponse", ns(SERVICE_TYPE))]
     pub struct GetLastIndexChangeResponse {
         #[xml(rename = "LastIndexChange", ns(""))]
         pub last_index_change: Option<String>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetSearchCapabilitiesResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetSearchCapabilitiesResponse", ns(SERVICE_TYPE))]
     pub struct GetSearchCapabilitiesResponse {
         #[xml(rename = "SearchCaps", ns(""))]
         pub search_caps: Option<String>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetShareIndexInProgressResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetShareIndexInProgressResponse", ns(SERVICE_TYPE))]
     pub struct GetShareIndexInProgressResponse {
         #[xml(rename = "IsIndexing", ns(""))]
         pub is_indexing: Option<bool>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetSortCapabilitiesResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetSortCapabilitiesResponse", ns(SERVICE_TYPE))]
     pub struct GetSortCapabilitiesResponse {
         #[xml(rename = "SortCaps", ns(""))]
         pub sort_caps: Option<String>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetSystemUpdateIDResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetSystemUpdateIDResponse", ns(SERVICE_TYPE))]
     pub struct GetSystemUpdateIdResponse {
         #[xml(rename = "Id", ns(""))]
         pub id: Option<u32>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "RefreshShareIndex", ns(SERVICE_NS))]
+    #[xml(rename = "RefreshShareIndex", ns(SERVICE_TYPE))]
     pub struct RefreshShareIndexRequest {
         #[xml(rename = "AlbumArtistDisplayOption", ns(""))]
         pub album_artist_display_option: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "RequestResort", ns(SERVICE_NS))]
+    #[xml(rename = "RequestResort", ns(SERVICE_TYPE))]
     pub struct RequestResortRequest {
         #[xml(rename = "SortOrder", ns(""))]
         pub sort_order: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetBrowseable", ns(SERVICE_NS))]
+    #[xml(rename = "SetBrowseable", ns(SERVICE_TYPE))]
     pub struct SetBrowseableRequest {
         #[xml(rename = "Browseable", ns(""))]
         pub browseable: bool,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "UpdateObject", ns(SERVICE_NS))]
+    #[xml(rename = "UpdateObject", ns(SERVICE_TYPE))]
     pub struct UpdateObjectRequest {
         #[xml(rename = "ObjectID", ns(""))]
         pub object_id: String,
@@ -1100,34 +1083,30 @@ pub mod content_directory {
 /// Request and Response types for the `DeviceProperties` service.
 pub mod device_properties {
     use instant_xml::{FromXml, ToXml};
-    use ssdp_client::URN;
 
-    /// URN for calling the `DeviceProperties` service.
+    /// URN for the `DeviceProperties` service.
     /// `urn:schemas-upnp-org:service:DeviceProperties:1`
-    pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "DeviceProperties", 1);
-    /// XML Namespace for the `DeviceProperties` service.
-    /// `urn:schemas-upnp-org:service:DeviceProperties:1`
-    pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:DeviceProperties:1";
+    pub const SERVICE_TYPE: &str = "urn:schemas-upnp-org:service:DeviceProperties:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "AddBondedZones", ns(SERVICE_NS))]
+    #[xml(rename = "AddBondedZones", ns(SERVICE_TYPE))]
     pub struct AddBondedZonesRequest {
         #[xml(rename = "ChannelMapSet", ns(""))]
         pub channel_map_set: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "AddHTSatellite", ns(SERVICE_NS))]
+    #[xml(rename = "AddHTSatellite", ns(SERVICE_TYPE))]
     pub struct AddHtSatelliteRequest {
         #[xml(rename = "HTSatChanMapSet", ns(""))]
         pub ht_sat_chan_map_set: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "CreateStereoPair", ns(SERVICE_NS))]
+    #[xml(rename = "CreateStereoPair", ns(SERVICE_TYPE))]
     pub struct CreateStereoPairRequest {
         #[xml(rename = "ChannelMapSet", ns(""))]
         pub channel_map_set: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "EnterConfigMode", ns(SERVICE_NS))]
+    #[xml(rename = "EnterConfigMode", ns(SERVICE_TYPE))]
     pub struct EnterConfigModeRequest {
         #[xml(rename = "Mode", ns(""))]
         pub mode: String,
@@ -1135,97 +1114,97 @@ pub mod device_properties {
         pub options: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "EnterConfigModeResponse", ns(SERVICE_NS))]
+    #[xml(rename = "EnterConfigModeResponse", ns(SERVICE_TYPE))]
     pub struct EnterConfigModeResponse {
         #[xml(rename = "State", ns(""))]
         pub state: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "ExitConfigMode", ns(SERVICE_NS))]
+    #[xml(rename = "ExitConfigMode", ns(SERVICE_TYPE))]
     pub struct ExitConfigModeRequest {
         #[xml(rename = "Options", ns(""))]
         pub options: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetAutoplayLinkedZones", ns(SERVICE_NS))]
+    #[xml(rename = "GetAutoplayLinkedZones", ns(SERVICE_TYPE))]
     pub struct GetAutoplayLinkedZonesRequest {
         #[xml(rename = "Source", ns(""))]
         pub source: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetAutoplayLinkedZonesResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetAutoplayLinkedZonesResponse", ns(SERVICE_TYPE))]
     pub struct GetAutoplayLinkedZonesResponse {
         #[xml(rename = "IncludeLinkedZones", ns(""))]
         pub include_linked_zones: Option<bool>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetAutoplayRoomUUID", ns(SERVICE_NS))]
+    #[xml(rename = "GetAutoplayRoomUUID", ns(SERVICE_TYPE))]
     pub struct GetAutoplayRoomUuidRequest {
         #[xml(rename = "Source", ns(""))]
         pub source: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetAutoplayRoomUUIDResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetAutoplayRoomUUIDResponse", ns(SERVICE_TYPE))]
     pub struct GetAutoplayRoomUuidResponse {
         #[xml(rename = "RoomUUID", ns(""))]
         pub room_uuid: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetAutoplayVolume", ns(SERVICE_NS))]
+    #[xml(rename = "GetAutoplayVolume", ns(SERVICE_TYPE))]
     pub struct GetAutoplayVolumeRequest {
         #[xml(rename = "Source", ns(""))]
         pub source: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetAutoplayVolumeResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetAutoplayVolumeResponse", ns(SERVICE_TYPE))]
     pub struct GetAutoplayVolumeResponse {
         #[xml(rename = "CurrentVolume", ns(""))]
         pub current_volume: Option<u16>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetButtonLockStateResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetButtonLockStateResponse", ns(SERVICE_TYPE))]
     pub struct GetButtonLockStateResponse {
         #[xml(rename = "CurrentButtonLockState", ns(""))]
         pub current_button_lock_state: Option<String>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetButtonStateResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetButtonStateResponse", ns(SERVICE_TYPE))]
     pub struct GetButtonStateResponse {
         #[xml(rename = "State", ns(""))]
         pub state: Option<String>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetHTForwardStateResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetHTForwardStateResponse", ns(SERVICE_TYPE))]
     pub struct GetHtForwardStateResponse {
         #[xml(rename = "IsHTForwardEnabled", ns(""))]
         pub is_ht_forward_enabled: Option<bool>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetHouseholdIDResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetHouseholdIDResponse", ns(SERVICE_TYPE))]
     pub struct GetHouseholdIdResponse {
         #[xml(rename = "CurrentHouseholdID", ns(""))]
         pub current_household_id: Option<String>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetLEDStateResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetLEDStateResponse", ns(SERVICE_TYPE))]
     pub struct GetLedStateResponse {
         #[xml(rename = "CurrentLEDState", ns(""))]
         pub current_led_state: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetUseAutoplayVolume", ns(SERVICE_NS))]
+    #[xml(rename = "GetUseAutoplayVolume", ns(SERVICE_TYPE))]
     pub struct GetUseAutoplayVolumeRequest {
         #[xml(rename = "Source", ns(""))]
         pub source: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetUseAutoplayVolumeResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetUseAutoplayVolumeResponse", ns(SERVICE_TYPE))]
     pub struct GetUseAutoplayVolumeResponse {
         #[xml(rename = "UseVolume", ns(""))]
         pub use_volume: Option<bool>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetZoneAttributesResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetZoneAttributesResponse", ns(SERVICE_TYPE))]
     pub struct GetZoneAttributesResponse {
         #[xml(rename = "CurrentZoneName", ns(""))]
         pub current_zone_name: Option<String>,
@@ -1237,7 +1216,7 @@ pub mod device_properties {
         pub current_target_room_name: Option<String>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetZoneInfoResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetZoneInfoResponse", ns(SERVICE_TYPE))]
     pub struct GetZoneInfoResponse {
         #[xml(rename = "SerialNumber", ns(""))]
         pub serial_number: Option<String>,
@@ -1261,7 +1240,7 @@ pub mod device_properties {
         pub flags: Option<u32>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "RemoveBondedZones", ns(SERVICE_NS))]
+    #[xml(rename = "RemoveBondedZones", ns(SERVICE_TYPE))]
     pub struct RemoveBondedZonesRequest {
         #[xml(rename = "ChannelMapSet", ns(""))]
         pub channel_map_set: String,
@@ -1269,13 +1248,13 @@ pub mod device_properties {
         pub keep_grouped: bool,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "RemoveHTSatellite", ns(SERVICE_NS))]
+    #[xml(rename = "RemoveHTSatellite", ns(SERVICE_TYPE))]
     pub struct RemoveHtSatelliteRequest {
         #[xml(rename = "SatRoomUUID", ns(""))]
         pub sat_room_uuid: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "RoomDetectionStartChirping", ns(SERVICE_NS))]
+    #[xml(rename = "RoomDetectionStartChirping", ns(SERVICE_TYPE))]
     pub struct RoomDetectionStartChirpingRequest {
         #[xml(rename = "Channel", ns(""))]
         pub channel: u16,
@@ -1285,7 +1264,7 @@ pub mod device_properties {
         pub chirp_if_playing_swappable_audio: bool,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "RoomDetectionStartChirpingResponse", ns(SERVICE_NS))]
+    #[xml(rename = "RoomDetectionStartChirpingResponse", ns(SERVICE_TYPE))]
     pub struct RoomDetectionStartChirpingResponse {
         #[xml(rename = "PlayId", ns(""))]
         pub play_id: Option<u32>,
@@ -1293,19 +1272,19 @@ pub mod device_properties {
         pub chirp_if_playing_swappable_audio: Option<bool>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "RoomDetectionStopChirping", ns(SERVICE_NS))]
+    #[xml(rename = "RoomDetectionStopChirping", ns(SERVICE_TYPE))]
     pub struct RoomDetectionStopChirpingRequest {
         #[xml(rename = "PlayId", ns(""))]
         pub play_id: u32,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SeparateStereoPair", ns(SERVICE_NS))]
+    #[xml(rename = "SeparateStereoPair", ns(SERVICE_TYPE))]
     pub struct SeparateStereoPairRequest {
         #[xml(rename = "ChannelMapSet", ns(""))]
         pub channel_map_set: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetAutoplayLinkedZones", ns(SERVICE_NS))]
+    #[xml(rename = "SetAutoplayLinkedZones", ns(SERVICE_TYPE))]
     pub struct SetAutoplayLinkedZonesRequest {
         #[xml(rename = "IncludeLinkedZones", ns(""))]
         pub include_linked_zones: bool,
@@ -1313,7 +1292,7 @@ pub mod device_properties {
         pub source: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetAutoplayRoomUUID", ns(SERVICE_NS))]
+    #[xml(rename = "SetAutoplayRoomUUID", ns(SERVICE_TYPE))]
     pub struct SetAutoplayRoomUuidRequest {
         #[xml(rename = "RoomUUID", ns(""))]
         pub room_uuid: String,
@@ -1321,7 +1300,7 @@ pub mod device_properties {
         pub source: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetAutoplayVolume", ns(SERVICE_NS))]
+    #[xml(rename = "SetAutoplayVolume", ns(SERVICE_TYPE))]
     pub struct SetAutoplayVolumeRequest {
         #[xml(rename = "Volume", ns(""))]
         pub volume: u16,
@@ -1329,19 +1308,19 @@ pub mod device_properties {
         pub source: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetButtonLockState", ns(SERVICE_NS))]
+    #[xml(rename = "SetButtonLockState", ns(SERVICE_TYPE))]
     pub struct SetButtonLockStateRequest {
         #[xml(rename = "DesiredButtonLockState", ns(""))]
         pub desired_button_lock_state: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetLEDState", ns(SERVICE_NS))]
+    #[xml(rename = "SetLEDState", ns(SERVICE_TYPE))]
     pub struct SetLedStateRequest {
         #[xml(rename = "DesiredLEDState", ns(""))]
         pub desired_led_state: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetUseAutoplayVolume", ns(SERVICE_NS))]
+    #[xml(rename = "SetUseAutoplayVolume", ns(SERVICE_TYPE))]
     pub struct SetUseAutoplayVolumeRequest {
         #[xml(rename = "UseVolume", ns(""))]
         pub use_volume: bool,
@@ -1349,7 +1328,7 @@ pub mod device_properties {
         pub source: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetZoneAttributes", ns(SERVICE_NS))]
+    #[xml(rename = "SetZoneAttributes", ns(SERVICE_TYPE))]
     pub struct SetZoneAttributesRequest {
         #[xml(rename = "DesiredZoneName", ns(""))]
         pub desired_zone_name: String,
@@ -1364,16 +1343,12 @@ pub mod device_properties {
 /// Request and Response types for the `GroupManagement` service.
 pub mod group_management {
     use instant_xml::{FromXml, ToXml};
-    use ssdp_client::URN;
 
-    /// URN for calling the `GroupManagement` service.
+    /// URN for the `GroupManagement` service.
     /// `urn:schemas-upnp-org:service:GroupManagement:1`
-    pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "GroupManagement", 1);
-    /// XML Namespace for the `GroupManagement` service.
-    /// `urn:schemas-upnp-org:service:GroupManagement:1`
-    pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:GroupManagement:1";
+    pub const SERVICE_TYPE: &str = "urn:schemas-upnp-org:service:GroupManagement:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "AddMember", ns(SERVICE_NS))]
+    #[xml(rename = "AddMember", ns(SERVICE_TYPE))]
     pub struct AddMemberRequest {
         #[xml(rename = "MemberID", ns(""))]
         pub member_id: String,
@@ -1381,7 +1356,7 @@ pub mod group_management {
         pub boot_seq: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "AddMemberResponse", ns(SERVICE_NS))]
+    #[xml(rename = "AddMemberResponse", ns(SERVICE_TYPE))]
     pub struct AddMemberResponse {
         #[xml(rename = "CurrentTransportSettings", ns(""))]
         pub current_transport_settings: Option<String>,
@@ -1395,13 +1370,13 @@ pub mod group_management {
         pub volume_av_transport_uri: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "RemoveMember", ns(SERVICE_NS))]
+    #[xml(rename = "RemoveMember", ns(SERVICE_TYPE))]
     pub struct RemoveMemberRequest {
         #[xml(rename = "MemberID", ns(""))]
         pub member_id: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "ReportTrackBufferingResult", ns(SERVICE_NS))]
+    #[xml(rename = "ReportTrackBufferingResult", ns(SERVICE_TYPE))]
     pub struct ReportTrackBufferingResultRequest {
         #[xml(rename = "MemberID", ns(""))]
         pub member_id: String,
@@ -1409,7 +1384,7 @@ pub mod group_management {
         pub result_code: i32,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetSourceAreaIds", ns(SERVICE_NS))]
+    #[xml(rename = "SetSourceAreaIds", ns(SERVICE_TYPE))]
     pub struct SetSourceAreaIdsRequest {
         #[xml(rename = "DesiredSourceAreaIds", ns(""))]
         pub desired_source_area_ids: String,
@@ -1418,40 +1393,36 @@ pub mod group_management {
 /// Request and Response types for the `GroupRenderingControl` service.
 pub mod group_rendering_control {
     use instant_xml::{FromXml, ToXml};
-    use ssdp_client::URN;
 
-    /// URN for calling the `GroupRenderingControl` service.
+    /// URN for the `GroupRenderingControl` service.
     /// `urn:schemas-upnp-org:service:GroupRenderingControl:1`
-    pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "GroupRenderingControl", 1);
-    /// XML Namespace for the `GroupRenderingControl` service.
-    /// `urn:schemas-upnp-org:service:GroupRenderingControl:1`
-    pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:GroupRenderingControl:1";
+    pub const SERVICE_TYPE: &str = "urn:schemas-upnp-org:service:GroupRenderingControl:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetGroupMute", ns(SERVICE_NS))]
+    #[xml(rename = "GetGroupMute", ns(SERVICE_TYPE))]
     pub struct GetGroupMuteRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetGroupMuteResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetGroupMuteResponse", ns(SERVICE_TYPE))]
     pub struct GetGroupMuteResponse {
         #[xml(rename = "CurrentMute", ns(""))]
         pub current_mute: Option<bool>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetGroupVolume", ns(SERVICE_NS))]
+    #[xml(rename = "GetGroupVolume", ns(SERVICE_TYPE))]
     pub struct GetGroupVolumeRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetGroupVolumeResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetGroupVolumeResponse", ns(SERVICE_TYPE))]
     pub struct GetGroupVolumeResponse {
         #[xml(rename = "CurrentVolume", ns(""))]
         pub current_volume: Option<u16>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetGroupMute", ns(SERVICE_NS))]
+    #[xml(rename = "SetGroupMute", ns(SERVICE_TYPE))]
     pub struct SetGroupMuteRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -1459,7 +1430,7 @@ pub mod group_rendering_control {
         pub desired_mute: bool,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetGroupVolume", ns(SERVICE_NS))]
+    #[xml(rename = "SetGroupVolume", ns(SERVICE_TYPE))]
     pub struct SetGroupVolumeRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -1467,7 +1438,7 @@ pub mod group_rendering_control {
         pub desired_volume: u16,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetRelativeGroupVolume", ns(SERVICE_NS))]
+    #[xml(rename = "SetRelativeGroupVolume", ns(SERVICE_TYPE))]
     pub struct SetRelativeGroupVolumeRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -1475,13 +1446,13 @@ pub mod group_rendering_control {
         pub adjustment: i32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "SetRelativeGroupVolumeResponse", ns(SERVICE_NS))]
+    #[xml(rename = "SetRelativeGroupVolumeResponse", ns(SERVICE_TYPE))]
     pub struct SetRelativeGroupVolumeResponse {
         #[xml(rename = "NewVolume", ns(""))]
         pub new_volume: Option<u16>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SnapshotGroupVolume", ns(SERVICE_NS))]
+    #[xml(rename = "SnapshotGroupVolume", ns(SERVICE_TYPE))]
     pub struct SnapshotGroupVolumeRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -1490,46 +1461,42 @@ pub mod group_rendering_control {
 /// Request and Response types for the `HTControl` service.
 pub mod ht_control {
     use instant_xml::{FromXml, ToXml};
-    use ssdp_client::URN;
 
-    /// URN for calling the `HTControl` service.
+    /// URN for the `HTControl` service.
     /// `urn:schemas-upnp-org:service:HTControl:1`
-    pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "HTControl", 1);
-    /// XML Namespace for the `HTControl` service.
-    /// `urn:schemas-upnp-org:service:HTControl:1`
-    pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:HTControl:1";
+    pub const SERVICE_TYPE: &str = "urn:schemas-upnp-org:service:HTControl:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "CommitLearnedIRCodes", ns(SERVICE_NS))]
+    #[xml(rename = "CommitLearnedIRCodes", ns(SERVICE_TYPE))]
     pub struct CommitLearnedIrCodesRequest {
         #[xml(rename = "Name", ns(""))]
         pub name: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetIRRepeaterStateResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetIRRepeaterStateResponse", ns(SERVICE_TYPE))]
     pub struct GetIrRepeaterStateResponse {
         #[xml(rename = "CurrentIRRepeaterState", ns(""))]
         pub current_ir_repeater_state: Option<String>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetLEDFeedbackStateResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetLEDFeedbackStateResponse", ns(SERVICE_TYPE))]
     pub struct GetLedFeedbackStateResponse {
         #[xml(rename = "LEDFeedbackState", ns(""))]
         pub led_feedback_state: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "IdentifyIRRemote", ns(SERVICE_NS))]
+    #[xml(rename = "IdentifyIRRemote", ns(SERVICE_TYPE))]
     pub struct IdentifyIrRemoteRequest {
         #[xml(rename = "Timeout", ns(""))]
         pub timeout: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "IsRemoteConfiguredResponse", ns(SERVICE_NS))]
+    #[xml(rename = "IsRemoteConfiguredResponse", ns(SERVICE_TYPE))]
     pub struct IsRemoteConfiguredResponse {
         #[xml(rename = "RemoteConfigured", ns(""))]
         pub remote_configured: Option<bool>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "LearnIRCode", ns(SERVICE_NS))]
+    #[xml(rename = "LearnIRCode", ns(SERVICE_TYPE))]
     pub struct LearnIrCodeRequest {
         #[xml(rename = "IRCode", ns(""))]
         pub ir_code: String,
@@ -1537,13 +1504,13 @@ pub mod ht_control {
         pub timeout: u32,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetIRRepeaterState", ns(SERVICE_NS))]
+    #[xml(rename = "SetIRRepeaterState", ns(SERVICE_TYPE))]
     pub struct SetIrRepeaterStateRequest {
         #[xml(rename = "DesiredIRRepeaterState", ns(""))]
         pub desired_ir_repeater_state: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetLEDFeedbackState", ns(SERVICE_NS))]
+    #[xml(rename = "SetLEDFeedbackState", ns(SERVICE_TYPE))]
     pub struct SetLedFeedbackStateRequest {
         #[xml(rename = "LEDFeedbackState", ns(""))]
         pub led_feedback_state: String,
@@ -1552,16 +1519,12 @@ pub mod ht_control {
 /// Request and Response types for the `MusicServices` service.
 pub mod music_services {
     use instant_xml::{FromXml, ToXml};
-    use ssdp_client::URN;
 
-    /// URN for calling the `MusicServices` service.
+    /// URN for the `MusicServices` service.
     /// `urn:schemas-upnp-org:service:MusicServices:1`
-    pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "MusicServices", 1);
-    /// XML Namespace for the `MusicServices` service.
-    /// `urn:schemas-upnp-org:service:MusicServices:1`
-    pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:MusicServices:1";
+    pub const SERVICE_TYPE: &str = "urn:schemas-upnp-org:service:MusicServices:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetSessionId", ns(SERVICE_NS))]
+    #[xml(rename = "GetSessionId", ns(SERVICE_TYPE))]
     pub struct GetSessionIdRequest {
         #[xml(rename = "ServiceId", ns(""))]
         pub service_id: u32,
@@ -1569,13 +1532,13 @@ pub mod music_services {
         pub username: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetSessionIdResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetSessionIdResponse", ns(SERVICE_TYPE))]
     pub struct GetSessionIdResponse {
         #[xml(rename = "SessionId", ns(""))]
         pub session_id: Option<String>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "ListAvailableServicesResponse", ns(SERVICE_NS))]
+    #[xml(rename = "ListAvailableServicesResponse", ns(SERVICE_TYPE))]
     pub struct ListAvailableServicesResponse {
         #[xml(rename = "AvailableServiceDescriptorList", ns(""))]
         pub available_service_descriptor_list: Option<String>,
@@ -1588,22 +1551,18 @@ pub mod music_services {
 /// Request and Response types for the `QPlay` service.
 pub mod q_play {
     use instant_xml::{FromXml, ToXml};
-    use ssdp_client::URN;
 
-    /// URN for calling the `QPlay` service.
+    /// URN for the `QPlay` service.
     /// `urn:schemas-tencent-com:service:QPlay:1`
-    pub const SERVICE_TYPE: &URN = &URN::service("schemas-tencent-com", "QPlay", 1);
-    /// XML Namespace for the `QPlay` service.
-    /// `urn:schemas-tencent-com:service:QPlay:1`
-    pub const SERVICE_NS: &str = "urn:schemas-tencent-com:service:QPlay:1";
+    pub const SERVICE_TYPE: &str = "urn:schemas-tencent-com:service:QPlay:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "QPlayAuth", ns(SERVICE_NS))]
+    #[xml(rename = "QPlayAuth", ns(SERVICE_TYPE))]
     pub struct QPlayAuthRequest {
         #[xml(rename = "Seed", ns(""))]
         pub seed: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "QPlayAuthResponse", ns(SERVICE_NS))]
+    #[xml(rename = "QPlayAuthResponse", ns(SERVICE_TYPE))]
     pub struct QPlayAuthResponse {
         #[xml(rename = "Code", ns(""))]
         pub code: Option<String>,
@@ -1616,16 +1575,12 @@ pub mod q_play {
 /// Request and Response types for the `Queue` service.
 pub mod queue {
     use instant_xml::{FromXml, ToXml};
-    use ssdp_client::URN;
 
-    /// URN for calling the `Queue` service.
+    /// URN for the `Queue` service.
     /// `urn:schemas-sonos-com:service:Queue:1`
-    pub const SERVICE_TYPE: &URN = &URN::service("schemas-sonos-com", "Queue", 1);
-    /// XML Namespace for the `Queue` service.
-    /// `urn:schemas-sonos-com:service:Queue:1`
-    pub const SERVICE_NS: &str = "urn:schemas-sonos-com:service:Queue:1";
+    pub const SERVICE_TYPE: &str = "urn:schemas-sonos-com:service:Queue:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "AddMultipleURIs", ns(SERVICE_NS))]
+    #[xml(rename = "AddMultipleURIs", ns(SERVICE_TYPE))]
     pub struct AddMultipleUrisRequest {
         #[xml(rename = "QueueID", ns(""))]
         pub queue_id: u32,
@@ -1645,7 +1600,7 @@ pub mod queue {
         pub enqueued_uris_and_meta_data: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "AddMultipleURIsResponse", ns(SERVICE_NS))]
+    #[xml(rename = "AddMultipleURIsResponse", ns(SERVICE_TYPE))]
     pub struct AddMultipleUrisResponse {
         #[xml(rename = "FirstTrackNumberEnqueued", ns(""))]
         pub first_track_number_enqueued: Option<u32>,
@@ -1657,7 +1612,7 @@ pub mod queue {
         pub new_update_id: Option<u32>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "AddURI", ns(SERVICE_NS))]
+    #[xml(rename = "AddURI", ns(SERVICE_TYPE))]
     pub struct AddUriRequest {
         #[xml(rename = "QueueID", ns(""))]
         pub queue_id: u32,
@@ -1673,7 +1628,7 @@ pub mod queue {
         pub enqueue_as_next: bool,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "AddURIResponse", ns(SERVICE_NS))]
+    #[xml(rename = "AddURIResponse", ns(SERVICE_TYPE))]
     pub struct AddUriResponse {
         #[xml(rename = "FirstTrackNumberEnqueued", ns(""))]
         pub first_track_number_enqueued: Option<u32>,
@@ -1685,13 +1640,13 @@ pub mod queue {
         pub new_update_id: Option<u32>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "AttachQueue", ns(SERVICE_NS))]
+    #[xml(rename = "AttachQueue", ns(SERVICE_TYPE))]
     pub struct AttachQueueRequest {
         #[xml(rename = "QueueOwnerID", ns(""))]
         pub queue_owner_id: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "AttachQueueResponse", ns(SERVICE_NS))]
+    #[xml(rename = "AttachQueueResponse", ns(SERVICE_TYPE))]
     pub struct AttachQueueResponse {
         #[xml(rename = "QueueID", ns(""))]
         pub queue_id: Option<u32>,
@@ -1699,7 +1654,7 @@ pub mod queue {
         pub queue_owner_context: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "Browse", ns(SERVICE_NS))]
+    #[xml(rename = "Browse", ns(SERVICE_TYPE))]
     pub struct BrowseRequest {
         #[xml(rename = "QueueID", ns(""))]
         pub queue_id: u32,
@@ -1709,7 +1664,7 @@ pub mod queue {
         pub requested_count: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "BrowseResponse", ns(SERVICE_NS))]
+    #[xml(rename = "BrowseResponse", ns(SERVICE_TYPE))]
     pub struct BrowseResponse {
         #[xml(rename = "Result", ns(""))]
         pub result: Option<String>,
@@ -1721,7 +1676,7 @@ pub mod queue {
         pub update_id: Option<u32>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "CreateQueue", ns(SERVICE_NS))]
+    #[xml(rename = "CreateQueue", ns(SERVICE_TYPE))]
     pub struct CreateQueueRequest {
         #[xml(rename = "QueueOwnerID", ns(""))]
         pub queue_owner_id: String,
@@ -1731,13 +1686,13 @@ pub mod queue {
         pub queue_policy: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "CreateQueueResponse", ns(SERVICE_NS))]
+    #[xml(rename = "CreateQueueResponse", ns(SERVICE_TYPE))]
     pub struct CreateQueueResponse {
         #[xml(rename = "QueueID", ns(""))]
         pub queue_id: Option<u32>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "RemoveAllTracks", ns(SERVICE_NS))]
+    #[xml(rename = "RemoveAllTracks", ns(SERVICE_TYPE))]
     pub struct RemoveAllTracksRequest {
         #[xml(rename = "QueueID", ns(""))]
         pub queue_id: u32,
@@ -1745,13 +1700,13 @@ pub mod queue {
         pub update_id: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "RemoveAllTracksResponse", ns(SERVICE_NS))]
+    #[xml(rename = "RemoveAllTracksResponse", ns(SERVICE_TYPE))]
     pub struct RemoveAllTracksResponse {
         #[xml(rename = "NewUpdateID", ns(""))]
         pub new_update_id: Option<u32>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "RemoveTrackRange", ns(SERVICE_NS))]
+    #[xml(rename = "RemoveTrackRange", ns(SERVICE_TYPE))]
     pub struct RemoveTrackRangeRequest {
         #[xml(rename = "QueueID", ns(""))]
         pub queue_id: u32,
@@ -1763,13 +1718,13 @@ pub mod queue {
         pub number_of_tracks: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "RemoveTrackRangeResponse", ns(SERVICE_NS))]
+    #[xml(rename = "RemoveTrackRangeResponse", ns(SERVICE_TYPE))]
     pub struct RemoveTrackRangeResponse {
         #[xml(rename = "NewUpdateID", ns(""))]
         pub new_update_id: Option<u32>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "ReorderTracks", ns(SERVICE_NS))]
+    #[xml(rename = "ReorderTracks", ns(SERVICE_TYPE))]
     pub struct ReorderTracksRequest {
         #[xml(rename = "QueueID", ns(""))]
         pub queue_id: u32,
@@ -1783,13 +1738,13 @@ pub mod queue {
         pub update_id: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "ReorderTracksResponse", ns(SERVICE_NS))]
+    #[xml(rename = "ReorderTracksResponse", ns(SERVICE_TYPE))]
     pub struct ReorderTracksResponse {
         #[xml(rename = "NewUpdateID", ns(""))]
         pub new_update_id: Option<u32>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "ReplaceAllTracks", ns(SERVICE_NS))]
+    #[xml(rename = "ReplaceAllTracks", ns(SERVICE_TYPE))]
     pub struct ReplaceAllTracksRequest {
         #[xml(rename = "QueueID", ns(""))]
         pub queue_id: u32,
@@ -1809,7 +1764,7 @@ pub mod queue {
         pub enqueued_uris_and_meta_data: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "ReplaceAllTracksResponse", ns(SERVICE_NS))]
+    #[xml(rename = "ReplaceAllTracksResponse", ns(SERVICE_TYPE))]
     pub struct ReplaceAllTracksResponse {
         #[xml(rename = "NewQueueLength", ns(""))]
         pub new_queue_length: Option<u32>,
@@ -1817,7 +1772,7 @@ pub mod queue {
         pub new_update_id: Option<u32>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SaveAsSonosPlaylist", ns(SERVICE_NS))]
+    #[xml(rename = "SaveAsSonosPlaylist", ns(SERVICE_TYPE))]
     pub struct SaveAsSonosPlaylistRequest {
         #[xml(rename = "QueueID", ns(""))]
         pub queue_id: u32,
@@ -1827,7 +1782,7 @@ pub mod queue {
         pub object_id: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "SaveAsSonosPlaylistResponse", ns(SERVICE_NS))]
+    #[xml(rename = "SaveAsSonosPlaylistResponse", ns(SERVICE_TYPE))]
     pub struct SaveAsSonosPlaylistResponse {
         #[xml(rename = "AssignedObjectID", ns(""))]
         pub assigned_object_id: Option<String>,
@@ -1836,28 +1791,24 @@ pub mod queue {
 /// Request and Response types for the `RenderingControl` service.
 pub mod rendering_control {
     use instant_xml::{FromXml, ToXml};
-    use ssdp_client::URN;
 
-    /// URN for calling the `RenderingControl` service.
+    /// URN for the `RenderingControl` service.
     /// `urn:schemas-upnp-org:service:RenderingControl:1`
-    pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "RenderingControl", 1);
-    /// XML Namespace for the `RenderingControl` service.
-    /// `urn:schemas-upnp-org:service:RenderingControl:1`
-    pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:RenderingControl:1";
+    pub const SERVICE_TYPE: &str = "urn:schemas-upnp-org:service:RenderingControl:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetBass", ns(SERVICE_NS))]
+    #[xml(rename = "GetBass", ns(SERVICE_TYPE))]
     pub struct GetBassRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetBassResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetBassResponse", ns(SERVICE_TYPE))]
     pub struct GetBassResponse {
         #[xml(rename = "CurrentBass", ns(""))]
         pub current_bass: Option<i16>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetEQ", ns(SERVICE_NS))]
+    #[xml(rename = "GetEQ", ns(SERVICE_TYPE))]
     pub struct GetEqRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -1865,25 +1816,25 @@ pub mod rendering_control {
         pub eq_type: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetEQResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetEQResponse", ns(SERVICE_TYPE))]
     pub struct GetEqResponse {
         #[xml(rename = "CurrentValue", ns(""))]
         pub current_value: Option<i16>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetHeadphoneConnected", ns(SERVICE_NS))]
+    #[xml(rename = "GetHeadphoneConnected", ns(SERVICE_TYPE))]
     pub struct GetHeadphoneConnectedRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetHeadphoneConnectedResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetHeadphoneConnectedResponse", ns(SERVICE_TYPE))]
     pub struct GetHeadphoneConnectedResponse {
         #[xml(rename = "CurrentHeadphoneConnected", ns(""))]
         pub current_headphone_connected: Option<bool>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetLoudness", ns(SERVICE_NS))]
+    #[xml(rename = "GetLoudness", ns(SERVICE_TYPE))]
     pub struct GetLoudnessRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -1891,13 +1842,13 @@ pub mod rendering_control {
         pub channel: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetLoudnessResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetLoudnessResponse", ns(SERVICE_TYPE))]
     pub struct GetLoudnessResponse {
         #[xml(rename = "CurrentLoudness", ns(""))]
         pub current_loudness: Option<bool>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetMute", ns(SERVICE_NS))]
+    #[xml(rename = "GetMute", ns(SERVICE_TYPE))]
     pub struct GetMuteRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -1905,31 +1856,31 @@ pub mod rendering_control {
         pub channel: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetMuteResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetMuteResponse", ns(SERVICE_TYPE))]
     pub struct GetMuteResponse {
         #[xml(rename = "CurrentMute", ns(""))]
         pub current_mute: Option<bool>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetOutputFixed", ns(SERVICE_NS))]
+    #[xml(rename = "GetOutputFixed", ns(SERVICE_TYPE))]
     pub struct GetOutputFixedRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetOutputFixedResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetOutputFixedResponse", ns(SERVICE_TYPE))]
     pub struct GetOutputFixedResponse {
         #[xml(rename = "CurrentFixed", ns(""))]
         pub current_fixed: Option<bool>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetRoomCalibrationStatus", ns(SERVICE_NS))]
+    #[xml(rename = "GetRoomCalibrationStatus", ns(SERVICE_TYPE))]
     pub struct GetRoomCalibrationStatusRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetRoomCalibrationStatusResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetRoomCalibrationStatusResponse", ns(SERVICE_TYPE))]
     pub struct GetRoomCalibrationStatusResponse {
         #[xml(rename = "RoomCalibrationEnabled", ns(""))]
         pub room_calibration_enabled: Option<bool>,
@@ -1937,31 +1888,31 @@ pub mod rendering_control {
         pub room_calibration_available: Option<bool>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetSupportsOutputFixed", ns(SERVICE_NS))]
+    #[xml(rename = "GetSupportsOutputFixed", ns(SERVICE_TYPE))]
     pub struct GetSupportsOutputFixedRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetSupportsOutputFixedResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetSupportsOutputFixedResponse", ns(SERVICE_TYPE))]
     pub struct GetSupportsOutputFixedResponse {
         #[xml(rename = "CurrentSupportsFixed", ns(""))]
         pub current_supports_fixed: Option<bool>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetTreble", ns(SERVICE_NS))]
+    #[xml(rename = "GetTreble", ns(SERVICE_TYPE))]
     pub struct GetTrebleRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetTrebleResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetTrebleResponse", ns(SERVICE_TYPE))]
     pub struct GetTrebleResponse {
         #[xml(rename = "CurrentTreble", ns(""))]
         pub current_treble: Option<i16>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetVolume", ns(SERVICE_NS))]
+    #[xml(rename = "GetVolume", ns(SERVICE_TYPE))]
     pub struct GetVolumeRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -1969,13 +1920,13 @@ pub mod rendering_control {
         pub channel: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetVolumeResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetVolumeResponse", ns(SERVICE_TYPE))]
     pub struct GetVolumeResponse {
         #[xml(rename = "CurrentVolume", ns(""))]
         pub current_volume: Option<u16>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetVolumeDB", ns(SERVICE_NS))]
+    #[xml(rename = "GetVolumeDB", ns(SERVICE_TYPE))]
     pub struct GetVolumeDbRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -1983,13 +1934,13 @@ pub mod rendering_control {
         pub channel: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetVolumeDBResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetVolumeDBResponse", ns(SERVICE_TYPE))]
     pub struct GetVolumeDbResponse {
         #[xml(rename = "CurrentVolume", ns(""))]
         pub current_volume: Option<i16>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetVolumeDBRange", ns(SERVICE_NS))]
+    #[xml(rename = "GetVolumeDBRange", ns(SERVICE_TYPE))]
     pub struct GetVolumeDbRangeRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -1997,7 +1948,7 @@ pub mod rendering_control {
         pub channel: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetVolumeDBRangeResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetVolumeDBRangeResponse", ns(SERVICE_TYPE))]
     pub struct GetVolumeDbRangeResponse {
         #[xml(rename = "MinValue", ns(""))]
         pub min_value: Option<i16>,
@@ -2005,7 +1956,7 @@ pub mod rendering_control {
         pub max_value: Option<i16>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "RampToVolume", ns(SERVICE_NS))]
+    #[xml(rename = "RampToVolume", ns(SERVICE_TYPE))]
     pub struct RampToVolumeRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -2021,19 +1972,19 @@ pub mod rendering_control {
         pub program_uri: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "RampToVolumeResponse", ns(SERVICE_NS))]
+    #[xml(rename = "RampToVolumeResponse", ns(SERVICE_TYPE))]
     pub struct RampToVolumeResponse {
         #[xml(rename = "RampTime", ns(""))]
         pub ramp_time: Option<u32>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "ResetBasicEQ", ns(SERVICE_NS))]
+    #[xml(rename = "ResetBasicEQ", ns(SERVICE_TYPE))]
     pub struct ResetBasicEqRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "ResetBasicEQResponse", ns(SERVICE_NS))]
+    #[xml(rename = "ResetBasicEQResponse", ns(SERVICE_TYPE))]
     pub struct ResetBasicEqResponse {
         #[xml(rename = "Bass", ns(""))]
         pub bass: Option<i16>,
@@ -2047,7 +1998,7 @@ pub mod rendering_control {
         pub right_volume: Option<u16>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "ResetExtEQ", ns(SERVICE_NS))]
+    #[xml(rename = "ResetExtEQ", ns(SERVICE_TYPE))]
     pub struct ResetExtEqRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -2055,7 +2006,7 @@ pub mod rendering_control {
         pub eq_type: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "RestoreVolumePriorToRamp", ns(SERVICE_NS))]
+    #[xml(rename = "RestoreVolumePriorToRamp", ns(SERVICE_TYPE))]
     pub struct RestoreVolumePriorToRampRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -2063,7 +2014,7 @@ pub mod rendering_control {
         pub channel: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetBass", ns(SERVICE_NS))]
+    #[xml(rename = "SetBass", ns(SERVICE_TYPE))]
     pub struct SetBassRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -2071,7 +2022,7 @@ pub mod rendering_control {
         pub desired_bass: i16,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetChannelMap", ns(SERVICE_NS))]
+    #[xml(rename = "SetChannelMap", ns(SERVICE_TYPE))]
     pub struct SetChannelMapRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -2079,7 +2030,7 @@ pub mod rendering_control {
         pub channel_map: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetEQ", ns(SERVICE_NS))]
+    #[xml(rename = "SetEQ", ns(SERVICE_TYPE))]
     pub struct SetEqRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -2089,7 +2040,7 @@ pub mod rendering_control {
         pub desired_value: i16,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetLoudness", ns(SERVICE_NS))]
+    #[xml(rename = "SetLoudness", ns(SERVICE_TYPE))]
     pub struct SetLoudnessRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -2099,7 +2050,7 @@ pub mod rendering_control {
         pub desired_loudness: bool,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetMute", ns(SERVICE_NS))]
+    #[xml(rename = "SetMute", ns(SERVICE_TYPE))]
     pub struct SetMuteRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -2109,7 +2060,7 @@ pub mod rendering_control {
         pub desired_mute: bool,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetOutputFixed", ns(SERVICE_NS))]
+    #[xml(rename = "SetOutputFixed", ns(SERVICE_TYPE))]
     pub struct SetOutputFixedRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -2117,7 +2068,7 @@ pub mod rendering_control {
         pub desired_fixed: bool,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetRelativeVolume", ns(SERVICE_NS))]
+    #[xml(rename = "SetRelativeVolume", ns(SERVICE_TYPE))]
     pub struct SetRelativeVolumeRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -2127,13 +2078,13 @@ pub mod rendering_control {
         pub adjustment: i32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "SetRelativeVolumeResponse", ns(SERVICE_NS))]
+    #[xml(rename = "SetRelativeVolumeResponse", ns(SERVICE_TYPE))]
     pub struct SetRelativeVolumeResponse {
         #[xml(rename = "NewVolume", ns(""))]
         pub new_volume: Option<u16>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetRoomCalibrationStatus", ns(SERVICE_NS))]
+    #[xml(rename = "SetRoomCalibrationStatus", ns(SERVICE_TYPE))]
     pub struct SetRoomCalibrationStatusRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -2141,7 +2092,7 @@ pub mod rendering_control {
         pub room_calibration_enabled: bool,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetRoomCalibrationX", ns(SERVICE_NS))]
+    #[xml(rename = "SetRoomCalibrationX", ns(SERVICE_TYPE))]
     pub struct SetRoomCalibrationXRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -2153,7 +2104,7 @@ pub mod rendering_control {
         pub calibration_mode: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetTreble", ns(SERVICE_NS))]
+    #[xml(rename = "SetTreble", ns(SERVICE_TYPE))]
     pub struct SetTrebleRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -2161,7 +2112,7 @@ pub mod rendering_control {
         pub desired_treble: i16,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetVolume", ns(SERVICE_NS))]
+    #[xml(rename = "SetVolume", ns(SERVICE_TYPE))]
     pub struct SetVolumeRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -2171,7 +2122,7 @@ pub mod rendering_control {
         pub desired_volume: u16,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetVolumeDB", ns(SERVICE_NS))]
+    #[xml(rename = "SetVolumeDB", ns(SERVICE_TYPE))]
     pub struct SetVolumeDbRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -2184,16 +2135,12 @@ pub mod rendering_control {
 /// Request and Response types for the `SystemProperties` service.
 pub mod system_properties {
     use instant_xml::{FromXml, ToXml};
-    use ssdp_client::URN;
 
-    /// URN for calling the `SystemProperties` service.
+    /// URN for the `SystemProperties` service.
     /// `urn:schemas-upnp-org:service:SystemProperties:1`
-    pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "SystemProperties", 1);
-    /// XML Namespace for the `SystemProperties` service.
-    /// `urn:schemas-upnp-org:service:SystemProperties:1`
-    pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:SystemProperties:1";
+    pub const SERVICE_TYPE: &str = "urn:schemas-upnp-org:service:SystemProperties:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "AddAccountX", ns(SERVICE_NS))]
+    #[xml(rename = "AddAccountX", ns(SERVICE_TYPE))]
     pub struct AddAccountXRequest {
         #[xml(rename = "AccountType", ns(""))]
         pub account_type: u32,
@@ -2203,13 +2150,13 @@ pub mod system_properties {
         pub account_password: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "AddAccountXResponse", ns(SERVICE_NS))]
+    #[xml(rename = "AddAccountXResponse", ns(SERVICE_TYPE))]
     pub struct AddAccountXResponse {
         #[xml(rename = "AccountUDN", ns(""))]
         pub account_udn: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "AddOAuthAccountX", ns(SERVICE_NS))]
+    #[xml(rename = "AddOAuthAccountX", ns(SERVICE_TYPE))]
     pub struct AddOAuthAccountXRequest {
         #[xml(rename = "AccountType", ns(""))]
         pub account_type: u32,
@@ -2229,7 +2176,7 @@ pub mod system_properties {
         pub account_tier: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "AddOAuthAccountXResponse", ns(SERVICE_NS))]
+    #[xml(rename = "AddOAuthAccountXResponse", ns(SERVICE_TYPE))]
     pub struct AddOAuthAccountXResponse {
         #[xml(rename = "AccountUDN", ns(""))]
         pub account_udn: Option<String>,
@@ -2237,7 +2184,7 @@ pub mod system_properties {
         pub account_nickname: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "EditAccountMd", ns(SERVICE_NS))]
+    #[xml(rename = "EditAccountMd", ns(SERVICE_TYPE))]
     pub struct EditAccountMdRequest {
         #[xml(rename = "AccountType", ns(""))]
         pub account_type: u32,
@@ -2247,7 +2194,7 @@ pub mod system_properties {
         pub new_account_md: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "EditAccountPasswordX", ns(SERVICE_NS))]
+    #[xml(rename = "EditAccountPasswordX", ns(SERVICE_TYPE))]
     pub struct EditAccountPasswordXRequest {
         #[xml(rename = "AccountType", ns(""))]
         pub account_type: u32,
@@ -2257,43 +2204,43 @@ pub mod system_properties {
         pub new_account_password: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "EnableRDM", ns(SERVICE_NS))]
+    #[xml(rename = "EnableRDM", ns(SERVICE_TYPE))]
     pub struct EnableRdmRequest {
         #[xml(rename = "RDMValue", ns(""))]
         pub rdm_value: bool,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetRDMResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetRDMResponse", ns(SERVICE_TYPE))]
     pub struct GetRdmResponse {
         #[xml(rename = "RDMValue", ns(""))]
         pub rdm_value: Option<bool>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetString", ns(SERVICE_NS))]
+    #[xml(rename = "GetString", ns(SERVICE_TYPE))]
     pub struct GetStringRequest {
         #[xml(rename = "VariableName", ns(""))]
         pub variable_name: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetStringResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetStringResponse", ns(SERVICE_TYPE))]
     pub struct GetStringResponse {
         #[xml(rename = "StringValue", ns(""))]
         pub string_value: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "GetWebCode", ns(SERVICE_NS))]
+    #[xml(rename = "GetWebCode", ns(SERVICE_TYPE))]
     pub struct GetWebCodeRequest {
         #[xml(rename = "AccountType", ns(""))]
         pub account_type: u32,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetWebCodeResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetWebCodeResponse", ns(SERVICE_TYPE))]
     pub struct GetWebCodeResponse {
         #[xml(rename = "WebCode", ns(""))]
         pub web_code: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "ProvisionCredentialedTrialAccountX", ns(SERVICE_NS))]
+    #[xml(rename = "ProvisionCredentialedTrialAccountX", ns(SERVICE_TYPE))]
     pub struct ProvisionCredentialedTrialAccountXRequest {
         #[xml(rename = "AccountType", ns(""))]
         pub account_type: u32,
@@ -2303,7 +2250,10 @@ pub mod system_properties {
         pub account_password: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "ProvisionCredentialedTrialAccountXResponse", ns(SERVICE_NS))]
+    #[xml(
+        rename = "ProvisionCredentialedTrialAccountXResponse",
+        ns(SERVICE_TYPE)
+    )]
     pub struct ProvisionCredentialedTrialAccountXResponse {
         #[xml(rename = "IsExpired", ns(""))]
         pub is_expired: Option<bool>,
@@ -2311,7 +2261,7 @@ pub mod system_properties {
         pub account_udn: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "RefreshAccountCredentialsX", ns(SERVICE_NS))]
+    #[xml(rename = "RefreshAccountCredentialsX", ns(SERVICE_TYPE))]
     pub struct RefreshAccountCredentialsXRequest {
         #[xml(rename = "AccountType", ns(""))]
         pub account_type: u32,
@@ -2323,13 +2273,13 @@ pub mod system_properties {
         pub account_key: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "Remove", ns(SERVICE_NS))]
+    #[xml(rename = "Remove", ns(SERVICE_TYPE))]
     pub struct RemoveRequest {
         #[xml(rename = "VariableName", ns(""))]
         pub variable_name: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "RemoveAccount", ns(SERVICE_NS))]
+    #[xml(rename = "RemoveAccount", ns(SERVICE_TYPE))]
     pub struct RemoveAccountRequest {
         #[xml(rename = "AccountType", ns(""))]
         pub account_type: u32,
@@ -2337,7 +2287,7 @@ pub mod system_properties {
         pub account_id: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "ReplaceAccountX", ns(SERVICE_NS))]
+    #[xml(rename = "ReplaceAccountX", ns(SERVICE_TYPE))]
     pub struct ReplaceAccountXRequest {
         #[xml(rename = "AccountUDN", ns(""))]
         pub account_udn: String,
@@ -2353,13 +2303,13 @@ pub mod system_properties {
         pub o_auth_device_id: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "ReplaceAccountXResponse", ns(SERVICE_NS))]
+    #[xml(rename = "ReplaceAccountXResponse", ns(SERVICE_TYPE))]
     pub struct ReplaceAccountXResponse {
         #[xml(rename = "NewAccountUDN", ns(""))]
         pub new_account_udn: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetAccountNicknameX", ns(SERVICE_NS))]
+    #[xml(rename = "SetAccountNicknameX", ns(SERVICE_TYPE))]
     pub struct SetAccountNicknameXRequest {
         #[xml(rename = "AccountUDN", ns(""))]
         pub account_udn: String,
@@ -2367,7 +2317,7 @@ pub mod system_properties {
         pub account_nickname: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetString", ns(SERVICE_NS))]
+    #[xml(rename = "SetString", ns(SERVICE_TYPE))]
     pub struct SetStringRequest {
         #[xml(rename = "VariableName", ns(""))]
         pub variable_name: String,
@@ -2378,28 +2328,24 @@ pub mod system_properties {
 /// Request and Response types for the `VirtualLineIn` service.
 pub mod virtual_line_in {
     use instant_xml::{FromXml, ToXml};
-    use ssdp_client::URN;
 
-    /// URN for calling the `VirtualLineIn` service.
+    /// URN for the `VirtualLineIn` service.
     /// `urn:schemas-upnp-org:service:VirtualLineIn:1`
-    pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "VirtualLineIn", 1);
-    /// XML Namespace for the `VirtualLineIn` service.
-    /// `urn:schemas-upnp-org:service:VirtualLineIn:1`
-    pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:VirtualLineIn:1";
+    pub const SERVICE_TYPE: &str = "urn:schemas-upnp-org:service:VirtualLineIn:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "Next", ns(SERVICE_NS))]
+    #[xml(rename = "Next", ns(SERVICE_TYPE))]
     pub struct NextRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "Pause", ns(SERVICE_NS))]
+    #[xml(rename = "Pause", ns(SERVICE_TYPE))]
     pub struct PauseRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "Play", ns(SERVICE_NS))]
+    #[xml(rename = "Play", ns(SERVICE_TYPE))]
     pub struct PlayRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -2407,13 +2353,13 @@ pub mod virtual_line_in {
         pub speed: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "Previous", ns(SERVICE_NS))]
+    #[xml(rename = "Previous", ns(SERVICE_TYPE))]
     pub struct PreviousRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SetVolume", ns(SERVICE_NS))]
+    #[xml(rename = "SetVolume", ns(SERVICE_TYPE))]
     pub struct SetVolumeRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -2421,7 +2367,7 @@ pub mod virtual_line_in {
         pub desired_volume: u16,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "StartTransmission", ns(SERVICE_NS))]
+    #[xml(rename = "StartTransmission", ns(SERVICE_TYPE))]
     pub struct StartTransmissionRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -2429,19 +2375,19 @@ pub mod virtual_line_in {
         pub coordinator_id: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "StartTransmissionResponse", ns(SERVICE_NS))]
+    #[xml(rename = "StartTransmissionResponse", ns(SERVICE_TYPE))]
     pub struct StartTransmissionResponse {
         #[xml(rename = "CurrentTransportSettings", ns(""))]
         pub current_transport_settings: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "Stop", ns(SERVICE_NS))]
+    #[xml(rename = "Stop", ns(SERVICE_TYPE))]
     pub struct StopRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "StopTransmission", ns(SERVICE_NS))]
+    #[xml(rename = "StopTransmission", ns(SERVICE_TYPE))]
     pub struct StopTransmissionRequest {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
@@ -2452,16 +2398,12 @@ pub mod virtual_line_in {
 /// Request and Response types for the `ZoneGroupTopology` service.
 pub mod zone_group_topology {
     use instant_xml::{FromXml, ToXml};
-    use ssdp_client::URN;
 
-    /// URN for calling the `ZoneGroupTopology` service.
+    /// URN for the `ZoneGroupTopology` service.
     /// `urn:schemas-upnp-org:service:ZoneGroupTopology:1`
-    pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "ZoneGroupTopology", 1);
-    /// XML Namespace for the `ZoneGroupTopology` service.
-    /// `urn:schemas-upnp-org:service:ZoneGroupTopology:1`
-    pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:ZoneGroupTopology:1";
+    pub const SERVICE_TYPE: &str = "urn:schemas-upnp-org:service:ZoneGroupTopology:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "BeginSoftwareUpdate", ns(SERVICE_NS))]
+    #[xml(rename = "BeginSoftwareUpdate", ns(SERVICE_TYPE))]
     pub struct BeginSoftwareUpdateRequest {
         #[xml(rename = "UpdateURL", ns(""))]
         pub update_url: String,
@@ -2471,7 +2413,7 @@ pub mod zone_group_topology {
         pub extra_options: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "CheckForUpdate", ns(SERVICE_NS))]
+    #[xml(rename = "CheckForUpdate", ns(SERVICE_TYPE))]
     pub struct CheckForUpdateRequest {
         #[xml(rename = "UpdateType", ns(""))]
         pub update_type: String,
@@ -2481,13 +2423,13 @@ pub mod zone_group_topology {
         pub version: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "CheckForUpdateResponse", ns(SERVICE_NS))]
+    #[xml(rename = "CheckForUpdateResponse", ns(SERVICE_TYPE))]
     pub struct CheckForUpdateResponse {
         #[xml(rename = "UpdateItem", ns(""))]
         pub update_item: Option<String>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetZoneGroupAttributesResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetZoneGroupAttributesResponse", ns(SERVICE_TYPE))]
     pub struct GetZoneGroupAttributesResponse {
         #[xml(rename = "CurrentZoneGroupName", ns(""))]
         pub current_zone_group_name: Option<String>,
@@ -2499,13 +2441,13 @@ pub mod zone_group_topology {
         pub current_muse_household_id: Option<String>,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "GetZoneGroupStateResponse", ns(SERVICE_NS))]
+    #[xml(rename = "GetZoneGroupStateResponse", ns(SERVICE_TYPE))]
     pub struct GetZoneGroupStateResponse {
         #[xml(rename = "ZoneGroupState", ns(""))]
         pub zone_group_state: Option<String>,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "RegisterMobileDevice", ns(SERVICE_NS))]
+    #[xml(rename = "RegisterMobileDevice", ns(SERVICE_TYPE))]
     pub struct RegisterMobileDeviceRequest {
         #[xml(rename = "MobileDeviceName", ns(""))]
         pub mobile_device_name: String,
@@ -2515,7 +2457,7 @@ pub mod zone_group_topology {
         pub mobile_ip_and_port: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "ReportUnresponsiveDevice", ns(SERVICE_NS))]
+    #[xml(rename = "ReportUnresponsiveDevice", ns(SERVICE_TYPE))]
     pub struct ReportUnresponsiveDeviceRequest {
         #[xml(rename = "DeviceUUID", ns(""))]
         pub device_uuid: String,
@@ -2523,7 +2465,7 @@ pub mod zone_group_topology {
         pub desired_action: String,
     }
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
-    #[xml(rename = "SubmitDiagnostics", ns(SERVICE_NS))]
+    #[xml(rename = "SubmitDiagnostics", ns(SERVICE_TYPE))]
     pub struct SubmitDiagnosticsRequest {
         #[xml(rename = "IncludeControllers", ns(""))]
         pub include_controllers: bool,
@@ -2531,7 +2473,7 @@ pub mod zone_group_topology {
         pub type_: String,
     }
     #[derive(FromXml, Debug, Clone, PartialEq)]
-    #[xml(rename = "SubmitDiagnosticsResponse", ns(SERVICE_NS))]
+    #[xml(rename = "SubmitDiagnosticsResponse", ns(SERVICE_TYPE))]
     pub struct SubmitDiagnosticsResponse {
         #[xml(rename = "DiagnosticID", ns(""))]
         pub diagnostic_id: Option<u32>,

@@ -4,7 +4,6 @@ use crate::schema::ServiceInfo;
 use crate::schema::StateVariable;
 use inflector::Inflector;
 use serde_json::Value;
-use ssdp_client::URN;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
 use std::fmt::Write;
@@ -169,7 +168,7 @@ fn main() {
         let service_module = to_snake_case(service_name);
         println!("Service {service_name}");
 
-        let service_urn: URN = service.info.service_type.parse().unwrap();
+        let service_type = &service.info.service_type;
 
         writeln!(&mut traits, "#[allow(async_fn_in_trait)]").ok();
         writeln!(&mut traits, "pub trait {service_name} {{").ok();
@@ -180,7 +179,6 @@ fn main() {
             &mut types,
             "/// Request and Response types for the `{service_name}` service.
             pub mod {service_module} {{
-use ssdp_client::URN;
 use instant_xml::{{FromXml, ToXml}};
 "
         )
@@ -188,23 +186,9 @@ use instant_xml::{{FromXml, ToXml}};
 
         writeln!(
             &mut types,
-            "/// URN for calling the `{service_name}` service.
+            "/// URN for the `{service_name}` service.
             /// `{service_type}`
-            pub const SERVICE_TYPE: &URN = \
-                 &URN::service(\"{}\", \"{}\", {});",
-            service_urn.domain_name(),
-            service_urn.typ(),
-            service_urn.version(),
-            service_type=service.info.service_type,
-        )
-        .ok();
-
-        writeln!(
-            &mut types,
-            "/// XML Namespace for the `{service_name}` service.
-            /// `{service_type}`
-            pub const SERVICE_NS: &str = \"{service_type}\";",
-            service_type=service.info.service_type
+            pub const SERVICE_TYPE: &str = \"{service_type}\";",
         )
         .ok();
 
@@ -224,7 +208,7 @@ use instant_xml::{{FromXml, ToXml}};
                     .ok();
                     writeln!(
                         &mut types,
-                        "#[xml(rename=\"{action_name}\", ns(SERVICE_NS))]",
+                        "#[xml(rename=\"{action_name}\", ns(SERVICE_TYPE))]",
                     )
                     .ok();
                     writeln!(&mut types, "pub struct {request_type_name} {{").ok();
@@ -251,7 +235,7 @@ use instant_xml::{{FromXml, ToXml}};
                 writeln!(&mut types, "#[derive(FromXml, Debug, Clone, PartialEq)]").ok();
                 writeln!(
                     &mut types,
-                    "#[xml(rename=\"{action_name}Response\", ns(SERVICE_NS))]",
+                    "#[xml(rename=\"{action_name}Response\", ns(SERVICE_TYPE))]",
                 )
                 .ok();
                 writeln!(&mut types, "pub struct {response_type_name} {{").ok();
