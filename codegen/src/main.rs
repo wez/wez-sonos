@@ -3,6 +3,7 @@ use crate::schema::Parameter;
 use crate::schema::ServiceInfo;
 use crate::schema::StateVariable;
 use inflector::Inflector;
+use serde::Deserialize;
 use serde_json::Value;
 use std::collections::BTreeMap;
 use std::collections::BTreeSet;
@@ -102,8 +103,29 @@ fn merge_allowed_values(target: &mut Option<Value>, source: &Option<Value>) {
     }
 }
 
+#[derive(Deserialize, Debug)]
+struct Documentation {
+    services: BTreeMap<String, ServiceDocs>,
+}
+
+#[derive(Deserialize, Debug)]
+struct ServiceDocs {
+    description: String,
+    #[serde(default)]
+    actions: BTreeMap<String, ActionDocs>,
+}
+
+#[derive(Deserialize, Debug)]
+struct ActionDocs {
+    description: String,
+    #[serde(default)]
+    params: BTreeMap<String, String>,
+}
+
 fn main() {
     let mut models = BTreeMap::new();
+    let docs: Documentation =
+        serde_json::from_slice(&std::fs::read("data/documentation.json").unwrap()).unwrap();
 
     for entry in std::fs::read_dir("data/devices").unwrap() {
         let entry = entry.unwrap();
@@ -171,6 +193,14 @@ fn main() {
         let service_type = &service.info.service_type;
 
         writeln!(&mut traits, "#[allow(async_fn_in_trait)]").ok();
+
+        if let Some(doc) = docs
+            .services
+            .get(&format!("{service_name}Service"))
+            .map(|s| &s.description)
+        {
+            writeln!(&mut traits, "/// {doc}").ok();
+        }
         writeln!(&mut traits, "pub trait {service_name} {{").ok();
         writeln!(&mut prelude, "pub use super::{service_name};").ok();
         writeln!(&mut impls, "impl {service_name} for SonosDevice {{").ok();
@@ -188,7 +218,7 @@ use instant_xml::{{FromXml, ToXml}};
             &mut types,
             "/// URN for the `{service_name}` service.
             /// `{service_type}`
-            pub const SERVICE_TYPE: &str = \"{service_type}\";",
+            pub const SERVICE_TYPE: &str = \"{service_type}\";\n",
         )
         .ok();
 
@@ -215,6 +245,16 @@ use instant_xml::{{FromXml, ToXml}};
                     for p in &action.inputs {
                         let field_name = to_snake_case(&p.param.name);
                         let field_type = service.resolve_type_for_param(&p, false);
+
+                        if let Some(doc) = docs
+                            .services
+                            .get(&format!("{service_name}Service"))
+                            .and_then(|s| s.actions.get(action_name))
+                            .and_then(|a| a.params.get(&p.param.name))
+                        {
+                            writeln!(&mut types, "/// {doc}").ok();
+                        }
+
                         writeln!(
                             &mut types,
                             "  #[xml(rename=\"{}\", ns(\"\"))]",
@@ -223,7 +263,7 @@ use instant_xml::{{FromXml, ToXml}};
                         .ok();
                         writeln!(&mut types, "  pub {field_name}: {field_type},").ok();
                     }
-                    writeln!(&mut types, "}}").ok();
+                    writeln!(&mut types, "}}\n").ok();
                 }
                 format!("{service_module}::{request_type_name}")
             };
@@ -250,7 +290,7 @@ use instant_xml::{{FromXml, ToXml}};
                     .ok();
                     writeln!(&mut types, "  pub {field_name}: {field_type},").ok();
                 }
-                writeln!(&mut types, "}}").ok();
+                writeln!(&mut types, "}}\n").ok();
                 format!("{service_module}::{response_type_name}")
             };
 
@@ -266,6 +306,14 @@ use instant_xml::{{FromXml, ToXml}};
                 "crate::soap::Unit{}".to_string()
             };
 
+            if let Some(doc) = docs
+                .services
+                .get(&format!("{service_name}Service"))
+                .and_then(|s| s.actions.get(action_name))
+                .map(|a| &a.description)
+            {
+                writeln!(&mut traits, "/// {doc}").ok();
+            }
             writeln!(
                 &mut traits,
                 "async fn {method_name}(&self{params}) -> Result<{response_type_name}>;"
@@ -277,13 +325,13 @@ use instant_xml::{{FromXml, ToXml}};
             )
             .ok();
             writeln!(&mut impls, "  self.action(&{service_module}::SERVICE_TYPE, \"{action_name}\", {encode_payload}).await").ok();
-            writeln!(&mut impls, "}}").ok();
+            writeln!(&mut impls, "}}\n").ok();
             writeln!(&mut impls).ok();
         }
 
-        writeln!(&mut traits, "}}").ok();
-        writeln!(&mut impls, "}}").ok();
-        writeln!(&mut types, "}}").ok();
+        writeln!(&mut traits, "}}\n").ok();
+        writeln!(&mut impls, "}}\n").ok();
+        writeln!(&mut types, "}}\n").ok();
 
         /*
         for (name, _sv) in &service.state_variables {
