@@ -163,6 +163,7 @@ fn main() {
     let mut traits = String::new();
     let mut types = String::new();
     let mut impls = String::new();
+    let mut prelude = String::new();
 
     for (service_name, service) in &services {
         let service_module = to_snake_case(service_name);
@@ -172,11 +173,13 @@ fn main() {
 
         writeln!(&mut traits, "#[allow(async_fn_in_trait)]").ok();
         writeln!(&mut traits, "pub trait {service_name} {{").ok();
+        writeln!(&mut prelude, "pub use super::{service_name};").ok();
         writeln!(&mut impls, "impl {service_name} for SonosDevice {{").ok();
 
         writeln!(
             &mut types,
-            "pub mod {service_module} {{
+            "/// Request and Response types for the `{service_name}` service.
+            pub mod {service_module} {{
 use ssdp_client::URN;
 use instant_xml::{{FromXml, ToXml}};
 "
@@ -185,18 +188,23 @@ use instant_xml::{{FromXml, ToXml}};
 
         writeln!(
             &mut types,
-            "pub const SERVICE_TYPE: &URN = \
+            "/// URN for calling the `{service_name}` service.
+            /// `{service_type}`
+            pub const SERVICE_TYPE: &URN = \
                  &URN::service(\"{}\", \"{}\", {});",
             service_urn.domain_name(),
             service_urn.typ(),
-            service_urn.version()
+            service_urn.version(),
+            service_type=service.info.service_type,
         )
         .ok();
 
         writeln!(
             &mut types,
-            "pub const SERVICE_NS: &str = \"{}\";",
-            service.info.service_type
+            "/// XML Namespace for the `{service_name}` service.
+            /// `{service_type}`
+            pub const SERVICE_NS: &str = \"{service_type}\";",
+            service_type=service.info.service_type
         )
         .ok();
 
@@ -312,6 +320,13 @@ use crate::Result;
 {types}
 {traits}
 {impls}
+
+/// The prelude makes it convenient to use the methods of `SonosDevice`.
+/// Intended usage is `use sonos::prelude::*;` and then you don't have
+/// to worry about importing the individual service traits.
+pub mod prelude {{
+{prelude}
+}}
 "
         ),
     )

@@ -3,11 +3,16 @@
 use crate::Result;
 use crate::SonosDevice;
 
+/// Request and Response types for the `AVTransport` service.
 pub mod av_transport {
     use instant_xml::{FromXml, ToXml};
     use ssdp_client::URN;
 
+    /// URN for calling the `AVTransport` service.
+    /// `urn:schemas-upnp-org:service:AVTransport:1`
     pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "AVTransport", 1);
+    /// XML Namespace for the `AVTransport` service.
+    /// `urn:schemas-upnp-org:service:AVTransport:1`
     pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:AVTransport:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "AddMultipleURIsToQueue", ns(SERVICE_NS))]
@@ -618,11 +623,16 @@ pub mod av_transport {
         pub instance_id: u32,
     }
 }
+/// Request and Response types for the `AlarmClock` service.
 pub mod alarm_clock {
     use instant_xml::{FromXml, ToXml};
     use ssdp_client::URN;
 
+    /// URN for calling the `AlarmClock` service.
+    /// `urn:schemas-upnp-org:service:AlarmClock:1`
     pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "AlarmClock", 1);
+    /// XML Namespace for the `AlarmClock` service.
+    /// `urn:schemas-upnp-org:service:AlarmClock:1`
     pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:AlarmClock:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "CreateAlarm", ns(SERVICE_NS))]
@@ -805,11 +815,16 @@ pub mod alarm_clock {
         pub include_linked_zones: bool,
     }
 }
+/// Request and Response types for the `AudioIn` service.
 pub mod audio_in {
     use instant_xml::{FromXml, ToXml};
     use ssdp_client::URN;
 
+    /// URN for calling the `AudioIn` service.
+    /// `urn:schemas-upnp-org:service:AudioIn:1`
     pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "AudioIn", 1);
+    /// XML Namespace for the `AudioIn` service.
+    /// `urn:schemas-upnp-org:service:AudioIn:1`
     pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:AudioIn:1";
     #[derive(FromXml, Debug, Clone, PartialEq)]
     #[xml(rename = "GetAudioInputAttributesResponse", ns(SERVICE_NS))]
@@ -868,11 +883,16 @@ pub mod audio_in {
         pub coordinator_id: String,
     }
 }
+/// Request and Response types for the `ConnectionManager` service.
 pub mod connection_manager {
     use instant_xml::{FromXml, ToXml};
     use ssdp_client::URN;
 
+    /// URN for calling the `ConnectionManager` service.
+    /// `urn:schemas-upnp-org:service:ConnectionManager:1`
     pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "ConnectionManager", 1);
+    /// XML Namespace for the `ConnectionManager` service.
+    /// `urn:schemas-upnp-org:service:ConnectionManager:1`
     pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:ConnectionManager:1";
     #[derive(FromXml, Debug, Clone, PartialEq)]
     #[xml(rename = "GetCurrentConnectionIDsResponse", ns(SERVICE_NS))]
@@ -913,11 +933,16 @@ pub mod connection_manager {
         pub sink: Option<String>,
     }
 }
+/// Request and Response types for the `ContentDirectory` service.
 pub mod content_directory {
     use instant_xml::{FromXml, ToXml};
     use ssdp_client::URN;
 
+    /// URN for calling the `ContentDirectory` service.
+    /// `urn:schemas-upnp-org:service:ContentDirectory:1`
     pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "ContentDirectory", 1);
+    /// XML Namespace for the `ContentDirectory` service.
+    /// `urn:schemas-upnp-org:service:ContentDirectory:1`
     pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:ContentDirectory:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "Browse", ns(SERVICE_NS))]
@@ -1072,11 +1097,16 @@ pub mod content_directory {
         pub new_tag_value: String,
     }
 }
+/// Request and Response types for the `DeviceProperties` service.
 pub mod device_properties {
     use instant_xml::{FromXml, ToXml};
     use ssdp_client::URN;
 
+    /// URN for calling the `DeviceProperties` service.
+    /// `urn:schemas-upnp-org:service:DeviceProperties:1`
     pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "DeviceProperties", 1);
+    /// XML Namespace for the `DeviceProperties` service.
+    /// `urn:schemas-upnp-org:service:DeviceProperties:1`
     pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:DeviceProperties:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "AddBondedZones", ns(SERVICE_NS))]
@@ -1331,11 +1361,16 @@ pub mod device_properties {
         pub desired_target_room_name: String,
     }
 }
+/// Request and Response types for the `GroupManagement` service.
 pub mod group_management {
     use instant_xml::{FromXml, ToXml};
     use ssdp_client::URN;
 
+    /// URN for calling the `GroupManagement` service.
+    /// `urn:schemas-upnp-org:service:GroupManagement:1`
     pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "GroupManagement", 1);
+    /// XML Namespace for the `GroupManagement` service.
+    /// `urn:schemas-upnp-org:service:GroupManagement:1`
     pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:GroupManagement:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "AddMember", ns(SERVICE_NS))]
@@ -1380,11 +1415,16 @@ pub mod group_management {
         pub desired_source_area_ids: String,
     }
 }
+/// Request and Response types for the `GroupRenderingControl` service.
 pub mod group_rendering_control {
     use instant_xml::{FromXml, ToXml};
     use ssdp_client::URN;
 
+    /// URN for calling the `GroupRenderingControl` service.
+    /// `urn:schemas-upnp-org:service:GroupRenderingControl:1`
     pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "GroupRenderingControl", 1);
+    /// XML Namespace for the `GroupRenderingControl` service.
+    /// `urn:schemas-upnp-org:service:GroupRenderingControl:1`
     pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:GroupRenderingControl:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "GetGroupMute", ns(SERVICE_NS))]
@@ -1447,11 +1487,16 @@ pub mod group_rendering_control {
         pub instance_id: u32,
     }
 }
+/// Request and Response types for the `HTControl` service.
 pub mod ht_control {
     use instant_xml::{FromXml, ToXml};
     use ssdp_client::URN;
 
+    /// URN for calling the `HTControl` service.
+    /// `urn:schemas-upnp-org:service:HTControl:1`
     pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "HTControl", 1);
+    /// XML Namespace for the `HTControl` service.
+    /// `urn:schemas-upnp-org:service:HTControl:1`
     pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:HTControl:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "CommitLearnedIRCodes", ns(SERVICE_NS))]
@@ -1504,11 +1549,16 @@ pub mod ht_control {
         pub led_feedback_state: String,
     }
 }
+/// Request and Response types for the `MusicServices` service.
 pub mod music_services {
     use instant_xml::{FromXml, ToXml};
     use ssdp_client::URN;
 
+    /// URN for calling the `MusicServices` service.
+    /// `urn:schemas-upnp-org:service:MusicServices:1`
     pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "MusicServices", 1);
+    /// XML Namespace for the `MusicServices` service.
+    /// `urn:schemas-upnp-org:service:MusicServices:1`
     pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:MusicServices:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "GetSessionId", ns(SERVICE_NS))]
@@ -1535,11 +1585,16 @@ pub mod music_services {
         pub available_service_list_version: Option<String>,
     }
 }
+/// Request and Response types for the `QPlay` service.
 pub mod q_play {
     use instant_xml::{FromXml, ToXml};
     use ssdp_client::URN;
 
+    /// URN for calling the `QPlay` service.
+    /// `urn:schemas-tencent-com:service:QPlay:1`
     pub const SERVICE_TYPE: &URN = &URN::service("schemas-tencent-com", "QPlay", 1);
+    /// XML Namespace for the `QPlay` service.
+    /// `urn:schemas-tencent-com:service:QPlay:1`
     pub const SERVICE_NS: &str = "urn:schemas-tencent-com:service:QPlay:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "QPlayAuth", ns(SERVICE_NS))]
@@ -1558,11 +1613,16 @@ pub mod q_play {
         pub did: Option<String>,
     }
 }
+/// Request and Response types for the `Queue` service.
 pub mod queue {
     use instant_xml::{FromXml, ToXml};
     use ssdp_client::URN;
 
+    /// URN for calling the `Queue` service.
+    /// `urn:schemas-sonos-com:service:Queue:1`
     pub const SERVICE_TYPE: &URN = &URN::service("schemas-sonos-com", "Queue", 1);
+    /// XML Namespace for the `Queue` service.
+    /// `urn:schemas-sonos-com:service:Queue:1`
     pub const SERVICE_NS: &str = "urn:schemas-sonos-com:service:Queue:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "AddMultipleURIs", ns(SERVICE_NS))]
@@ -1773,11 +1833,16 @@ pub mod queue {
         pub assigned_object_id: Option<String>,
     }
 }
+/// Request and Response types for the `RenderingControl` service.
 pub mod rendering_control {
     use instant_xml::{FromXml, ToXml};
     use ssdp_client::URN;
 
+    /// URN for calling the `RenderingControl` service.
+    /// `urn:schemas-upnp-org:service:RenderingControl:1`
     pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "RenderingControl", 1);
+    /// XML Namespace for the `RenderingControl` service.
+    /// `urn:schemas-upnp-org:service:RenderingControl:1`
     pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:RenderingControl:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "GetBass", ns(SERVICE_NS))]
@@ -2116,11 +2181,16 @@ pub mod rendering_control {
         pub desired_volume: i16,
     }
 }
+/// Request and Response types for the `SystemProperties` service.
 pub mod system_properties {
     use instant_xml::{FromXml, ToXml};
     use ssdp_client::URN;
 
+    /// URN for calling the `SystemProperties` service.
+    /// `urn:schemas-upnp-org:service:SystemProperties:1`
     pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "SystemProperties", 1);
+    /// XML Namespace for the `SystemProperties` service.
+    /// `urn:schemas-upnp-org:service:SystemProperties:1`
     pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:SystemProperties:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "AddAccountX", ns(SERVICE_NS))]
@@ -2305,11 +2375,16 @@ pub mod system_properties {
         pub string_value: String,
     }
 }
+/// Request and Response types for the `VirtualLineIn` service.
 pub mod virtual_line_in {
     use instant_xml::{FromXml, ToXml};
     use ssdp_client::URN;
 
+    /// URN for calling the `VirtualLineIn` service.
+    /// `urn:schemas-upnp-org:service:VirtualLineIn:1`
     pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "VirtualLineIn", 1);
+    /// XML Namespace for the `VirtualLineIn` service.
+    /// `urn:schemas-upnp-org:service:VirtualLineIn:1`
     pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:VirtualLineIn:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "Next", ns(SERVICE_NS))]
@@ -2374,11 +2449,16 @@ pub mod virtual_line_in {
         pub coordinator_id: String,
     }
 }
+/// Request and Response types for the `ZoneGroupTopology` service.
 pub mod zone_group_topology {
     use instant_xml::{FromXml, ToXml};
     use ssdp_client::URN;
 
+    /// URN for calling the `ZoneGroupTopology` service.
+    /// `urn:schemas-upnp-org:service:ZoneGroupTopology:1`
     pub const SERVICE_TYPE: &URN = &URN::service("schemas-upnp-org", "ZoneGroupTopology", 1);
+    /// XML Namespace for the `ZoneGroupTopology` service.
+    /// `urn:schemas-upnp-org:service:ZoneGroupTopology:1`
     pub const SERVICE_NS: &str = "urn:schemas-upnp-org:service:ZoneGroupTopology:1";
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "BeginSoftwareUpdate", ns(SERVICE_NS))]
@@ -4918,4 +4998,26 @@ impl ZoneGroupTopology for SonosDevice {
         )
         .await
     }
+}
+
+/// The prelude makes it convenient to use the methods of `SonosDevice`.
+/// Intended usage is `use sonos::prelude::*;` and then you don't have
+/// to worry about importing the individual service traits.
+pub mod prelude {
+    pub use super::AVTransport;
+    pub use super::AlarmClock;
+    pub use super::AudioIn;
+    pub use super::ConnectionManager;
+    pub use super::ContentDirectory;
+    pub use super::DeviceProperties;
+    pub use super::GroupManagement;
+    pub use super::GroupRenderingControl;
+    pub use super::HTControl;
+    pub use super::MusicServices;
+    pub use super::QPlay;
+    pub use super::Queue;
+    pub use super::RenderingControl;
+    pub use super::SystemProperties;
+    pub use super::VirtualLineIn;
+    pub use super::ZoneGroupTopology;
 }
