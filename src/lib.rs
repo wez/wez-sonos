@@ -131,6 +131,9 @@ impl SonosDevice {
         &self.device
     }
 
+    /// This is a low level helper function for performing a SOAP Action
+    /// request. You most likely want to use one of the methods
+    /// implemented by the various service traits instead of this.
     pub async fn action<REQ: ToXml, RESP>(
         &self,
         service: &URN,
