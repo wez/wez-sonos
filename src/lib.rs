@@ -81,6 +81,87 @@ impl SonosDevice {
         let state = <Self as ZoneGroupTopology>::get_zone_group_state(self).await?;
         ZoneGroup::parse_xml(&state.zone_group_state.as_deref().unwrap_or(""))
     }
+
+    /// Stops playback
+    pub async fn stop(&self) -> Result<()> {
+        <Self as AVTransport>::stop(self, Default::default()).await
+    }
+
+    /// Begin playback
+    pub async fn play(&self) -> Result<()> {
+        <Self as AVTransport>::play(
+            self,
+            av_transport::PlayRequest {
+                instance_id: 0,
+                speed: "1".to_string(),
+            },
+        )
+        .await
+    }
+
+    /// Clears the queue
+    pub async fn remove_all_tracks_from_queue(&self) -> Result<()> {
+        <Self as AVTransport>::remove_all_tracks_from_queue(self, Default::default()).await
+    }
+
+    pub async fn set_play_mode(&self, new_play_mode: CurrentPlayMode) -> Result<()> {
+        <Self as AVTransport>::set_play_mode(
+            self,
+            av_transport::SetPlayModeRequest {
+                instance_id: 0,
+                new_play_mode,
+            },
+        )
+        .await
+    }
+
+    pub async fn set_av_transport_uri(&self, uri: &str, metadata: &str) -> Result<()> {
+        <Self as AVTransport>::set_av_transport_uri(
+            self,
+            av_transport::SetAvTransportUriRequest {
+                instance_id: 0,
+                current_uri: uri.to_string(),
+                current_uri_meta_data: metadata.to_string(),
+            },
+        )
+        .await
+    }
+
+    pub async fn queue_prepend(
+        &self,
+        uri: &str,
+        metadata: &str,
+    ) -> Result<av_transport::AddUriToQueueResponse> {
+        <Self as AVTransport>::add_uri_to_queue(
+            self,
+            av_transport::AddUriToQueueRequest {
+                instance_id: 0,
+                enqueued_uri: uri.to_string(),
+                enqueued_uri_meta_data: metadata.to_string(),
+                desired_first_track_number_enqueued: 0,
+                enqueue_as_next: true,
+            },
+        )
+        .await
+    }
+
+    pub async fn queue_append(
+        &self,
+        uri: &str,
+        metadata: &str,
+    ) -> Result<av_transport::AddUriToQueueResponse> {
+        <Self as AVTransport>::add_uri_to_queue(
+            self,
+            av_transport::AddUriToQueueRequest {
+                instance_id: 0,
+                enqueued_uri: uri.to_string(),
+                enqueued_uri_meta_data: metadata.to_string(),
+                desired_first_track_number_enqueued: 0,
+                enqueue_as_next: false,
+            },
+        )
+        .await
+    }
 }
 
 const SOAP_ENCODING: &str = "http://schemas.xmlsoap.org/soap/encoding/";
@@ -127,6 +208,43 @@ mod soap_resp {
     }
 }
 
+/// Special case for decoding (), as instant_xml considers the empty
+/// body in the soap_resp::Body<T> case to be an error
+mod soap_empty_resp {
+    use super::SOAP_ENVELOPE;
+    use instant_xml::FromXml;
+
+    #[derive(Debug, Eq, PartialEq, FromXml)]
+    #[xml(ns(SOAP_ENVELOPE))]
+    pub struct Envelope {
+        #[xml(rename = "encodingStyle", attribute, ns(SOAP_ENVELOPE))]
+        pub encoding_style: String,
+        pub body: Body,
+    }
+
+    #[derive(Debug, Eq, PartialEq, FromXml)]
+    #[xml(ns(SOAP_ENVELOPE))]
+    pub struct Body {}
+}
+
+/// This trait decodes a SOAP response envelope into Self
+pub trait DecodeSoapResponse {
+    /// xml is a complete Soap `<Envelope>` element.
+    /// This method decodes and returns Self from that Envelope.
+    fn decode_soap_xml(xml: &str) -> Result<Self>
+    where
+        Self: Sized;
+}
+
+impl DecodeSoapResponse for () {
+    fn decode_soap_xml(xml: &str) -> Result<()> {
+        // Verify that it parses, but discard because it has no
+        // useful content for us
+        let _envelope: soap_empty_resp::Envelope = instant_xml::from_str(xml)?;
+        Ok(())
+    }
+}
+
 impl SonosDevice {
     pub fn device_spec(&self) -> &DeviceSpec {
         &self.device
@@ -142,7 +260,7 @@ impl SonosDevice {
         payload: REQ,
     ) -> Result<RESP>
     where
-        RESP: FromXmlOwned + std::fmt::Debug,
+        RESP: FromXmlOwned + std::fmt::Debug + DecodeSoapResponse,
     {
         let service = self
             .device
@@ -181,9 +299,7 @@ impl SonosDevice {
         let body = response.text().await?;
         log::trace!("Got response: {body}");
 
-        let envelope: soap_resp::Envelope<RESP> = instant_xml::from_str(&body)?;
-
-        Ok(envelope.body.payload)
+        RESP::decode_soap_xml(&body)
     }
 }
 

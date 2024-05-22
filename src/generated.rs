@@ -48,6 +48,13 @@ pub mod av_transport {
         pub new_update_id: Option<u32>,
     }
 
+    impl crate::DecodeSoapResponse for AddMultipleUrisToQueueResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "AddURIToQueue", ns(SERVICE_TYPE))]
     pub struct AddUriToQueueRequest {
@@ -73,6 +80,13 @@ pub mod av_transport {
         pub num_tracks_added: Option<u32>,
         #[xml(rename = "NewQueueLength", ns(""))]
         pub new_queue_length: Option<u32>,
+    }
+
+    impl crate::DecodeSoapResponse for AddUriToQueueResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -103,6 +117,13 @@ pub mod av_transport {
         pub new_update_id: Option<u32>,
     }
 
+    impl crate::DecodeSoapResponse for AddUriToSavedQueueResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "BackupQueue", ns(SERVICE_TYPE))]
     pub struct BackupQueueRequest {
@@ -127,6 +148,13 @@ pub mod av_transport {
         pub delegated_group_coordinator_id: Option<String>,
         #[xml(rename = "NewGroupID", ns(""))]
         pub new_group_id: Option<String>,
+    }
+
+    impl crate::DecodeSoapResponse for BecomeCoordinatorOfStandaloneGroupResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -251,6 +279,13 @@ pub mod av_transport {
         pub new_update_id: Option<u32>,
     }
 
+    impl crate::DecodeSoapResponse for CreateSavedQueueResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "DelegateGroupCoordinationTo", ns(SERVICE_TYPE))]
     pub struct DelegateGroupCoordinationToRequest {
@@ -285,6 +320,13 @@ pub mod av_transport {
         pub crossfade_mode: Option<bool>,
     }
 
+    impl crate::DecodeSoapResponse for GetCrossfadeModeResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "GetCurrentTransportActions", ns(SERVICE_TYPE))]
     pub struct GetCurrentTransportActionsRequest {
@@ -297,6 +339,13 @@ pub mod av_transport {
     pub struct GetCurrentTransportActionsResponse {
         #[xml(rename = "Actions", ns(""))]
         pub actions: Option<String>,
+    }
+
+    impl crate::DecodeSoapResponse for GetCurrentTransportActionsResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -315,6 +364,13 @@ pub mod av_transport {
         pub rec_media: Option<String>,
         #[xml(rename = "RecQualityModes", ns(""))]
         pub rec_quality_modes: Option<String>,
+    }
+
+    impl crate::DecodeSoapResponse for GetDeviceCapabilitiesResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -347,6 +403,13 @@ pub mod av_transport {
         pub write_status: Option<String>,
     }
 
+    impl crate::DecodeSoapResponse for GetMediaInfoResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "GetPositionInfo", ns(SERVICE_TYPE))]
     pub struct GetPositionInfoRequest {
@@ -375,6 +438,13 @@ pub mod av_transport {
         pub abs_count: Option<i32>,
     }
 
+    impl crate::DecodeSoapResponse for GetPositionInfoResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "GetRemainingSleepTimerDuration", ns(SERVICE_TYPE))]
     pub struct GetRemainingSleepTimerDurationRequest {
@@ -389,6 +459,13 @@ pub mod av_transport {
         pub remaining_sleep_timer_duration: Option<String>,
         #[xml(rename = "CurrentSleepTimerGeneration", ns(""))]
         pub current_sleep_timer_generation: Option<u32>,
+    }
+
+    impl crate::DecodeSoapResponse for GetRemainingSleepTimerDurationResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -409,6 +486,13 @@ pub mod av_transport {
         pub logged_start_time: Option<String>,
     }
 
+    impl crate::DecodeSoapResponse for GetRunningAlarmPropertiesResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "GetTransportInfo", ns(SERVICE_TYPE))]
     pub struct GetTransportInfoRequest {
@@ -427,6 +511,13 @@ pub mod av_transport {
         pub current_speed: Option<String>,
     }
 
+    impl crate::DecodeSoapResponse for GetTransportInfoResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "GetTransportSettings", ns(SERVICE_TYPE))]
     pub struct GetTransportSettingsRequest {
@@ -441,6 +532,13 @@ pub mod av_transport {
         pub play_mode: Option<super::CurrentPlayMode>,
         #[xml(rename = "RecQualityMode", ns(""))]
         pub rec_quality_mode: Option<String>,
+    }
+
+    impl crate::DecodeSoapResponse for GetTransportSettingsResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -523,6 +621,13 @@ pub mod av_transport {
         pub new_update_id: Option<u32>,
     }
 
+    impl crate::DecodeSoapResponse for RemoveTrackRangeFromQueueResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "ReorderTracksInQueue", ns(SERVICE_TYPE))]
     pub struct ReorderTracksInQueueRequest {
@@ -562,6 +667,13 @@ pub mod av_transport {
         pub new_queue_length: Option<u32>,
         #[xml(rename = "NewUpdateID", ns(""))]
         pub new_update_id: Option<u32>,
+    }
+
+    impl crate::DecodeSoapResponse for ReorderTracksInSavedQueueResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -605,6 +717,13 @@ pub mod av_transport {
     pub struct SaveQueueResponse {
         #[xml(rename = "AssignedObjectID", ns(""))]
         pub assigned_object_id: Option<String>,
+    }
+
+    impl crate::DecodeSoapResponse for SaveQueueResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -1101,6 +1220,13 @@ pub mod alarm_clock {
         pub assigned_id: Option<u32>,
     }
 
+    impl crate::DecodeSoapResponse for CreateAlarmResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "DestroyAlarm", ns(SERVICE_TYPE))]
     pub struct DestroyAlarmRequest {
@@ -1116,6 +1242,13 @@ pub mod alarm_clock {
         pub current_daily_index_refresh_time: Option<String>,
     }
 
+    impl crate::DecodeSoapResponse for GetDailyIndexRefreshTimeResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(FromXml, Debug, Clone, PartialEq)]
     #[xml(rename = "GetFormatResponse", ns(SERVICE_TYPE))]
     pub struct GetFormatResponse {
@@ -1123,6 +1256,13 @@ pub mod alarm_clock {
         pub current_time_format: Option<String>,
         #[xml(rename = "CurrentDateFormat", ns(""))]
         pub current_date_format: Option<String>,
+    }
+
+    impl crate::DecodeSoapResponse for GetFormatResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -1139,6 +1279,13 @@ pub mod alarm_clock {
         pub household_utc_time: Option<String>,
     }
 
+    impl crate::DecodeSoapResponse for GetHouseholdTimeAtStampResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(FromXml, Debug, Clone, PartialEq)]
     #[xml(rename = "GetTimeNowResponse", ns(SERVICE_TYPE))]
     pub struct GetTimeNowResponse {
@@ -1152,11 +1299,25 @@ pub mod alarm_clock {
         pub current_time_generation: Option<u32>,
     }
 
+    impl crate::DecodeSoapResponse for GetTimeNowResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(FromXml, Debug, Clone, PartialEq)]
     #[xml(rename = "GetTimeServerResponse", ns(SERVICE_TYPE))]
     pub struct GetTimeServerResponse {
         #[xml(rename = "CurrentTimeServer", ns(""))]
         pub current_time_server: Option<String>,
+    }
+
+    impl crate::DecodeSoapResponse for GetTimeServerResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(FromXml, Debug, Clone, PartialEq)]
@@ -1168,6 +1329,13 @@ pub mod alarm_clock {
         pub auto_adjust_dst: Option<bool>,
     }
 
+    impl crate::DecodeSoapResponse for GetTimeZoneResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(FromXml, Debug, Clone, PartialEq)]
     #[xml(rename = "GetTimeZoneAndRuleResponse", ns(SERVICE_TYPE))]
     pub struct GetTimeZoneAndRuleResponse {
@@ -1177,6 +1345,13 @@ pub mod alarm_clock {
         pub auto_adjust_dst: Option<bool>,
         #[xml(rename = "CurrentTimeZone", ns(""))]
         pub current_time_zone: Option<String>,
+    }
+
+    impl crate::DecodeSoapResponse for GetTimeZoneAndRuleResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -1193,6 +1368,13 @@ pub mod alarm_clock {
         pub time_zone: Option<String>,
     }
 
+    impl crate::DecodeSoapResponse for GetTimeZoneRuleResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(FromXml, Debug, Clone, PartialEq)]
     #[xml(rename = "ListAlarmsResponse", ns(SERVICE_TYPE))]
     pub struct ListAlarmsResponse {
@@ -1200,6 +1382,13 @@ pub mod alarm_clock {
         pub current_alarm_list: Option<String>,
         #[xml(rename = "CurrentAlarmListVersion", ns(""))]
         pub current_alarm_list_version: Option<String>,
+    }
+
+    impl crate::DecodeSoapResponse for ListAlarmsResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -1477,6 +1666,13 @@ pub mod audio_in {
         pub current_icon: Option<String>,
     }
 
+    impl crate::DecodeSoapResponse for GetAudioInputAttributesResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(FromXml, Debug, Clone, PartialEq)]
     #[xml(rename = "GetLineInLevelResponse", ns(SERVICE_TYPE))]
     pub struct GetLineInLevelResponse {
@@ -1484,6 +1680,13 @@ pub mod audio_in {
         pub current_left_line_in_level: Option<i32>,
         #[xml(rename = "CurrentRightLineInLevel", ns(""))]
         pub current_right_line_in_level: Option<i32>,
+    }
+
+    impl crate::DecodeSoapResponse for GetLineInLevelResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -1525,6 +1728,13 @@ pub mod audio_in {
         pub current_transport_settings: Option<String>,
     }
 
+    impl crate::DecodeSoapResponse for StartTransmissionToGroupResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "StopTransmissionToGroup", ns(SERVICE_TYPE))]
     pub struct StopTransmissionToGroupRequest {
@@ -1546,6 +1756,13 @@ pub mod connection_manager {
     pub struct GetCurrentConnectionIdsResponse {
         #[xml(rename = "ConnectionIDs", ns(""))]
         pub connection_ids: Option<String>,
+    }
+
+    impl crate::DecodeSoapResponse for GetCurrentConnectionIdsResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -1574,6 +1791,13 @@ pub mod connection_manager {
         pub status: Option<super::ConnectionStatus>,
     }
 
+    impl crate::DecodeSoapResponse for GetCurrentConnectionInfoResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(FromXml, Debug, Clone, PartialEq)]
     #[xml(rename = "GetProtocolInfoResponse", ns(SERVICE_TYPE))]
     pub struct GetProtocolInfoResponse {
@@ -1581,6 +1805,13 @@ pub mod connection_manager {
         pub source: Option<String>,
         #[xml(rename = "Sink", ns(""))]
         pub sink: Option<String>,
+    }
+
+    impl crate::DecodeSoapResponse for GetProtocolInfoResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 }
 
@@ -1803,6 +2034,13 @@ pub mod content_directory {
         pub update_id: Option<u32>,
     }
 
+    impl crate::DecodeSoapResponse for BrowseResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "CreateObject", ns(SERVICE_TYPE))]
     pub struct CreateObjectRequest {
@@ -1819,6 +2057,13 @@ pub mod content_directory {
         pub object_id: Option<String>,
         #[xml(rename = "Result", ns(""))]
         pub result: Option<String>,
+    }
+
+    impl crate::DecodeSoapResponse for CreateObjectResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -1846,11 +2091,25 @@ pub mod content_directory {
         pub update_id: Option<u32>,
     }
 
+    impl crate::DecodeSoapResponse for FindPrefixResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(FromXml, Debug, Clone, PartialEq)]
     #[xml(rename = "GetAlbumArtistDisplayOptionResponse", ns(SERVICE_TYPE))]
     pub struct GetAlbumArtistDisplayOptionResponse {
         #[xml(rename = "AlbumArtistDisplayOption", ns(""))]
         pub album_artist_display_option: Option<String>,
+    }
+
+    impl crate::DecodeSoapResponse for GetAlbumArtistDisplayOptionResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -1871,11 +2130,25 @@ pub mod content_directory {
         pub update_id: Option<u32>,
     }
 
+    impl crate::DecodeSoapResponse for GetAllPrefixLocationsResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(FromXml, Debug, Clone, PartialEq)]
     #[xml(rename = "GetBrowseableResponse", ns(SERVICE_TYPE))]
     pub struct GetBrowseableResponse {
         #[xml(rename = "IsBrowseable", ns(""))]
         pub is_browseable: Option<bool>,
+    }
+
+    impl crate::DecodeSoapResponse for GetBrowseableResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(FromXml, Debug, Clone, PartialEq)]
@@ -1885,11 +2158,25 @@ pub mod content_directory {
         pub last_index_change: Option<String>,
     }
 
+    impl crate::DecodeSoapResponse for GetLastIndexChangeResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(FromXml, Debug, Clone, PartialEq)]
     #[xml(rename = "GetSearchCapabilitiesResponse", ns(SERVICE_TYPE))]
     pub struct GetSearchCapabilitiesResponse {
         #[xml(rename = "SearchCaps", ns(""))]
         pub search_caps: Option<String>,
+    }
+
+    impl crate::DecodeSoapResponse for GetSearchCapabilitiesResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(FromXml, Debug, Clone, PartialEq)]
@@ -1899,6 +2186,13 @@ pub mod content_directory {
         pub is_indexing: Option<bool>,
     }
 
+    impl crate::DecodeSoapResponse for GetShareIndexInProgressResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(FromXml, Debug, Clone, PartialEq)]
     #[xml(rename = "GetSortCapabilitiesResponse", ns(SERVICE_TYPE))]
     pub struct GetSortCapabilitiesResponse {
@@ -1906,11 +2200,25 @@ pub mod content_directory {
         pub sort_caps: Option<String>,
     }
 
+    impl crate::DecodeSoapResponse for GetSortCapabilitiesResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(FromXml, Debug, Clone, PartialEq)]
     #[xml(rename = "GetSystemUpdateIDResponse", ns(SERVICE_TYPE))]
     pub struct GetSystemUpdateIdResponse {
         #[xml(rename = "Id", ns(""))]
         pub id: Option<u32>,
+    }
+
+    impl crate::DecodeSoapResponse for GetSystemUpdateIdResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -2077,6 +2385,13 @@ pub mod device_properties {
         pub state: Option<String>,
     }
 
+    impl crate::DecodeSoapResponse for EnterConfigModeResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "ExitConfigMode", ns(SERVICE_TYPE))]
     pub struct ExitConfigModeRequest {
@@ -2098,6 +2413,13 @@ pub mod device_properties {
         pub include_linked_zones: Option<bool>,
     }
 
+    impl crate::DecodeSoapResponse for GetAutoplayLinkedZonesResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "GetAutoplayRoomUUID", ns(SERVICE_TYPE))]
     pub struct GetAutoplayRoomUuidRequest {
@@ -2110,6 +2432,13 @@ pub mod device_properties {
     pub struct GetAutoplayRoomUuidResponse {
         #[xml(rename = "RoomUUID", ns(""))]
         pub room_uuid: Option<String>,
+    }
+
+    impl crate::DecodeSoapResponse for GetAutoplayRoomUuidResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -2126,11 +2455,25 @@ pub mod device_properties {
         pub current_volume: Option<u16>,
     }
 
+    impl crate::DecodeSoapResponse for GetAutoplayVolumeResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(FromXml, Debug, Clone, PartialEq)]
     #[xml(rename = "GetButtonLockStateResponse", ns(SERVICE_TYPE))]
     pub struct GetButtonLockStateResponse {
         #[xml(rename = "CurrentButtonLockState", ns(""))]
         pub current_button_lock_state: Option<super::ButtonLockState>,
+    }
+
+    impl crate::DecodeSoapResponse for GetButtonLockStateResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(FromXml, Debug, Clone, PartialEq)]
@@ -2140,11 +2483,25 @@ pub mod device_properties {
         pub state: Option<String>,
     }
 
+    impl crate::DecodeSoapResponse for GetButtonStateResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(FromXml, Debug, Clone, PartialEq)]
     #[xml(rename = "GetHTForwardStateResponse", ns(SERVICE_TYPE))]
     pub struct GetHtForwardStateResponse {
         #[xml(rename = "IsHTForwardEnabled", ns(""))]
         pub is_ht_forward_enabled: Option<bool>,
+    }
+
+    impl crate::DecodeSoapResponse for GetHtForwardStateResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(FromXml, Debug, Clone, PartialEq)]
@@ -2154,11 +2511,25 @@ pub mod device_properties {
         pub current_household_id: Option<String>,
     }
 
+    impl crate::DecodeSoapResponse for GetHouseholdIdResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(FromXml, Debug, Clone, PartialEq)]
     #[xml(rename = "GetLEDStateResponse", ns(SERVICE_TYPE))]
     pub struct GetLedStateResponse {
         #[xml(rename = "CurrentLEDState", ns(""))]
         pub current_led_state: Option<super::LEDState>,
+    }
+
+    impl crate::DecodeSoapResponse for GetLedStateResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -2175,6 +2546,13 @@ pub mod device_properties {
         pub use_volume: Option<bool>,
     }
 
+    impl crate::DecodeSoapResponse for GetUseAutoplayVolumeResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(FromXml, Debug, Clone, PartialEq)]
     #[xml(rename = "GetZoneAttributesResponse", ns(SERVICE_TYPE))]
     pub struct GetZoneAttributesResponse {
@@ -2186,6 +2564,13 @@ pub mod device_properties {
         pub current_configuration: Option<String>,
         #[xml(rename = "CurrentTargetRoomName", ns(""))]
         pub current_target_room_name: Option<String>,
+    }
+
+    impl crate::DecodeSoapResponse for GetZoneAttributesResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(FromXml, Debug, Clone, PartialEq)]
@@ -2211,6 +2596,13 @@ pub mod device_properties {
         pub ht_audio_in: Option<u32>,
         #[xml(rename = "Flags", ns(""))]
         pub flags: Option<u32>,
+    }
+
+    impl crate::DecodeSoapResponse for GetZoneInfoResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -2248,6 +2640,13 @@ pub mod device_properties {
         pub play_id: Option<u32>,
         #[xml(rename = "ChirpIfPlayingSwappableAudio", ns(""))]
         pub chirp_if_playing_swappable_audio: Option<bool>,
+    }
+
+    impl crate::DecodeSoapResponse for RoomDetectionStartChirpingResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -2527,6 +2926,13 @@ pub mod group_management {
         pub volume_av_transport_uri: Option<String>,
     }
 
+    impl crate::DecodeSoapResponse for AddMemberResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "RemoveMember", ns(SERVICE_TYPE))]
     pub struct RemoveMemberRequest {
@@ -2573,6 +2979,13 @@ pub mod group_rendering_control {
         pub current_mute: Option<bool>,
     }
 
+    impl crate::DecodeSoapResponse for GetGroupMuteResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "GetGroupVolume", ns(SERVICE_TYPE))]
     pub struct GetGroupVolumeRequest {
@@ -2585,6 +2998,13 @@ pub mod group_rendering_control {
     pub struct GetGroupVolumeResponse {
         #[xml(rename = "CurrentVolume", ns(""))]
         pub current_volume: Option<u16>,
+    }
+
+    impl crate::DecodeSoapResponse for GetGroupVolumeResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -2623,6 +3043,13 @@ pub mod group_rendering_control {
         pub new_volume: Option<u16>,
     }
 
+    impl crate::DecodeSoapResponse for SetRelativeGroupVolumeResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "SnapshotGroupVolume", ns(SERVICE_TYPE))]
     pub struct SnapshotGroupVolumeRequest {
@@ -2653,11 +3080,25 @@ pub mod ht_control {
         pub current_ir_repeater_state: Option<super::IRRepeaterState>,
     }
 
+    impl crate::DecodeSoapResponse for GetIrRepeaterStateResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(FromXml, Debug, Clone, PartialEq)]
     #[xml(rename = "GetLEDFeedbackStateResponse", ns(SERVICE_TYPE))]
     pub struct GetLedFeedbackStateResponse {
         #[xml(rename = "LEDFeedbackState", ns(""))]
         pub led_feedback_state: Option<super::LEDFeedbackState>,
+    }
+
+    impl crate::DecodeSoapResponse for GetLedFeedbackStateResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -2672,6 +3113,13 @@ pub mod ht_control {
     pub struct IsRemoteConfiguredResponse {
         #[xml(rename = "RemoteConfigured", ns(""))]
         pub remote_configured: Option<bool>,
+    }
+
+    impl crate::DecodeSoapResponse for IsRemoteConfiguredResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -2891,6 +3339,13 @@ pub mod music_services {
         pub session_id: Option<String>,
     }
 
+    impl crate::DecodeSoapResponse for GetSessionIdResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(FromXml, Debug, Clone, PartialEq)]
     #[xml(rename = "ListAvailableServicesResponse", ns(SERVICE_TYPE))]
     pub struct ListAvailableServicesResponse {
@@ -2900,6 +3355,13 @@ pub mod music_services {
         pub available_service_type_list: Option<String>,
         #[xml(rename = "AvailableServiceListVersion", ns(""))]
         pub available_service_list_version: Option<String>,
+    }
+
+    impl crate::DecodeSoapResponse for ListAvailableServicesResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 }
 
@@ -2927,6 +3389,13 @@ pub mod q_play {
         pub mid: Option<String>,
         #[xml(rename = "DID", ns(""))]
         pub did: Option<String>,
+    }
+
+    impl crate::DecodeSoapResponse for QPlayAuthResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 }
 
@@ -2972,6 +3441,13 @@ pub mod queue {
         pub new_update_id: Option<u32>,
     }
 
+    impl crate::DecodeSoapResponse for AddMultipleUrisResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "AddURI", ns(SERVICE_TYPE))]
     pub struct AddUriRequest {
@@ -3002,6 +3478,13 @@ pub mod queue {
         pub new_update_id: Option<u32>,
     }
 
+    impl crate::DecodeSoapResponse for AddUriResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "AttachQueue", ns(SERVICE_TYPE))]
     pub struct AttachQueueRequest {
@@ -3016,6 +3499,13 @@ pub mod queue {
         pub queue_id: Option<u32>,
         #[xml(rename = "QueueOwnerContext", ns(""))]
         pub queue_owner_context: Option<String>,
+    }
+
+    impl crate::DecodeSoapResponse for AttachQueueResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -3042,6 +3532,13 @@ pub mod queue {
         pub update_id: Option<u32>,
     }
 
+    impl crate::DecodeSoapResponse for BrowseResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "CreateQueue", ns(SERVICE_TYPE))]
     pub struct CreateQueueRequest {
@@ -3060,6 +3557,13 @@ pub mod queue {
         pub queue_id: Option<u32>,
     }
 
+    impl crate::DecodeSoapResponse for CreateQueueResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "RemoveAllTracks", ns(SERVICE_TYPE))]
     pub struct RemoveAllTracksRequest {
@@ -3074,6 +3578,13 @@ pub mod queue {
     pub struct RemoveAllTracksResponse {
         #[xml(rename = "NewUpdateID", ns(""))]
         pub new_update_id: Option<u32>,
+    }
+
+    impl crate::DecodeSoapResponse for RemoveAllTracksResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -3096,6 +3607,13 @@ pub mod queue {
         pub new_update_id: Option<u32>,
     }
 
+    impl crate::DecodeSoapResponse for RemoveTrackRangeResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "ReorderTracks", ns(SERVICE_TYPE))]
     pub struct ReorderTracksRequest {
@@ -3116,6 +3634,13 @@ pub mod queue {
     pub struct ReorderTracksResponse {
         #[xml(rename = "NewUpdateID", ns(""))]
         pub new_update_id: Option<u32>,
+    }
+
+    impl crate::DecodeSoapResponse for ReorderTracksResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -3148,6 +3673,13 @@ pub mod queue {
         pub new_update_id: Option<u32>,
     }
 
+    impl crate::DecodeSoapResponse for ReplaceAllTracksResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "SaveAsSonosPlaylist", ns(SERVICE_TYPE))]
     pub struct SaveAsSonosPlaylistRequest {
@@ -3164,6 +3696,13 @@ pub mod queue {
     pub struct SaveAsSonosPlaylistResponse {
         #[xml(rename = "AssignedObjectID", ns(""))]
         pub assigned_object_id: Option<String>,
+    }
+
+    impl crate::DecodeSoapResponse for SaveAsSonosPlaylistResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 }
 
@@ -3189,6 +3728,13 @@ pub mod rendering_control {
         pub current_bass: Option<i16>,
     }
 
+    impl crate::DecodeSoapResponse for GetBassResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "GetEQ", ns(SERVICE_TYPE))]
     pub struct GetEqRequest {
@@ -3206,6 +3752,13 @@ pub mod rendering_control {
         pub current_value: Option<i16>,
     }
 
+    impl crate::DecodeSoapResponse for GetEqResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "GetHeadphoneConnected", ns(SERVICE_TYPE))]
     pub struct GetHeadphoneConnectedRequest {
@@ -3218,6 +3771,13 @@ pub mod rendering_control {
     pub struct GetHeadphoneConnectedResponse {
         #[xml(rename = "CurrentHeadphoneConnected", ns(""))]
         pub current_headphone_connected: Option<bool>,
+    }
+
+    impl crate::DecodeSoapResponse for GetHeadphoneConnectedResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -3236,6 +3796,13 @@ pub mod rendering_control {
         pub current_loudness: Option<bool>,
     }
 
+    impl crate::DecodeSoapResponse for GetLoudnessResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "GetMute", ns(SERVICE_TYPE))]
     pub struct GetMuteRequest {
@@ -3252,6 +3819,13 @@ pub mod rendering_control {
         pub current_mute: Option<bool>,
     }
 
+    impl crate::DecodeSoapResponse for GetMuteResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "GetOutputFixed", ns(SERVICE_TYPE))]
     pub struct GetOutputFixedRequest {
@@ -3264,6 +3838,13 @@ pub mod rendering_control {
     pub struct GetOutputFixedResponse {
         #[xml(rename = "CurrentFixed", ns(""))]
         pub current_fixed: Option<bool>,
+    }
+
+    impl crate::DecodeSoapResponse for GetOutputFixedResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -3282,6 +3863,13 @@ pub mod rendering_control {
         pub room_calibration_available: Option<bool>,
     }
 
+    impl crate::DecodeSoapResponse for GetRoomCalibrationStatusResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "GetSupportsOutputFixed", ns(SERVICE_TYPE))]
     pub struct GetSupportsOutputFixedRequest {
@@ -3296,6 +3884,13 @@ pub mod rendering_control {
         pub current_supports_fixed: Option<bool>,
     }
 
+    impl crate::DecodeSoapResponse for GetSupportsOutputFixedResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "GetTreble", ns(SERVICE_TYPE))]
     pub struct GetTrebleRequest {
@@ -3308,6 +3903,13 @@ pub mod rendering_control {
     pub struct GetTrebleResponse {
         #[xml(rename = "CurrentTreble", ns(""))]
         pub current_treble: Option<i16>,
+    }
+
+    impl crate::DecodeSoapResponse for GetTrebleResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -3326,6 +3928,13 @@ pub mod rendering_control {
         pub current_volume: Option<u16>,
     }
 
+    impl crate::DecodeSoapResponse for GetVolumeResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "GetVolumeDB", ns(SERVICE_TYPE))]
     pub struct GetVolumeDbRequest {
@@ -3340,6 +3949,13 @@ pub mod rendering_control {
     pub struct GetVolumeDbResponse {
         #[xml(rename = "CurrentVolume", ns(""))]
         pub current_volume: Option<i16>,
+    }
+
+    impl crate::DecodeSoapResponse for GetVolumeDbResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -3358,6 +3974,13 @@ pub mod rendering_control {
         pub min_value: Option<i16>,
         #[xml(rename = "MaxValue", ns(""))]
         pub max_value: Option<i16>,
+    }
+
+    impl crate::DecodeSoapResponse for GetVolumeDbRangeResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -3384,6 +4007,13 @@ pub mod rendering_control {
         pub ramp_time: Option<u32>,
     }
 
+    impl crate::DecodeSoapResponse for RampToVolumeResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "ResetBasicEQ", ns(SERVICE_TYPE))]
     pub struct ResetBasicEqRequest {
@@ -3404,6 +4034,13 @@ pub mod rendering_control {
         pub left_volume: Option<u16>,
         #[xml(rename = "RightVolume", ns(""))]
         pub right_volume: Option<u16>,
+    }
+
+    impl crate::DecodeSoapResponse for ResetBasicEqResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -3502,6 +4139,13 @@ pub mod rendering_control {
     pub struct SetRelativeVolumeResponse {
         #[xml(rename = "NewVolume", ns(""))]
         pub new_volume: Option<u16>,
+    }
+
+    impl crate::DecodeSoapResponse for SetRelativeVolumeResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -3846,6 +4490,13 @@ pub mod system_properties {
         pub account_udn: Option<String>,
     }
 
+    impl crate::DecodeSoapResponse for AddAccountXResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "AddOAuthAccountX", ns(SERVICE_TYPE))]
     pub struct AddOAuthAccountXRequest {
@@ -3874,6 +4525,13 @@ pub mod system_properties {
         pub account_udn: Option<String>,
         #[xml(rename = "AccountNickname", ns(""))]
         pub account_nickname: Option<String>,
+    }
+
+    impl crate::DecodeSoapResponse for AddOAuthAccountXResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -3912,6 +4570,13 @@ pub mod system_properties {
         pub rdm_value: Option<bool>,
     }
 
+    impl crate::DecodeSoapResponse for GetRdmResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "GetString", ns(SERVICE_TYPE))]
     pub struct GetStringRequest {
@@ -3927,6 +4592,13 @@ pub mod system_properties {
         pub string_value: Option<String>,
     }
 
+    impl crate::DecodeSoapResponse for GetStringResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "GetWebCode", ns(SERVICE_TYPE))]
     pub struct GetWebCodeRequest {
@@ -3939,6 +4611,13 @@ pub mod system_properties {
     pub struct GetWebCodeResponse {
         #[xml(rename = "WebCode", ns(""))]
         pub web_code: Option<String>,
+    }
+
+    impl crate::DecodeSoapResponse for GetWebCodeResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -3962,6 +4641,13 @@ pub mod system_properties {
         pub is_expired: Option<bool>,
         #[xml(rename = "AccountUDN", ns(""))]
         pub account_udn: Option<String>,
+    }
+
+    impl crate::DecodeSoapResponse for ProvisionCredentialedTrialAccountXResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -4016,6 +4702,13 @@ pub mod system_properties {
     pub struct ReplaceAccountXResponse {
         #[xml(rename = "NewAccountUDN", ns(""))]
         pub new_account_udn: Option<String>,
+    }
+
+    impl crate::DecodeSoapResponse for ReplaceAccountXResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -4101,6 +4794,13 @@ pub mod virtual_line_in {
         pub current_transport_settings: Option<String>,
     }
 
+    impl crate::DecodeSoapResponse for StartTransmissionResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "Stop", ns(SERVICE_TYPE))]
     pub struct StopRequest {
@@ -4155,6 +4855,13 @@ pub mod zone_group_topology {
         pub update_item: Option<String>,
     }
 
+    impl crate::DecodeSoapResponse for CheckForUpdateResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(FromXml, Debug, Clone, PartialEq)]
     #[xml(rename = "GetZoneGroupAttributesResponse", ns(SERVICE_TYPE))]
     pub struct GetZoneGroupAttributesResponse {
@@ -4168,11 +4875,25 @@ pub mod zone_group_topology {
         pub current_muse_household_id: Option<String>,
     }
 
+    impl crate::DecodeSoapResponse for GetZoneGroupAttributesResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
+    }
+
     #[derive(FromXml, Debug, Clone, PartialEq)]
     #[xml(rename = "GetZoneGroupStateResponse", ns(SERVICE_TYPE))]
     pub struct GetZoneGroupStateResponse {
         #[xml(rename = "ZoneGroupState", ns(""))]
         pub zone_group_state: Option<String>,
+    }
+
+    impl crate::DecodeSoapResponse for GetZoneGroupStateResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -4209,6 +4930,13 @@ pub mod zone_group_topology {
     pub struct SubmitDiagnosticsResponse {
         #[xml(rename = "DiagnosticID", ns(""))]
         pub diagnostic_id: Option<u32>,
+    }
+
+    impl crate::DecodeSoapResponse for SubmitDiagnosticsResponse {
+        fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
+            let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+            Ok(envelope.body.payload)
+        }
     }
 }
 

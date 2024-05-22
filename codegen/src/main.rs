@@ -303,6 +303,14 @@ use instant_xml::{{FromXml, ToXml}};
                     writeln!(&mut types, "  pub {field_name}: {field_type},").ok();
                 }
                 writeln!(&mut types, "}}\n").ok();
+                writeln!(&mut types, "
+impl crate::DecodeSoapResponse for {response_type_name} {{
+    fn decode_soap_xml(xml: &str) -> crate::Result<Self> {{
+        let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
+        Ok(envelope.body.payload)
+    }}
+}}
+").ok();
                 format!("{service_module}::{response_type_name}")
             };
 
