@@ -13,6 +13,9 @@ pub const SONOS_URN: &str = "urn:schemas-upnp-org:device:ZonePlayer:1";
 
 /// Discover SonosDevices on the network, stopping once the specified
 /// timeout is reached.
+/// Returns a channel that will yield `SonosDevice` instances as responses
+/// to discovery requests are detected.
+/// Note that it is possible (likely) for duplicates to be returned.
 pub async fn discover(timeout: Duration) -> Result<Receiver<SonosDevice>> {
     const MX: usize = 3;
 
