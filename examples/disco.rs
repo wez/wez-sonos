@@ -10,7 +10,7 @@ async fn main() -> sonos::Result<()> {
 
     while let Some(device) = devices.try_next().await? {
         use sonos::av_transport::GetMediaInfoRequest;
-        use sonos::AVTransportTrait;
+        use sonos::AVTransport;
 
         match device
             .get_media_info(GetMediaInfoRequest { instance_id: 0 })

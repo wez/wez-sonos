@@ -170,10 +170,9 @@ fn main() {
 
         let service_urn: URN = service.info.service_type.parse().unwrap();
 
-        writeln!(&mut traits, "#[async_trait::async_trait]").ok();
-        writeln!(&mut traits, "pub trait {service_name}Trait {{").ok();
-        writeln!(&mut impls, "#[async_trait::async_trait]").ok();
-        writeln!(&mut impls, "impl {service_name}Trait for SonosDevice {{").ok();
+        writeln!(&mut traits, "#[allow(async_fn_in_trait)]").ok();
+        writeln!(&mut traits, "pub trait {service_name} {{").ok();
+        writeln!(&mut impls, "impl {service_name} for SonosDevice {{").ok();
 
         writeln!(
             &mut types,
@@ -210,7 +209,11 @@ use instant_xml::{{FromXml, ToXml}};
             } else {
                 let request_type_name = format!("{method_name}_request").to_pascal_case();
                 if !action.inputs.is_empty() {
-                    writeln!(&mut types, "#[derive(ToXml, Debug, Clone, PartialEq)]").ok();
+                    writeln!(
+                        &mut types,
+                        "#[derive(ToXml, Debug, Clone, PartialEq, Default)]"
+                    )
+                    .ok();
                     writeln!(
                         &mut types,
                         "#[xml(rename=\"{action_name}\", ns(SERVICE_NS))]",
@@ -317,7 +320,7 @@ use crate::Result;
 
 fn to_snake_case(s: &str) -> String {
     // Fixup some special cases
-    let s = s.replace("URIs", "Uris");
+    let s = s.replace("URIs", "Uris").replace("IDs", "Ids");
     let result = s.to_snake_case();
     if result == "type" {
         "type_".to_string()

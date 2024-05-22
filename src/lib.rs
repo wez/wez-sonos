@@ -10,7 +10,7 @@ mod discovery;
 mod generated;
 mod upnp;
 
-pub use discovery::discover;
+pub use discovery::*;
 pub use generated::*;
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -26,8 +26,6 @@ pub enum Error {
         error: instant_xml::Error,
         text: String,
     },
-    #[error("Json Error: {0}")]
-    Json(#[from] serde_json::Error),
     #[error("Service {0:?} is not supported by this device")]
     UnsupportedService(URN),
     #[error("Invalid URI: {0:#?}")]
@@ -65,11 +63,11 @@ impl SonosDevice {
     }
 }
 
-pub const SOAP_ENCODING: &str = "http://schemas.xmlsoap.org/soap/encoding/";
-pub const SOAP_ENVELOPE: &str = "http://schemas.xmlsoap.org/soap/envelope/";
+const SOAP_ENCODING: &str = "http://schemas.xmlsoap.org/soap/encoding/";
+const SOAP_ENVELOPE: &str = "http://schemas.xmlsoap.org/soap/envelope/";
 
 mod soap {
-    use super::{SOAP_ENVELOPE};
+    use super::SOAP_ENVELOPE;
     use instant_xml::ToXml;
 
     #[derive(Debug, Eq, PartialEq, ToXml)]
@@ -91,7 +89,7 @@ mod soap {
 }
 
 mod soap_resp {
-    use super::{SOAP_ENVELOPE};
+    use super::SOAP_ENVELOPE;
     use instant_xml::FromXml;
 
     #[derive(Debug, Eq, PartialEq, FromXml)]
@@ -174,9 +172,9 @@ mod test {
     fn test_xml() {
         use crate::av_transport::StopRequest;
         let stop = StopRequest { instance_id: 32 };
-        assert_eq!(
+        k9::snapshot!(
             instant_xml::to_string(&stop).unwrap(),
-            "<u:Stop xmlns:u=\"urn:schemas-upnp-org:service:AVTransport:1\"><InstanceID>32</InstanceID></u:Stop>"
+            r#"<Stop xmlns="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID xmlns="">32</InstanceID></Stop>"#
         );
     }
 
@@ -185,22 +183,15 @@ mod test {
         use crate::av_transport::StopRequest;
 
         let action = soap::Envelope {
-            encoding_style: soap::SOAP_ENCODING,
+            encoding_style: crate::SOAP_ENCODING,
             body: soap::Body {
                 payload: StopRequest { instance_id: 0 },
             },
         };
 
-        assert_eq!(
+        k9::snapshot!(
             instant_xml::to_string(&action).unwrap(),
-            "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" \
-                s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\
-                <s:Body>\
-                <u:Stop xmlns:u=\"urn:schemas-upnp-org:service:AVTransport:1\">\
-                <InstanceID>0</InstanceID>\
-                </u:Stop>\
-                </s:Body>\
-                </s:Envelope>"
+            r#"<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/" s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"><s:Body><Stop xmlns="urn:schemas-upnp-org:service:AVTransport:1"><InstanceID xmlns="">0</InstanceID></Stop></s:Body></s:Envelope>"#
         );
     }
 }
