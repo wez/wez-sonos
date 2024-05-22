@@ -10,14 +10,12 @@ async fn main() -> sonos::Result<()> {
     futures_util::pin_mut!(devices);
 
     while let Some(device) = devices.try_next().await? {
-        use sonos::av_transport::GetMediaInfoRequest;
-
-        match device
-            .get_media_info(GetMediaInfoRequest { instance_id: 0 })
-            .await
-        {
-            Ok(info) => {
-                println!("{info:#?}");
+        match device.name().await {
+            Ok(name) => {
+                println!("{name}");
+                if let Ok(state) = device.get_zone_group_state().await {
+                    println!("{state:?}");
+                }
             }
             Err(err) => {
                 // log::error!("device: {device:#?}");

@@ -4,14 +4,17 @@ use instant_xml::ToXml;
 use reqwest::StatusCode;
 use reqwest::Url;
 use ssdp_client::URN;
+use std::net::Ipv4Addr;
 use thiserror::Error;
 
 mod discovery;
 mod generated;
 mod upnp;
+mod zone;
 
 pub use discovery::*;
 pub use generated::*;
+pub use zone::*;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -34,6 +37,8 @@ pub enum Error {
     Reqwest(#[from] reqwest::Error),
     #[error("Failed Request: {status:?} {body}")]
     FailedRequest { status: StatusCode, body: String },
+    #[error("Device has no name!?")]
+    NoName,
 }
 
 #[derive(Debug)]
@@ -43,6 +48,10 @@ pub struct SonosDevice {
 }
 
 impl SonosDevice {
+    pub async fn from_ip(addr: Ipv4Addr) -> Result<Self> {
+        Self::from_url(format!("http://{addr}:1400/xml/device_description.xml").parse()?).await
+    }
+
     pub async fn from_url(url: Url) -> Result<Self> {
         let response = reqwest::get(url.clone()).await?;
 
@@ -60,6 +69,16 @@ impl SonosDevice {
         let device = DeviceSpec::parse_xml(&body)?;
 
         Ok(Self { url, device })
+    }
+
+    pub async fn name(&self) -> Result<String> {
+        let attr = self.get_zone_attributes().await?;
+        attr.current_zone_name.ok_or(Error::NoName)
+    }
+
+    pub async fn get_zone_group_state(&self) -> Result<Vec<ZoneGroup>> {
+        let state = <Self as ZoneGroupTopology>::get_zone_group_state(self).await?;
+        ZoneGroup::parse_xml(&state.zone_group_state.as_deref().unwrap_or(""))
     }
 }
 

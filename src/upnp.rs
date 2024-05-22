@@ -80,7 +80,7 @@ pub struct DeviceSpec {
     #[xml(rename = "SSLPort")]
     pub ssl_port: Option<u16>,
 
-    service_list: ServiceList,
+    service_list: Option<ServiceList>,
     device_list: Option<DeviceList>,
 }
 
@@ -94,7 +94,10 @@ impl DeviceSpec {
     }
 
     pub fn services(&self) -> &[Service] {
-        &self.service_list.services
+        match &self.service_list {
+            None => &[],
+            Some(list) => &list.services,
+        }
     }
 
     pub fn get_service(&self, service_type: &URN) -> Option<&Service> {
@@ -195,114 +198,116 @@ Root {
         ssl_port: Some(
             1443,
         ),
-        service_list: ServiceList {
-            services: [
-                Service {
-                    service_type: XmlWrapped(
-                        Service(
-                            "schemas-upnp-org",
-                            "AlarmClock",
-                            1,
+        service_list: Some(
+            ServiceList {
+                services: [
+                    Service {
+                        service_type: XmlWrapped(
+                            Service(
+                                "schemas-upnp-org",
+                                "AlarmClock",
+                                1,
+                            ),
                         ),
-                    ),
-                    service_id: "urn:upnp-org:serviceId:AlarmClock",
-                    control_url: "/AlarmClock/Control",
-                    event_sub_url: "/AlarmClock/Event",
-                    scpd_url: "/xml/AlarmClock1.xml",
-                },
-                Service {
-                    service_type: XmlWrapped(
-                        Service(
-                            "schemas-upnp-org",
-                            "MusicServices",
-                            1,
+                        service_id: "urn:upnp-org:serviceId:AlarmClock",
+                        control_url: "/AlarmClock/Control",
+                        event_sub_url: "/AlarmClock/Event",
+                        scpd_url: "/xml/AlarmClock1.xml",
+                    },
+                    Service {
+                        service_type: XmlWrapped(
+                            Service(
+                                "schemas-upnp-org",
+                                "MusicServices",
+                                1,
+                            ),
                         ),
-                    ),
-                    service_id: "urn:upnp-org:serviceId:MusicServices",
-                    control_url: "/MusicServices/Control",
-                    event_sub_url: "/MusicServices/Event",
-                    scpd_url: "/xml/MusicServices1.xml",
-                },
-                Service {
-                    service_type: XmlWrapped(
-                        Service(
-                            "schemas-upnp-org",
-                            "AudioIn",
-                            1,
+                        service_id: "urn:upnp-org:serviceId:MusicServices",
+                        control_url: "/MusicServices/Control",
+                        event_sub_url: "/MusicServices/Event",
+                        scpd_url: "/xml/MusicServices1.xml",
+                    },
+                    Service {
+                        service_type: XmlWrapped(
+                            Service(
+                                "schemas-upnp-org",
+                                "AudioIn",
+                                1,
+                            ),
                         ),
-                    ),
-                    service_id: "urn:upnp-org:serviceId:AudioIn",
-                    control_url: "/AudioIn/Control",
-                    event_sub_url: "/AudioIn/Event",
-                    scpd_url: "/xml/AudioIn1.xml",
-                },
-                Service {
-                    service_type: XmlWrapped(
-                        Service(
-                            "schemas-upnp-org",
-                            "DeviceProperties",
-                            1,
+                        service_id: "urn:upnp-org:serviceId:AudioIn",
+                        control_url: "/AudioIn/Control",
+                        event_sub_url: "/AudioIn/Event",
+                        scpd_url: "/xml/AudioIn1.xml",
+                    },
+                    Service {
+                        service_type: XmlWrapped(
+                            Service(
+                                "schemas-upnp-org",
+                                "DeviceProperties",
+                                1,
+                            ),
                         ),
-                    ),
-                    service_id: "urn:upnp-org:serviceId:DeviceProperties",
-                    control_url: "/DeviceProperties/Control",
-                    event_sub_url: "/DeviceProperties/Event",
-                    scpd_url: "/xml/DeviceProperties1.xml",
-                },
-                Service {
-                    service_type: XmlWrapped(
-                        Service(
-                            "schemas-upnp-org",
-                            "SystemProperties",
-                            1,
+                        service_id: "urn:upnp-org:serviceId:DeviceProperties",
+                        control_url: "/DeviceProperties/Control",
+                        event_sub_url: "/DeviceProperties/Event",
+                        scpd_url: "/xml/DeviceProperties1.xml",
+                    },
+                    Service {
+                        service_type: XmlWrapped(
+                            Service(
+                                "schemas-upnp-org",
+                                "SystemProperties",
+                                1,
+                            ),
                         ),
-                    ),
-                    service_id: "urn:upnp-org:serviceId:SystemProperties",
-                    control_url: "/SystemProperties/Control",
-                    event_sub_url: "/SystemProperties/Event",
-                    scpd_url: "/xml/SystemProperties1.xml",
-                },
-                Service {
-                    service_type: XmlWrapped(
-                        Service(
-                            "schemas-upnp-org",
-                            "ZoneGroupTopology",
-                            1,
+                        service_id: "urn:upnp-org:serviceId:SystemProperties",
+                        control_url: "/SystemProperties/Control",
+                        event_sub_url: "/SystemProperties/Event",
+                        scpd_url: "/xml/SystemProperties1.xml",
+                    },
+                    Service {
+                        service_type: XmlWrapped(
+                            Service(
+                                "schemas-upnp-org",
+                                "ZoneGroupTopology",
+                                1,
+                            ),
                         ),
-                    ),
-                    service_id: "urn:upnp-org:serviceId:ZoneGroupTopology",
-                    control_url: "/ZoneGroupTopology/Control",
-                    event_sub_url: "/ZoneGroupTopology/Event",
-                    scpd_url: "/xml/ZoneGroupTopology1.xml",
-                },
-                Service {
-                    service_type: XmlWrapped(
-                        Service(
-                            "schemas-upnp-org",
-                            "GroupManagement",
-                            1,
+                        service_id: "urn:upnp-org:serviceId:ZoneGroupTopology",
+                        control_url: "/ZoneGroupTopology/Control",
+                        event_sub_url: "/ZoneGroupTopology/Event",
+                        scpd_url: "/xml/ZoneGroupTopology1.xml",
+                    },
+                    Service {
+                        service_type: XmlWrapped(
+                            Service(
+                                "schemas-upnp-org",
+                                "GroupManagement",
+                                1,
+                            ),
                         ),
-                    ),
-                    service_id: "urn:upnp-org:serviceId:GroupManagement",
-                    control_url: "/GroupManagement/Control",
-                    event_sub_url: "/GroupManagement/Event",
-                    scpd_url: "/xml/GroupManagement1.xml",
-                },
-                Service {
-                    service_type: XmlWrapped(
-                        Service(
-                            "schemas-tencent-com",
-                            "QPlay",
-                            1,
+                        service_id: "urn:upnp-org:serviceId:GroupManagement",
+                        control_url: "/GroupManagement/Control",
+                        event_sub_url: "/GroupManagement/Event",
+                        scpd_url: "/xml/GroupManagement1.xml",
+                    },
+                    Service {
+                        service_type: XmlWrapped(
+                            Service(
+                                "schemas-tencent-com",
+                                "QPlay",
+                                1,
+                            ),
                         ),
-                    ),
-                    service_id: "urn:tencent-com:serviceId:QPlay",
-                    control_url: "/QPlay/Control",
-                    event_sub_url: "/QPlay/Event",
-                    scpd_url: "/xml/QPlay1.xml",
-                },
-            ],
-        },
+                        service_id: "urn:tencent-com:serviceId:QPlay",
+                        control_url: "/QPlay/Control",
+                        event_sub_url: "/QPlay/Event",
+                        scpd_url: "/xml/QPlay1.xml",
+                    },
+                ],
+            },
+        ),
         device_list: Some(
             DeviceList {
                 devices: [
@@ -325,36 +330,38 @@ Root {
                             "Sonos Port",
                         ),
                         ssl_port: None,
-                        service_list: ServiceList {
-                            services: [
-                                Service {
-                                    service_type: XmlWrapped(
-                                        Service(
-                                            "schemas-upnp-org",
-                                            "ContentDirectory",
-                                            1,
+                        service_list: Some(
+                            ServiceList {
+                                services: [
+                                    Service {
+                                        service_type: XmlWrapped(
+                                            Service(
+                                                "schemas-upnp-org",
+                                                "ContentDirectory",
+                                                1,
+                                            ),
                                         ),
-                                    ),
-                                    service_id: "urn:upnp-org:serviceId:ContentDirectory",
-                                    control_url: "/MediaServer/ContentDirectory/Control",
-                                    event_sub_url: "/MediaServer/ContentDirectory/Event",
-                                    scpd_url: "/xml/ContentDirectory1.xml",
-                                },
-                                Service {
-                                    service_type: XmlWrapped(
-                                        Service(
-                                            "schemas-upnp-org",
-                                            "ConnectionManager",
-                                            1,
+                                        service_id: "urn:upnp-org:serviceId:ContentDirectory",
+                                        control_url: "/MediaServer/ContentDirectory/Control",
+                                        event_sub_url: "/MediaServer/ContentDirectory/Event",
+                                        scpd_url: "/xml/ContentDirectory1.xml",
+                                    },
+                                    Service {
+                                        service_type: XmlWrapped(
+                                            Service(
+                                                "schemas-upnp-org",
+                                                "ConnectionManager",
+                                                1,
+                                            ),
                                         ),
-                                    ),
-                                    service_id: "urn:upnp-org:serviceId:ConnectionManager",
-                                    control_url: "/MediaServer/ConnectionManager/Control",
-                                    event_sub_url: "/MediaServer/ConnectionManager/Event",
-                                    scpd_url: "/xml/ConnectionManager1.xml",
-                                },
-                            ],
-                        },
+                                        service_id: "urn:upnp-org:serviceId:ConnectionManager",
+                                        control_url: "/MediaServer/ConnectionManager/Control",
+                                        event_sub_url: "/MediaServer/ConnectionManager/Event",
+                                        scpd_url: "/xml/ConnectionManager1.xml",
+                                    },
+                                ],
+                            },
+                        ),
                         device_list: None,
                     },
                     DeviceSpec {
@@ -376,88 +383,90 @@ Root {
                             "Sonos Port",
                         ),
                         ssl_port: None,
-                        service_list: ServiceList {
-                            services: [
-                                Service {
-                                    service_type: XmlWrapped(
-                                        Service(
-                                            "schemas-upnp-org",
-                                            "RenderingControl",
-                                            1,
+                        service_list: Some(
+                            ServiceList {
+                                services: [
+                                    Service {
+                                        service_type: XmlWrapped(
+                                            Service(
+                                                "schemas-upnp-org",
+                                                "RenderingControl",
+                                                1,
+                                            ),
                                         ),
-                                    ),
-                                    service_id: "urn:upnp-org:serviceId:RenderingControl",
-                                    control_url: "/MediaRenderer/RenderingControl/Control",
-                                    event_sub_url: "/MediaRenderer/RenderingControl/Event",
-                                    scpd_url: "/xml/RenderingControl1.xml",
-                                },
-                                Service {
-                                    service_type: XmlWrapped(
-                                        Service(
-                                            "schemas-upnp-org",
-                                            "ConnectionManager",
-                                            1,
+                                        service_id: "urn:upnp-org:serviceId:RenderingControl",
+                                        control_url: "/MediaRenderer/RenderingControl/Control",
+                                        event_sub_url: "/MediaRenderer/RenderingControl/Event",
+                                        scpd_url: "/xml/RenderingControl1.xml",
+                                    },
+                                    Service {
+                                        service_type: XmlWrapped(
+                                            Service(
+                                                "schemas-upnp-org",
+                                                "ConnectionManager",
+                                                1,
+                                            ),
                                         ),
-                                    ),
-                                    service_id: "urn:upnp-org:serviceId:ConnectionManager",
-                                    control_url: "/MediaRenderer/ConnectionManager/Control",
-                                    event_sub_url: "/MediaRenderer/ConnectionManager/Event",
-                                    scpd_url: "/xml/ConnectionManager1.xml",
-                                },
-                                Service {
-                                    service_type: XmlWrapped(
-                                        Service(
-                                            "schemas-upnp-org",
-                                            "AVTransport",
-                                            1,
+                                        service_id: "urn:upnp-org:serviceId:ConnectionManager",
+                                        control_url: "/MediaRenderer/ConnectionManager/Control",
+                                        event_sub_url: "/MediaRenderer/ConnectionManager/Event",
+                                        scpd_url: "/xml/ConnectionManager1.xml",
+                                    },
+                                    Service {
+                                        service_type: XmlWrapped(
+                                            Service(
+                                                "schemas-upnp-org",
+                                                "AVTransport",
+                                                1,
+                                            ),
                                         ),
-                                    ),
-                                    service_id: "urn:upnp-org:serviceId:AVTransport",
-                                    control_url: "/MediaRenderer/AVTransport/Control",
-                                    event_sub_url: "/MediaRenderer/AVTransport/Event",
-                                    scpd_url: "/xml/AVTransport1.xml",
-                                },
-                                Service {
-                                    service_type: XmlWrapped(
-                                        Service(
-                                            "schemas-sonos-com",
-                                            "Queue",
-                                            1,
+                                        service_id: "urn:upnp-org:serviceId:AVTransport",
+                                        control_url: "/MediaRenderer/AVTransport/Control",
+                                        event_sub_url: "/MediaRenderer/AVTransport/Event",
+                                        scpd_url: "/xml/AVTransport1.xml",
+                                    },
+                                    Service {
+                                        service_type: XmlWrapped(
+                                            Service(
+                                                "schemas-sonos-com",
+                                                "Queue",
+                                                1,
+                                            ),
                                         ),
-                                    ),
-                                    service_id: "urn:sonos-com:serviceId:Queue",
-                                    control_url: "/MediaRenderer/Queue/Control",
-                                    event_sub_url: "/MediaRenderer/Queue/Event",
-                                    scpd_url: "/xml/Queue1.xml",
-                                },
-                                Service {
-                                    service_type: XmlWrapped(
-                                        Service(
-                                            "schemas-upnp-org",
-                                            "GroupRenderingControl",
-                                            1,
+                                        service_id: "urn:sonos-com:serviceId:Queue",
+                                        control_url: "/MediaRenderer/Queue/Control",
+                                        event_sub_url: "/MediaRenderer/Queue/Event",
+                                        scpd_url: "/xml/Queue1.xml",
+                                    },
+                                    Service {
+                                        service_type: XmlWrapped(
+                                            Service(
+                                                "schemas-upnp-org",
+                                                "GroupRenderingControl",
+                                                1,
+                                            ),
                                         ),
-                                    ),
-                                    service_id: "urn:upnp-org:serviceId:GroupRenderingControl",
-                                    control_url: "/MediaRenderer/GroupRenderingControl/Control",
-                                    event_sub_url: "/MediaRenderer/GroupRenderingControl/Event",
-                                    scpd_url: "/xml/GroupRenderingControl1.xml",
-                                },
-                                Service {
-                                    service_type: XmlWrapped(
-                                        Service(
-                                            "schemas-upnp-org",
-                                            "VirtualLineIn",
-                                            1,
+                                        service_id: "urn:upnp-org:serviceId:GroupRenderingControl",
+                                        control_url: "/MediaRenderer/GroupRenderingControl/Control",
+                                        event_sub_url: "/MediaRenderer/GroupRenderingControl/Event",
+                                        scpd_url: "/xml/GroupRenderingControl1.xml",
+                                    },
+                                    Service {
+                                        service_type: XmlWrapped(
+                                            Service(
+                                                "schemas-upnp-org",
+                                                "VirtualLineIn",
+                                                1,
+                                            ),
                                         ),
-                                    ),
-                                    service_id: "urn:upnp-org:serviceId:VirtualLineIn",
-                                    control_url: "/MediaRenderer/VirtualLineIn/Control",
-                                    event_sub_url: "/MediaRenderer/VirtualLineIn/Event",
-                                    scpd_url: "/xml/VirtualLineIn1.xml",
-                                },
-                            ],
-                        },
+                                        service_id: "urn:upnp-org:serviceId:VirtualLineIn",
+                                        control_url: "/MediaRenderer/VirtualLineIn/Control",
+                                        event_sub_url: "/MediaRenderer/VirtualLineIn/Event",
+                                        scpd_url: "/xml/VirtualLineIn1.xml",
+                                    },
+                                ],
+                            },
+                        ),
                         device_list: None,
                     },
                 ],
