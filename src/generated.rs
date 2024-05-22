@@ -2,6 +2,7 @@
 
 use crate::Result;
 use crate::SonosDevice;
+use std::str::FromStr;
 
 /// Request and Response types for the `AVTransport` service.
 pub mod av_transport {
@@ -339,7 +340,7 @@ pub mod av_transport {
         #[xml(rename = "NextURIMetaData", ns(""))]
         pub next_uri_meta_data: Option<String>,
         #[xml(rename = "PlayMedium", ns(""))]
-        pub play_medium: Option<String>,
+        pub play_medium: Option<super::PlaybackStorageMedium>,
         #[xml(rename = "RecordMedium", ns(""))]
         pub record_medium: Option<String>,
         #[xml(rename = "WriteStatus", ns(""))]
@@ -419,7 +420,7 @@ pub mod av_transport {
     #[xml(rename = "GetTransportInfoResponse", ns(SERVICE_TYPE))]
     pub struct GetTransportInfoResponse {
         #[xml(rename = "CurrentTransportState", ns(""))]
-        pub current_transport_state: Option<String>,
+        pub current_transport_state: Option<super::TransportState>,
         #[xml(rename = "CurrentTransportStatus", ns(""))]
         pub current_transport_status: Option<String>,
         #[xml(rename = "CurrentSpeed", ns(""))]
@@ -437,7 +438,7 @@ pub mod av_transport {
     #[xml(rename = "GetTransportSettingsResponse", ns(SERVICE_TYPE))]
     pub struct GetTransportSettingsResponse {
         #[xml(rename = "PlayMode", ns(""))]
-        pub play_mode: Option<String>,
+        pub play_mode: Option<super::CurrentPlayMode>,
         #[xml(rename = "RecQualityMode", ns(""))]
         pub rec_quality_mode: Option<String>,
     }
@@ -579,7 +580,7 @@ pub mod av_transport {
         #[xml(rename = "ProgramMetaData", ns(""))]
         pub program_meta_data: String,
         #[xml(rename = "PlayMode", ns(""))]
-        pub play_mode: String,
+        pub play_mode: super::CurrentPlayMode,
         #[xml(rename = "Volume", ns(""))]
         pub volume: u16,
         #[xml(rename = "IncludeLinkedZones", ns(""))]
@@ -613,7 +614,7 @@ pub mod av_transport {
         pub instance_id: u32,
         /// What to seek
         #[xml(rename = "Unit", ns(""))]
-        pub unit: String,
+        pub unit: super::SeekMode,
         /// Position of track in queue (start at 1) or `hh:mm:ss` for `REL_TIME` or `+/-hh:mm:ss` for `TIME_DELTA`
         #[xml(rename = "Target", ns(""))]
         pub target: String,
@@ -659,7 +660,7 @@ pub mod av_transport {
         pub instance_id: u32,
         /// New playmode
         #[xml(rename = "NewPlayMode", ns(""))]
-        pub new_play_mode: String,
+        pub new_play_mode: super::CurrentPlayMode,
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -697,6 +698,335 @@ pub mod av_transport {
     }
 }
 
+#[derive(PartialEq, Debug, Clone, Eq, Default)]
+pub enum SeekMode {
+    #[default]
+    TrackNr,
+    RelTime,
+    TimeDelta,
+}
+
+impl ToString for SeekMode {
+    fn to_string(&self) -> String {
+        match self {
+            SeekMode::TrackNr => "TRACK_NR".to_string(),
+            SeekMode::RelTime => "REL_TIME".to_string(),
+            SeekMode::TimeDelta => "TIME_DELTA".to_string(),
+        }
+    }
+}
+
+impl FromStr for SeekMode {
+    type Err = crate::Error;
+    fn from_str(s: &str) -> Result<SeekMode> {
+        match s {
+            "TRACK_NR" => Ok(SeekMode::TrackNr),
+            "REL_TIME" => Ok(SeekMode::RelTime),
+            "TIME_DELTA" => Ok(SeekMode::TimeDelta),
+            _ => Err(crate::Error::InvalidEnumVariantValue),
+        }
+    }
+}
+
+impl instant_xml::ToXml for SeekMode {
+    fn serialize<W: std::fmt::Write + ?Sized>(
+        &self,
+        field: Option<instant_xml::Id<'_>>,
+        serializer: &mut instant_xml::Serializer<W>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        self.to_string().serialize(field, serializer)
+    }
+
+    fn present(&self) -> bool {
+        true
+    }
+}
+
+impl<'xml> instant_xml::FromXml<'xml> for SeekMode {
+    #[inline]
+    fn matches(id: instant_xml::Id<'_>, field: Option<instant_xml::Id<'_>>) -> bool {
+        match field {
+            Some(field) => id == field,
+            None => false,
+        }
+    }
+
+    fn deserialize<'cx>(
+        into: &mut Self::Accumulator,
+        field: &'static str,
+        deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        if into.is_some() {
+            return Err(instant_xml::Error::DuplicateValue);
+        }
+
+        match deserializer.take_str()? {
+            Some(value) => {
+                let parsed: SeekMode = value.parse().map_err(|err| {
+                    instant_xml::Error::Other(format!(
+                        "invalid value for field {field}: {value}: {err:#}"
+                    ))
+                })?;
+                *into = Some(parsed);
+                Ok(())
+            }
+            None => Err(instant_xml::Error::MissingValue(field)),
+        }
+    }
+
+    type Accumulator = Option<SeekMode>;
+    const KIND: instant_xml::Kind = instant_xml::Kind::Scalar;
+}
+
+#[derive(PartialEq, Debug, Clone, Eq, Default)]
+pub enum CurrentPlayMode {
+    #[default]
+    Normal,
+    RepeatAll,
+    RepeatOne,
+    ShuffleNorepeat,
+    Shuffle,
+    ShuffleRepeatOne,
+}
+
+impl ToString for CurrentPlayMode {
+    fn to_string(&self) -> String {
+        match self {
+            CurrentPlayMode::Normal => "NORMAL".to_string(),
+            CurrentPlayMode::RepeatAll => "REPEAT_ALL".to_string(),
+            CurrentPlayMode::RepeatOne => "REPEAT_ONE".to_string(),
+            CurrentPlayMode::ShuffleNorepeat => "SHUFFLE_NOREPEAT".to_string(),
+            CurrentPlayMode::Shuffle => "SHUFFLE".to_string(),
+            CurrentPlayMode::ShuffleRepeatOne => "SHUFFLE_REPEAT_ONE".to_string(),
+        }
+    }
+}
+
+impl FromStr for CurrentPlayMode {
+    type Err = crate::Error;
+    fn from_str(s: &str) -> Result<CurrentPlayMode> {
+        match s {
+            "NORMAL" => Ok(CurrentPlayMode::Normal),
+            "REPEAT_ALL" => Ok(CurrentPlayMode::RepeatAll),
+            "REPEAT_ONE" => Ok(CurrentPlayMode::RepeatOne),
+            "SHUFFLE_NOREPEAT" => Ok(CurrentPlayMode::ShuffleNorepeat),
+            "SHUFFLE" => Ok(CurrentPlayMode::Shuffle),
+            "SHUFFLE_REPEAT_ONE" => Ok(CurrentPlayMode::ShuffleRepeatOne),
+            _ => Err(crate::Error::InvalidEnumVariantValue),
+        }
+    }
+}
+
+impl instant_xml::ToXml for CurrentPlayMode {
+    fn serialize<W: std::fmt::Write + ?Sized>(
+        &self,
+        field: Option<instant_xml::Id<'_>>,
+        serializer: &mut instant_xml::Serializer<W>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        self.to_string().serialize(field, serializer)
+    }
+
+    fn present(&self) -> bool {
+        true
+    }
+}
+
+impl<'xml> instant_xml::FromXml<'xml> for CurrentPlayMode {
+    #[inline]
+    fn matches(id: instant_xml::Id<'_>, field: Option<instant_xml::Id<'_>>) -> bool {
+        match field {
+            Some(field) => id == field,
+            None => false,
+        }
+    }
+
+    fn deserialize<'cx>(
+        into: &mut Self::Accumulator,
+        field: &'static str,
+        deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        if into.is_some() {
+            return Err(instant_xml::Error::DuplicateValue);
+        }
+
+        match deserializer.take_str()? {
+            Some(value) => {
+                let parsed: CurrentPlayMode = value.parse().map_err(|err| {
+                    instant_xml::Error::Other(format!(
+                        "invalid value for field {field}: {value}: {err:#}"
+                    ))
+                })?;
+                *into = Some(parsed);
+                Ok(())
+            }
+            None => Err(instant_xml::Error::MissingValue(field)),
+        }
+    }
+
+    type Accumulator = Option<CurrentPlayMode>;
+    const KIND: instant_xml::Kind = instant_xml::Kind::Scalar;
+}
+
+#[derive(PartialEq, Debug, Clone, Eq, Default)]
+pub enum PlaybackStorageMedium {
+    #[default]
+    None,
+    Network,
+}
+
+impl ToString for PlaybackStorageMedium {
+    fn to_string(&self) -> String {
+        match self {
+            PlaybackStorageMedium::None => "NONE".to_string(),
+            PlaybackStorageMedium::Network => "NETWORK".to_string(),
+        }
+    }
+}
+
+impl FromStr for PlaybackStorageMedium {
+    type Err = crate::Error;
+    fn from_str(s: &str) -> Result<PlaybackStorageMedium> {
+        match s {
+            "NONE" => Ok(PlaybackStorageMedium::None),
+            "NETWORK" => Ok(PlaybackStorageMedium::Network),
+            _ => Err(crate::Error::InvalidEnumVariantValue),
+        }
+    }
+}
+
+impl instant_xml::ToXml for PlaybackStorageMedium {
+    fn serialize<W: std::fmt::Write + ?Sized>(
+        &self,
+        field: Option<instant_xml::Id<'_>>,
+        serializer: &mut instant_xml::Serializer<W>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        self.to_string().serialize(field, serializer)
+    }
+
+    fn present(&self) -> bool {
+        true
+    }
+}
+
+impl<'xml> instant_xml::FromXml<'xml> for PlaybackStorageMedium {
+    #[inline]
+    fn matches(id: instant_xml::Id<'_>, field: Option<instant_xml::Id<'_>>) -> bool {
+        match field {
+            Some(field) => id == field,
+            None => false,
+        }
+    }
+
+    fn deserialize<'cx>(
+        into: &mut Self::Accumulator,
+        field: &'static str,
+        deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        if into.is_some() {
+            return Err(instant_xml::Error::DuplicateValue);
+        }
+
+        match deserializer.take_str()? {
+            Some(value) => {
+                let parsed: PlaybackStorageMedium = value.parse().map_err(|err| {
+                    instant_xml::Error::Other(format!(
+                        "invalid value for field {field}: {value}: {err:#}"
+                    ))
+                })?;
+                *into = Some(parsed);
+                Ok(())
+            }
+            None => Err(instant_xml::Error::MissingValue(field)),
+        }
+    }
+
+    type Accumulator = Option<PlaybackStorageMedium>;
+    const KIND: instant_xml::Kind = instant_xml::Kind::Scalar;
+}
+
+#[derive(PartialEq, Debug, Clone, Eq, Default)]
+pub enum TransportState {
+    #[default]
+    Stopped,
+    Playing,
+    PausedPlayback,
+    Transitioning,
+}
+
+impl ToString for TransportState {
+    fn to_string(&self) -> String {
+        match self {
+            TransportState::Stopped => "STOPPED".to_string(),
+            TransportState::Playing => "PLAYING".to_string(),
+            TransportState::PausedPlayback => "PAUSED_PLAYBACK".to_string(),
+            TransportState::Transitioning => "TRANSITIONING".to_string(),
+        }
+    }
+}
+
+impl FromStr for TransportState {
+    type Err = crate::Error;
+    fn from_str(s: &str) -> Result<TransportState> {
+        match s {
+            "STOPPED" => Ok(TransportState::Stopped),
+            "PLAYING" => Ok(TransportState::Playing),
+            "PAUSED_PLAYBACK" => Ok(TransportState::PausedPlayback),
+            "TRANSITIONING" => Ok(TransportState::Transitioning),
+            _ => Err(crate::Error::InvalidEnumVariantValue),
+        }
+    }
+}
+
+impl instant_xml::ToXml for TransportState {
+    fn serialize<W: std::fmt::Write + ?Sized>(
+        &self,
+        field: Option<instant_xml::Id<'_>>,
+        serializer: &mut instant_xml::Serializer<W>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        self.to_string().serialize(field, serializer)
+    }
+
+    fn present(&self) -> bool {
+        true
+    }
+}
+
+impl<'xml> instant_xml::FromXml<'xml> for TransportState {
+    #[inline]
+    fn matches(id: instant_xml::Id<'_>, field: Option<instant_xml::Id<'_>>) -> bool {
+        match field {
+            Some(field) => id == field,
+            None => false,
+        }
+    }
+
+    fn deserialize<'cx>(
+        into: &mut Self::Accumulator,
+        field: &'static str,
+        deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        if into.is_some() {
+            return Err(instant_xml::Error::DuplicateValue);
+        }
+
+        match deserializer.take_str()? {
+            Some(value) => {
+                let parsed: TransportState = value.parse().map_err(|err| {
+                    instant_xml::Error::Other(format!(
+                        "invalid value for field {field}: {value}: {err:#}"
+                    ))
+                })?;
+                *into = Some(parsed);
+                Ok(())
+            }
+            None => Err(instant_xml::Error::MissingValue(field)),
+        }
+    }
+
+    type Accumulator = Option<TransportState>;
+    const KIND: instant_xml::Kind = instant_xml::Kind::Scalar;
+}
+
 /// Request and Response types for the `AlarmClock` service.
 pub mod alarm_clock {
     use instant_xml::{FromXml, ToXml};
@@ -716,7 +1046,7 @@ pub mod alarm_clock {
         pub duration: String,
         /// Repeat this alarm on
         #[xml(rename = "Recurrence", ns(""))]
-        pub recurrence: String,
+        pub recurrence: super::Recurrence,
         /// Alarm enabled after creation
         #[xml(rename = "Enabled", ns(""))]
         pub enabled: bool,
@@ -731,7 +1061,7 @@ pub mod alarm_clock {
         pub program_meta_data: String,
         /// Alarm play mode
         #[xml(rename = "PlayMode", ns(""))]
-        pub play_mode: String,
+        pub play_mode: super::AlarmPlayMode,
         /// Volume between 0 and 100
         #[xml(rename = "Volume", ns(""))]
         pub volume: u16,
@@ -903,7 +1233,7 @@ pub mod alarm_clock {
         pub duration: String,
         /// Repeat this alarm on
         #[xml(rename = "Recurrence", ns(""))]
-        pub recurrence: String,
+        pub recurrence: super::Recurrence,
         /// Alarm enabled after creation
         #[xml(rename = "Enabled", ns(""))]
         pub enabled: bool,
@@ -918,7 +1248,7 @@ pub mod alarm_clock {
         pub program_meta_data: String,
         /// Alarm play mode
         #[xml(rename = "PlayMode", ns(""))]
-        pub play_mode: String,
+        pub play_mode: super::AlarmPlayMode,
         /// Volume between 0 and 100
         #[xml(rename = "Volume", ns(""))]
         pub volume: u16,
@@ -926,6 +1256,172 @@ pub mod alarm_clock {
         #[xml(rename = "IncludeLinkedZones", ns(""))]
         pub include_linked_zones: bool,
     }
+}
+
+#[derive(PartialEq, Debug, Clone, Eq, Default)]
+pub enum AlarmPlayMode {
+    #[default]
+    Normal,
+    RepeatAll,
+    ShuffleNorepeat,
+    Shuffle,
+}
+
+impl ToString for AlarmPlayMode {
+    fn to_string(&self) -> String {
+        match self {
+            AlarmPlayMode::Normal => "NORMAL".to_string(),
+            AlarmPlayMode::RepeatAll => "REPEAT_ALL".to_string(),
+            AlarmPlayMode::ShuffleNorepeat => "SHUFFLE_NOREPEAT".to_string(),
+            AlarmPlayMode::Shuffle => "SHUFFLE".to_string(),
+        }
+    }
+}
+
+impl FromStr for AlarmPlayMode {
+    type Err = crate::Error;
+    fn from_str(s: &str) -> Result<AlarmPlayMode> {
+        match s {
+            "NORMAL" => Ok(AlarmPlayMode::Normal),
+            "REPEAT_ALL" => Ok(AlarmPlayMode::RepeatAll),
+            "SHUFFLE_NOREPEAT" => Ok(AlarmPlayMode::ShuffleNorepeat),
+            "SHUFFLE" => Ok(AlarmPlayMode::Shuffle),
+            _ => Err(crate::Error::InvalidEnumVariantValue),
+        }
+    }
+}
+
+impl instant_xml::ToXml for AlarmPlayMode {
+    fn serialize<W: std::fmt::Write + ?Sized>(
+        &self,
+        field: Option<instant_xml::Id<'_>>,
+        serializer: &mut instant_xml::Serializer<W>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        self.to_string().serialize(field, serializer)
+    }
+
+    fn present(&self) -> bool {
+        true
+    }
+}
+
+impl<'xml> instant_xml::FromXml<'xml> for AlarmPlayMode {
+    #[inline]
+    fn matches(id: instant_xml::Id<'_>, field: Option<instant_xml::Id<'_>>) -> bool {
+        match field {
+            Some(field) => id == field,
+            None => false,
+        }
+    }
+
+    fn deserialize<'cx>(
+        into: &mut Self::Accumulator,
+        field: &'static str,
+        deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        if into.is_some() {
+            return Err(instant_xml::Error::DuplicateValue);
+        }
+
+        match deserializer.take_str()? {
+            Some(value) => {
+                let parsed: AlarmPlayMode = value.parse().map_err(|err| {
+                    instant_xml::Error::Other(format!(
+                        "invalid value for field {field}: {value}: {err:#}"
+                    ))
+                })?;
+                *into = Some(parsed);
+                Ok(())
+            }
+            None => Err(instant_xml::Error::MissingValue(field)),
+        }
+    }
+
+    type Accumulator = Option<AlarmPlayMode>;
+    const KIND: instant_xml::Kind = instant_xml::Kind::Scalar;
+}
+
+#[derive(PartialEq, Debug, Clone, Eq, Default)]
+pub enum Recurrence {
+    #[default]
+    Once,
+    Weekdays,
+    Weekends,
+    Daily,
+}
+
+impl ToString for Recurrence {
+    fn to_string(&self) -> String {
+        match self {
+            Recurrence::Once => "ONCE".to_string(),
+            Recurrence::Weekdays => "WEEKDAYS".to_string(),
+            Recurrence::Weekends => "WEEKENDS".to_string(),
+            Recurrence::Daily => "DAILY".to_string(),
+        }
+    }
+}
+
+impl FromStr for Recurrence {
+    type Err = crate::Error;
+    fn from_str(s: &str) -> Result<Recurrence> {
+        match s {
+            "ONCE" => Ok(Recurrence::Once),
+            "WEEKDAYS" => Ok(Recurrence::Weekdays),
+            "WEEKENDS" => Ok(Recurrence::Weekends),
+            "DAILY" => Ok(Recurrence::Daily),
+            _ => Err(crate::Error::InvalidEnumVariantValue),
+        }
+    }
+}
+
+impl instant_xml::ToXml for Recurrence {
+    fn serialize<W: std::fmt::Write + ?Sized>(
+        &self,
+        field: Option<instant_xml::Id<'_>>,
+        serializer: &mut instant_xml::Serializer<W>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        self.to_string().serialize(field, serializer)
+    }
+
+    fn present(&self) -> bool {
+        true
+    }
+}
+
+impl<'xml> instant_xml::FromXml<'xml> for Recurrence {
+    #[inline]
+    fn matches(id: instant_xml::Id<'_>, field: Option<instant_xml::Id<'_>>) -> bool {
+        match field {
+            Some(field) => id == field,
+            None => false,
+        }
+    }
+
+    fn deserialize<'cx>(
+        into: &mut Self::Accumulator,
+        field: &'static str,
+        deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        if into.is_some() {
+            return Err(instant_xml::Error::DuplicateValue);
+        }
+
+        match deserializer.take_str()? {
+            Some(value) => {
+                let parsed: Recurrence = value.parse().map_err(|err| {
+                    instant_xml::Error::Other(format!(
+                        "invalid value for field {field}: {value}: {err:#}"
+                    ))
+                })?;
+                *into = Some(parsed);
+                Ok(())
+            }
+            None => Err(instant_xml::Error::MissingValue(field)),
+        }
+    }
+
+    type Accumulator = Option<Recurrence>;
+    const KIND: instant_xml::Kind = instant_xml::Kind::Scalar;
 }
 
 /// Request and Response types for the `AudioIn` service.
@@ -1037,9 +1533,9 @@ pub mod connection_manager {
         #[xml(rename = "PeerConnectionID", ns(""))]
         pub peer_connection_id: Option<i32>,
         #[xml(rename = "Direction", ns(""))]
-        pub direction: Option<String>,
+        pub direction: Option<super::Direction>,
         #[xml(rename = "Status", ns(""))]
-        pub status: Option<String>,
+        pub status: Option<super::ConnectionStatus>,
     }
 
     #[derive(FromXml, Debug, Clone, PartialEq)]
@@ -1050,6 +1546,169 @@ pub mod connection_manager {
         #[xml(rename = "Sink", ns(""))]
         pub sink: Option<String>,
     }
+}
+
+#[derive(PartialEq, Debug, Clone, Eq, Default)]
+pub enum ConnectionStatus {
+    #[default]
+    Ok,
+    ContentFormatMismatch,
+    InsufficientBandwidth,
+    UnreliableChannel,
+    Unknown,
+}
+
+impl ToString for ConnectionStatus {
+    fn to_string(&self) -> String {
+        match self {
+            ConnectionStatus::Ok => "OK".to_string(),
+            ConnectionStatus::ContentFormatMismatch => "ContentFormatMismatch".to_string(),
+            ConnectionStatus::InsufficientBandwidth => "InsufficientBandwidth".to_string(),
+            ConnectionStatus::UnreliableChannel => "UnreliableChannel".to_string(),
+            ConnectionStatus::Unknown => "Unknown".to_string(),
+        }
+    }
+}
+
+impl FromStr for ConnectionStatus {
+    type Err = crate::Error;
+    fn from_str(s: &str) -> Result<ConnectionStatus> {
+        match s {
+            "OK" => Ok(ConnectionStatus::Ok),
+            "ContentFormatMismatch" => Ok(ConnectionStatus::ContentFormatMismatch),
+            "InsufficientBandwidth" => Ok(ConnectionStatus::InsufficientBandwidth),
+            "UnreliableChannel" => Ok(ConnectionStatus::UnreliableChannel),
+            "Unknown" => Ok(ConnectionStatus::Unknown),
+            _ => Err(crate::Error::InvalidEnumVariantValue),
+        }
+    }
+}
+
+impl instant_xml::ToXml for ConnectionStatus {
+    fn serialize<W: std::fmt::Write + ?Sized>(
+        &self,
+        field: Option<instant_xml::Id<'_>>,
+        serializer: &mut instant_xml::Serializer<W>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        self.to_string().serialize(field, serializer)
+    }
+
+    fn present(&self) -> bool {
+        true
+    }
+}
+
+impl<'xml> instant_xml::FromXml<'xml> for ConnectionStatus {
+    #[inline]
+    fn matches(id: instant_xml::Id<'_>, field: Option<instant_xml::Id<'_>>) -> bool {
+        match field {
+            Some(field) => id == field,
+            None => false,
+        }
+    }
+
+    fn deserialize<'cx>(
+        into: &mut Self::Accumulator,
+        field: &'static str,
+        deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        if into.is_some() {
+            return Err(instant_xml::Error::DuplicateValue);
+        }
+
+        match deserializer.take_str()? {
+            Some(value) => {
+                let parsed: ConnectionStatus = value.parse().map_err(|err| {
+                    instant_xml::Error::Other(format!(
+                        "invalid value for field {field}: {value}: {err:#}"
+                    ))
+                })?;
+                *into = Some(parsed);
+                Ok(())
+            }
+            None => Err(instant_xml::Error::MissingValue(field)),
+        }
+    }
+
+    type Accumulator = Option<ConnectionStatus>;
+    const KIND: instant_xml::Kind = instant_xml::Kind::Scalar;
+}
+
+#[derive(PartialEq, Debug, Clone, Eq, Default)]
+pub enum Direction {
+    #[default]
+    Input,
+    Output,
+}
+
+impl ToString for Direction {
+    fn to_string(&self) -> String {
+        match self {
+            Direction::Input => "Input".to_string(),
+            Direction::Output => "Output".to_string(),
+        }
+    }
+}
+
+impl FromStr for Direction {
+    type Err = crate::Error;
+    fn from_str(s: &str) -> Result<Direction> {
+        match s {
+            "Input" => Ok(Direction::Input),
+            "Output" => Ok(Direction::Output),
+            _ => Err(crate::Error::InvalidEnumVariantValue),
+        }
+    }
+}
+
+impl instant_xml::ToXml for Direction {
+    fn serialize<W: std::fmt::Write + ?Sized>(
+        &self,
+        field: Option<instant_xml::Id<'_>>,
+        serializer: &mut instant_xml::Serializer<W>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        self.to_string().serialize(field, serializer)
+    }
+
+    fn present(&self) -> bool {
+        true
+    }
+}
+
+impl<'xml> instant_xml::FromXml<'xml> for Direction {
+    #[inline]
+    fn matches(id: instant_xml::Id<'_>, field: Option<instant_xml::Id<'_>>) -> bool {
+        match field {
+            Some(field) => id == field,
+            None => false,
+        }
+    }
+
+    fn deserialize<'cx>(
+        into: &mut Self::Accumulator,
+        field: &'static str,
+        deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        if into.is_some() {
+            return Err(instant_xml::Error::DuplicateValue);
+        }
+
+        match deserializer.take_str()? {
+            Some(value) => {
+                let parsed: Direction = value.parse().map_err(|err| {
+                    instant_xml::Error::Other(format!(
+                        "invalid value for field {field}: {value}: {err:#}"
+                    ))
+                })?;
+                *into = Some(parsed);
+                Ok(())
+            }
+            None => Err(instant_xml::Error::MissingValue(field)),
+        }
+    }
+
+    type Accumulator = Option<Direction>;
+    const KIND: instant_xml::Kind = instant_xml::Kind::Scalar;
 }
 
 /// Request and Response types for the `ContentDirectory` service.
@@ -1068,7 +1727,7 @@ pub mod content_directory {
         pub object_id: String,
         /// How to browse
         #[xml(rename = "BrowseFlag", ns(""))]
-        pub browse_flag: String,
+        pub browse_flag: super::BrowseFlag,
         /// Which fields should be returned `*` for all.
         #[xml(rename = "Filter", ns(""))]
         pub filter: String,
@@ -1240,6 +1899,83 @@ pub mod content_directory {
     }
 }
 
+#[derive(PartialEq, Debug, Clone, Eq, Default)]
+pub enum BrowseFlag {
+    #[default]
+    BrowseMetadata,
+    BrowseDirectChildren,
+}
+
+impl ToString for BrowseFlag {
+    fn to_string(&self) -> String {
+        match self {
+            BrowseFlag::BrowseMetadata => "BrowseMetadata".to_string(),
+            BrowseFlag::BrowseDirectChildren => "BrowseDirectChildren".to_string(),
+        }
+    }
+}
+
+impl FromStr for BrowseFlag {
+    type Err = crate::Error;
+    fn from_str(s: &str) -> Result<BrowseFlag> {
+        match s {
+            "BrowseMetadata" => Ok(BrowseFlag::BrowseMetadata),
+            "BrowseDirectChildren" => Ok(BrowseFlag::BrowseDirectChildren),
+            _ => Err(crate::Error::InvalidEnumVariantValue),
+        }
+    }
+}
+
+impl instant_xml::ToXml for BrowseFlag {
+    fn serialize<W: std::fmt::Write + ?Sized>(
+        &self,
+        field: Option<instant_xml::Id<'_>>,
+        serializer: &mut instant_xml::Serializer<W>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        self.to_string().serialize(field, serializer)
+    }
+
+    fn present(&self) -> bool {
+        true
+    }
+}
+
+impl<'xml> instant_xml::FromXml<'xml> for BrowseFlag {
+    #[inline]
+    fn matches(id: instant_xml::Id<'_>, field: Option<instant_xml::Id<'_>>) -> bool {
+        match field {
+            Some(field) => id == field,
+            None => false,
+        }
+    }
+
+    fn deserialize<'cx>(
+        into: &mut Self::Accumulator,
+        field: &'static str,
+        deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        if into.is_some() {
+            return Err(instant_xml::Error::DuplicateValue);
+        }
+
+        match deserializer.take_str()? {
+            Some(value) => {
+                let parsed: BrowseFlag = value.parse().map_err(|err| {
+                    instant_xml::Error::Other(format!(
+                        "invalid value for field {field}: {value}: {err:#}"
+                    ))
+                })?;
+                *into = Some(parsed);
+                Ok(())
+            }
+            None => Err(instant_xml::Error::MissingValue(field)),
+        }
+    }
+
+    type Accumulator = Option<BrowseFlag>;
+    const KIND: instant_xml::Kind = instant_xml::Kind::Scalar;
+}
+
 /// Request and Response types for the `DeviceProperties` service.
 pub mod device_properties {
     use instant_xml::{FromXml, ToXml};
@@ -1340,7 +2076,7 @@ pub mod device_properties {
     #[xml(rename = "GetButtonLockStateResponse", ns(SERVICE_TYPE))]
     pub struct GetButtonLockStateResponse {
         #[xml(rename = "CurrentButtonLockState", ns(""))]
-        pub current_button_lock_state: Option<String>,
+        pub current_button_lock_state: Option<super::ButtonLockState>,
     }
 
     #[derive(FromXml, Debug, Clone, PartialEq)]
@@ -1368,7 +2104,7 @@ pub mod device_properties {
     #[xml(rename = "GetLEDStateResponse", ns(SERVICE_TYPE))]
     pub struct GetLedStateResponse {
         #[xml(rename = "CurrentLEDState", ns(""))]
-        pub current_led_state: Option<String>,
+        pub current_led_state: Option<super::LEDState>,
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -1506,14 +2242,14 @@ pub mod device_properties {
     #[xml(rename = "SetButtonLockState", ns(SERVICE_TYPE))]
     pub struct SetButtonLockStateRequest {
         #[xml(rename = "DesiredButtonLockState", ns(""))]
-        pub desired_button_lock_state: String,
+        pub desired_button_lock_state: super::ButtonLockState,
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "SetLEDState", ns(SERVICE_TYPE))]
     pub struct SetLedStateRequest {
         #[xml(rename = "DesiredLEDState", ns(""))]
-        pub desired_led_state: String,
+        pub desired_led_state: super::LEDState,
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -1537,6 +2273,160 @@ pub mod device_properties {
         #[xml(rename = "DesiredTargetRoomName", ns(""))]
         pub desired_target_room_name: String,
     }
+}
+
+#[derive(PartialEq, Debug, Clone, Eq, Default)]
+pub enum ButtonLockState {
+    #[default]
+    On,
+    Off,
+}
+
+impl ToString for ButtonLockState {
+    fn to_string(&self) -> String {
+        match self {
+            ButtonLockState::On => "On".to_string(),
+            ButtonLockState::Off => "Off".to_string(),
+        }
+    }
+}
+
+impl FromStr for ButtonLockState {
+    type Err = crate::Error;
+    fn from_str(s: &str) -> Result<ButtonLockState> {
+        match s {
+            "On" => Ok(ButtonLockState::On),
+            "Off" => Ok(ButtonLockState::Off),
+            _ => Err(crate::Error::InvalidEnumVariantValue),
+        }
+    }
+}
+
+impl instant_xml::ToXml for ButtonLockState {
+    fn serialize<W: std::fmt::Write + ?Sized>(
+        &self,
+        field: Option<instant_xml::Id<'_>>,
+        serializer: &mut instant_xml::Serializer<W>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        self.to_string().serialize(field, serializer)
+    }
+
+    fn present(&self) -> bool {
+        true
+    }
+}
+
+impl<'xml> instant_xml::FromXml<'xml> for ButtonLockState {
+    #[inline]
+    fn matches(id: instant_xml::Id<'_>, field: Option<instant_xml::Id<'_>>) -> bool {
+        match field {
+            Some(field) => id == field,
+            None => false,
+        }
+    }
+
+    fn deserialize<'cx>(
+        into: &mut Self::Accumulator,
+        field: &'static str,
+        deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        if into.is_some() {
+            return Err(instant_xml::Error::DuplicateValue);
+        }
+
+        match deserializer.take_str()? {
+            Some(value) => {
+                let parsed: ButtonLockState = value.parse().map_err(|err| {
+                    instant_xml::Error::Other(format!(
+                        "invalid value for field {field}: {value}: {err:#}"
+                    ))
+                })?;
+                *into = Some(parsed);
+                Ok(())
+            }
+            None => Err(instant_xml::Error::MissingValue(field)),
+        }
+    }
+
+    type Accumulator = Option<ButtonLockState>;
+    const KIND: instant_xml::Kind = instant_xml::Kind::Scalar;
+}
+
+#[derive(PartialEq, Debug, Clone, Eq, Default)]
+pub enum LEDState {
+    #[default]
+    On,
+    Off,
+}
+
+impl ToString for LEDState {
+    fn to_string(&self) -> String {
+        match self {
+            LEDState::On => "On".to_string(),
+            LEDState::Off => "Off".to_string(),
+        }
+    }
+}
+
+impl FromStr for LEDState {
+    type Err = crate::Error;
+    fn from_str(s: &str) -> Result<LEDState> {
+        match s {
+            "On" => Ok(LEDState::On),
+            "Off" => Ok(LEDState::Off),
+            _ => Err(crate::Error::InvalidEnumVariantValue),
+        }
+    }
+}
+
+impl instant_xml::ToXml for LEDState {
+    fn serialize<W: std::fmt::Write + ?Sized>(
+        &self,
+        field: Option<instant_xml::Id<'_>>,
+        serializer: &mut instant_xml::Serializer<W>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        self.to_string().serialize(field, serializer)
+    }
+
+    fn present(&self) -> bool {
+        true
+    }
+}
+
+impl<'xml> instant_xml::FromXml<'xml> for LEDState {
+    #[inline]
+    fn matches(id: instant_xml::Id<'_>, field: Option<instant_xml::Id<'_>>) -> bool {
+        match field {
+            Some(field) => id == field,
+            None => false,
+        }
+    }
+
+    fn deserialize<'cx>(
+        into: &mut Self::Accumulator,
+        field: &'static str,
+        deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        if into.is_some() {
+            return Err(instant_xml::Error::DuplicateValue);
+        }
+
+        match deserializer.take_str()? {
+            Some(value) => {
+                let parsed: LEDState = value.parse().map_err(|err| {
+                    instant_xml::Error::Other(format!(
+                        "invalid value for field {field}: {value}: {err:#}"
+                    ))
+                })?;
+                *into = Some(parsed);
+                Ok(())
+            }
+            None => Err(instant_xml::Error::MissingValue(field)),
+        }
+    }
+
+    type Accumulator = Option<LEDState>;
+    const KIND: instant_xml::Kind = instant_xml::Kind::Scalar;
 }
 
 /// Request and Response types for the `GroupManagement` service.
@@ -1694,14 +2584,14 @@ pub mod ht_control {
     #[xml(rename = "GetIRRepeaterStateResponse", ns(SERVICE_TYPE))]
     pub struct GetIrRepeaterStateResponse {
         #[xml(rename = "CurrentIRRepeaterState", ns(""))]
-        pub current_ir_repeater_state: Option<String>,
+        pub current_ir_repeater_state: Option<super::IRRepeaterState>,
     }
 
     #[derive(FromXml, Debug, Clone, PartialEq)]
     #[xml(rename = "GetLEDFeedbackStateResponse", ns(SERVICE_TYPE))]
     pub struct GetLedFeedbackStateResponse {
         #[xml(rename = "LEDFeedbackState", ns(""))]
-        pub led_feedback_state: Option<String>,
+        pub led_feedback_state: Option<super::LEDFeedbackState>,
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -1731,15 +2621,172 @@ pub mod ht_control {
     #[xml(rename = "SetIRRepeaterState", ns(SERVICE_TYPE))]
     pub struct SetIrRepeaterStateRequest {
         #[xml(rename = "DesiredIRRepeaterState", ns(""))]
-        pub desired_ir_repeater_state: String,
+        pub desired_ir_repeater_state: super::IRRepeaterState,
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
     #[xml(rename = "SetLEDFeedbackState", ns(SERVICE_TYPE))]
     pub struct SetLedFeedbackStateRequest {
         #[xml(rename = "LEDFeedbackState", ns(""))]
-        pub led_feedback_state: String,
+        pub led_feedback_state: super::LEDFeedbackState,
     }
+}
+
+#[derive(PartialEq, Debug, Clone, Eq, Default)]
+pub enum IRRepeaterState {
+    #[default]
+    On,
+    Off,
+    Disabled,
+}
+
+impl ToString for IRRepeaterState {
+    fn to_string(&self) -> String {
+        match self {
+            IRRepeaterState::On => "On".to_string(),
+            IRRepeaterState::Off => "Off".to_string(),
+            IRRepeaterState::Disabled => "Disabled".to_string(),
+        }
+    }
+}
+
+impl FromStr for IRRepeaterState {
+    type Err = crate::Error;
+    fn from_str(s: &str) -> Result<IRRepeaterState> {
+        match s {
+            "On" => Ok(IRRepeaterState::On),
+            "Off" => Ok(IRRepeaterState::Off),
+            "Disabled" => Ok(IRRepeaterState::Disabled),
+            _ => Err(crate::Error::InvalidEnumVariantValue),
+        }
+    }
+}
+
+impl instant_xml::ToXml for IRRepeaterState {
+    fn serialize<W: std::fmt::Write + ?Sized>(
+        &self,
+        field: Option<instant_xml::Id<'_>>,
+        serializer: &mut instant_xml::Serializer<W>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        self.to_string().serialize(field, serializer)
+    }
+
+    fn present(&self) -> bool {
+        true
+    }
+}
+
+impl<'xml> instant_xml::FromXml<'xml> for IRRepeaterState {
+    #[inline]
+    fn matches(id: instant_xml::Id<'_>, field: Option<instant_xml::Id<'_>>) -> bool {
+        match field {
+            Some(field) => id == field,
+            None => false,
+        }
+    }
+
+    fn deserialize<'cx>(
+        into: &mut Self::Accumulator,
+        field: &'static str,
+        deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        if into.is_some() {
+            return Err(instant_xml::Error::DuplicateValue);
+        }
+
+        match deserializer.take_str()? {
+            Some(value) => {
+                let parsed: IRRepeaterState = value.parse().map_err(|err| {
+                    instant_xml::Error::Other(format!(
+                        "invalid value for field {field}: {value}: {err:#}"
+                    ))
+                })?;
+                *into = Some(parsed);
+                Ok(())
+            }
+            None => Err(instant_xml::Error::MissingValue(field)),
+        }
+    }
+
+    type Accumulator = Option<IRRepeaterState>;
+    const KIND: instant_xml::Kind = instant_xml::Kind::Scalar;
+}
+
+#[derive(PartialEq, Debug, Clone, Eq, Default)]
+pub enum LEDFeedbackState {
+    #[default]
+    On,
+    Off,
+}
+
+impl ToString for LEDFeedbackState {
+    fn to_string(&self) -> String {
+        match self {
+            LEDFeedbackState::On => "On".to_string(),
+            LEDFeedbackState::Off => "Off".to_string(),
+        }
+    }
+}
+
+impl FromStr for LEDFeedbackState {
+    type Err = crate::Error;
+    fn from_str(s: &str) -> Result<LEDFeedbackState> {
+        match s {
+            "On" => Ok(LEDFeedbackState::On),
+            "Off" => Ok(LEDFeedbackState::Off),
+            _ => Err(crate::Error::InvalidEnumVariantValue),
+        }
+    }
+}
+
+impl instant_xml::ToXml for LEDFeedbackState {
+    fn serialize<W: std::fmt::Write + ?Sized>(
+        &self,
+        field: Option<instant_xml::Id<'_>>,
+        serializer: &mut instant_xml::Serializer<W>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        self.to_string().serialize(field, serializer)
+    }
+
+    fn present(&self) -> bool {
+        true
+    }
+}
+
+impl<'xml> instant_xml::FromXml<'xml> for LEDFeedbackState {
+    #[inline]
+    fn matches(id: instant_xml::Id<'_>, field: Option<instant_xml::Id<'_>>) -> bool {
+        match field {
+            Some(field) => id == field,
+            None => false,
+        }
+    }
+
+    fn deserialize<'cx>(
+        into: &mut Self::Accumulator,
+        field: &'static str,
+        deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        if into.is_some() {
+            return Err(instant_xml::Error::DuplicateValue);
+        }
+
+        match deserializer.take_str()? {
+            Some(value) => {
+                let parsed: LEDFeedbackState = value.parse().map_err(|err| {
+                    instant_xml::Error::Other(format!(
+                        "invalid value for field {field}: {value}: {err:#}"
+                    ))
+                })?;
+                *into = Some(parsed);
+                Ok(())
+            }
+            None => Err(instant_xml::Error::MissingValue(field)),
+        }
+    }
+
+    type Accumulator = Option<LEDFeedbackState>;
+    const KIND: instant_xml::Kind = instant_xml::Kind::Scalar;
 }
 
 /// Request and Response types for the `MusicServices` service.
@@ -2101,7 +3148,7 @@ pub mod rendering_control {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
         #[xml(rename = "Channel", ns(""))]
-        pub channel: String,
+        pub channel: super::Channel,
     }
 
     #[derive(FromXml, Debug, Clone, PartialEq)]
@@ -2117,7 +3164,7 @@ pub mod rendering_control {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
         #[xml(rename = "Channel", ns(""))]
-        pub channel: String,
+        pub channel: super::MuteChannel,
     }
 
     #[derive(FromXml, Debug, Clone, PartialEq)]
@@ -2191,7 +3238,7 @@ pub mod rendering_control {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
         #[xml(rename = "Channel", ns(""))]
-        pub channel: String,
+        pub channel: super::Channel,
     }
 
     #[derive(FromXml, Debug, Clone, PartialEq)]
@@ -2207,7 +3254,7 @@ pub mod rendering_control {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
         #[xml(rename = "Channel", ns(""))]
-        pub channel: String,
+        pub channel: super::Channel,
     }
 
     #[derive(FromXml, Debug, Clone, PartialEq)]
@@ -2223,7 +3270,7 @@ pub mod rendering_control {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
         #[xml(rename = "Channel", ns(""))]
-        pub channel: String,
+        pub channel: super::Channel,
     }
 
     #[derive(FromXml, Debug, Clone, PartialEq)]
@@ -2241,9 +3288,9 @@ pub mod rendering_control {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
         #[xml(rename = "Channel", ns(""))]
-        pub channel: String,
+        pub channel: super::Channel,
         #[xml(rename = "RampType", ns(""))]
-        pub ramp_type: String,
+        pub ramp_type: super::RampType,
         #[xml(rename = "DesiredVolume", ns(""))]
         pub desired_volume: u16,
         #[xml(rename = "ResetVolumeAfter", ns(""))]
@@ -2296,7 +3343,7 @@ pub mod rendering_control {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
         #[xml(rename = "Channel", ns(""))]
-        pub channel: String,
+        pub channel: super::Channel,
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -2336,7 +3383,7 @@ pub mod rendering_control {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
         #[xml(rename = "Channel", ns(""))]
-        pub channel: String,
+        pub channel: super::Channel,
         #[xml(rename = "DesiredLoudness", ns(""))]
         pub desired_loudness: bool,
     }
@@ -2347,7 +3394,7 @@ pub mod rendering_control {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
         #[xml(rename = "Channel", ns(""))]
-        pub channel: String,
+        pub channel: super::MuteChannel,
         #[xml(rename = "DesiredMute", ns(""))]
         pub desired_mute: bool,
     }
@@ -2367,7 +3414,7 @@ pub mod rendering_control {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
         #[xml(rename = "Channel", ns(""))]
-        pub channel: String,
+        pub channel: super::Channel,
         #[xml(rename = "Adjustment", ns(""))]
         pub adjustment: i32,
     }
@@ -2417,7 +3464,7 @@ pub mod rendering_control {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
         #[xml(rename = "Channel", ns(""))]
-        pub channel: String,
+        pub channel: super::Channel,
         #[xml(rename = "DesiredVolume", ns(""))]
         pub desired_volume: u16,
     }
@@ -2428,10 +3475,253 @@ pub mod rendering_control {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
         #[xml(rename = "Channel", ns(""))]
-        pub channel: String,
+        pub channel: super::Channel,
         #[xml(rename = "DesiredVolume", ns(""))]
         pub desired_volume: i16,
     }
+}
+
+#[derive(PartialEq, Debug, Clone, Eq, Default)]
+pub enum Channel {
+    #[default]
+    Master,
+    Lf,
+    Rf,
+}
+
+impl ToString for Channel {
+    fn to_string(&self) -> String {
+        match self {
+            Channel::Master => "Master".to_string(),
+            Channel::Lf => "LF".to_string(),
+            Channel::Rf => "RF".to_string(),
+        }
+    }
+}
+
+impl FromStr for Channel {
+    type Err = crate::Error;
+    fn from_str(s: &str) -> Result<Channel> {
+        match s {
+            "Master" => Ok(Channel::Master),
+            "LF" => Ok(Channel::Lf),
+            "RF" => Ok(Channel::Rf),
+            _ => Err(crate::Error::InvalidEnumVariantValue),
+        }
+    }
+}
+
+impl instant_xml::ToXml for Channel {
+    fn serialize<W: std::fmt::Write + ?Sized>(
+        &self,
+        field: Option<instant_xml::Id<'_>>,
+        serializer: &mut instant_xml::Serializer<W>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        self.to_string().serialize(field, serializer)
+    }
+
+    fn present(&self) -> bool {
+        true
+    }
+}
+
+impl<'xml> instant_xml::FromXml<'xml> for Channel {
+    #[inline]
+    fn matches(id: instant_xml::Id<'_>, field: Option<instant_xml::Id<'_>>) -> bool {
+        match field {
+            Some(field) => id == field,
+            None => false,
+        }
+    }
+
+    fn deserialize<'cx>(
+        into: &mut Self::Accumulator,
+        field: &'static str,
+        deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        if into.is_some() {
+            return Err(instant_xml::Error::DuplicateValue);
+        }
+
+        match deserializer.take_str()? {
+            Some(value) => {
+                let parsed: Channel = value.parse().map_err(|err| {
+                    instant_xml::Error::Other(format!(
+                        "invalid value for field {field}: {value}: {err:#}"
+                    ))
+                })?;
+                *into = Some(parsed);
+                Ok(())
+            }
+            None => Err(instant_xml::Error::MissingValue(field)),
+        }
+    }
+
+    type Accumulator = Option<Channel>;
+    const KIND: instant_xml::Kind = instant_xml::Kind::Scalar;
+}
+
+#[derive(PartialEq, Debug, Clone, Eq, Default)]
+pub enum MuteChannel {
+    #[default]
+    Master,
+    Lf,
+    Rf,
+    SpeakerOnly,
+}
+
+impl ToString for MuteChannel {
+    fn to_string(&self) -> String {
+        match self {
+            MuteChannel::Master => "Master".to_string(),
+            MuteChannel::Lf => "LF".to_string(),
+            MuteChannel::Rf => "RF".to_string(),
+            MuteChannel::SpeakerOnly => "SpeakerOnly".to_string(),
+        }
+    }
+}
+
+impl FromStr for MuteChannel {
+    type Err = crate::Error;
+    fn from_str(s: &str) -> Result<MuteChannel> {
+        match s {
+            "Master" => Ok(MuteChannel::Master),
+            "LF" => Ok(MuteChannel::Lf),
+            "RF" => Ok(MuteChannel::Rf),
+            "SpeakerOnly" => Ok(MuteChannel::SpeakerOnly),
+            _ => Err(crate::Error::InvalidEnumVariantValue),
+        }
+    }
+}
+
+impl instant_xml::ToXml for MuteChannel {
+    fn serialize<W: std::fmt::Write + ?Sized>(
+        &self,
+        field: Option<instant_xml::Id<'_>>,
+        serializer: &mut instant_xml::Serializer<W>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        self.to_string().serialize(field, serializer)
+    }
+
+    fn present(&self) -> bool {
+        true
+    }
+}
+
+impl<'xml> instant_xml::FromXml<'xml> for MuteChannel {
+    #[inline]
+    fn matches(id: instant_xml::Id<'_>, field: Option<instant_xml::Id<'_>>) -> bool {
+        match field {
+            Some(field) => id == field,
+            None => false,
+        }
+    }
+
+    fn deserialize<'cx>(
+        into: &mut Self::Accumulator,
+        field: &'static str,
+        deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        if into.is_some() {
+            return Err(instant_xml::Error::DuplicateValue);
+        }
+
+        match deserializer.take_str()? {
+            Some(value) => {
+                let parsed: MuteChannel = value.parse().map_err(|err| {
+                    instant_xml::Error::Other(format!(
+                        "invalid value for field {field}: {value}: {err:#}"
+                    ))
+                })?;
+                *into = Some(parsed);
+                Ok(())
+            }
+            None => Err(instant_xml::Error::MissingValue(field)),
+        }
+    }
+
+    type Accumulator = Option<MuteChannel>;
+    const KIND: instant_xml::Kind = instant_xml::Kind::Scalar;
+}
+
+#[derive(PartialEq, Debug, Clone, Eq, Default)]
+pub enum RampType {
+    #[default]
+    SleepTimerRampType,
+    AlarmRampType,
+    AutoplayRampType,
+}
+
+impl ToString for RampType {
+    fn to_string(&self) -> String {
+        match self {
+            RampType::SleepTimerRampType => "SLEEP_TIMER_RAMP_TYPE".to_string(),
+            RampType::AlarmRampType => "ALARM_RAMP_TYPE".to_string(),
+            RampType::AutoplayRampType => "AUTOPLAY_RAMP_TYPE".to_string(),
+        }
+    }
+}
+
+impl FromStr for RampType {
+    type Err = crate::Error;
+    fn from_str(s: &str) -> Result<RampType> {
+        match s {
+            "SLEEP_TIMER_RAMP_TYPE" => Ok(RampType::SleepTimerRampType),
+            "ALARM_RAMP_TYPE" => Ok(RampType::AlarmRampType),
+            "AUTOPLAY_RAMP_TYPE" => Ok(RampType::AutoplayRampType),
+            _ => Err(crate::Error::InvalidEnumVariantValue),
+        }
+    }
+}
+
+impl instant_xml::ToXml for RampType {
+    fn serialize<W: std::fmt::Write + ?Sized>(
+        &self,
+        field: Option<instant_xml::Id<'_>>,
+        serializer: &mut instant_xml::Serializer<W>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        self.to_string().serialize(field, serializer)
+    }
+
+    fn present(&self) -> bool {
+        true
+    }
+}
+
+impl<'xml> instant_xml::FromXml<'xml> for RampType {
+    #[inline]
+    fn matches(id: instant_xml::Id<'_>, field: Option<instant_xml::Id<'_>>) -> bool {
+        match field {
+            Some(field) => id == field,
+            None => false,
+        }
+    }
+
+    fn deserialize<'cx>(
+        into: &mut Self::Accumulator,
+        field: &'static str,
+        deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        if into.is_some() {
+            return Err(instant_xml::Error::DuplicateValue);
+        }
+
+        match deserializer.take_str()? {
+            Some(value) => {
+                let parsed: RampType = value.parse().map_err(|err| {
+                    instant_xml::Error::Other(format!(
+                        "invalid value for field {field}: {value}: {err:#}"
+                    ))
+                })?;
+                *into = Some(parsed);
+                Ok(())
+            }
+            None => Err(instant_xml::Error::MissingValue(field)),
+        }
+    }
+
+    type Accumulator = Option<RampType>;
+    const KIND: instant_xml::Kind = instant_xml::Kind::Scalar;
 }
 
 /// Request and Response types for the `SystemProperties` service.
@@ -2755,7 +4045,7 @@ pub mod zone_group_topology {
     #[xml(rename = "CheckForUpdate", ns(SERVICE_TYPE))]
     pub struct CheckForUpdateRequest {
         #[xml(rename = "UpdateType", ns(""))]
-        pub update_type: String,
+        pub update_type: super::UpdateType,
         #[xml(rename = "CachedOnly", ns(""))]
         pub cached_only: bool,
         #[xml(rename = "Version", ns(""))]
@@ -2806,7 +4096,7 @@ pub mod zone_group_topology {
         #[xml(rename = "DeviceUUID", ns(""))]
         pub device_uuid: String,
         #[xml(rename = "DesiredAction", ns(""))]
-        pub desired_action: String,
+        pub desired_action: super::UnresponsiveDeviceActionType,
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -2824,6 +4114,169 @@ pub mod zone_group_topology {
         #[xml(rename = "DiagnosticID", ns(""))]
         pub diagnostic_id: Option<u32>,
     }
+}
+
+#[derive(PartialEq, Debug, Clone, Eq, Default)]
+pub enum UnresponsiveDeviceActionType {
+    #[default]
+    Remove,
+    TopologyMonitorProbe,
+    VerifyThenRemoveSystemwide,
+}
+
+impl ToString for UnresponsiveDeviceActionType {
+    fn to_string(&self) -> String {
+        match self {
+            UnresponsiveDeviceActionType::Remove => "Remove".to_string(),
+            UnresponsiveDeviceActionType::TopologyMonitorProbe => {
+                "TopologyMonitorProbe".to_string()
+            }
+            UnresponsiveDeviceActionType::VerifyThenRemoveSystemwide => {
+                "VerifyThenRemoveSystemwide".to_string()
+            }
+        }
+    }
+}
+
+impl FromStr for UnresponsiveDeviceActionType {
+    type Err = crate::Error;
+    fn from_str(s: &str) -> Result<UnresponsiveDeviceActionType> {
+        match s {
+            "Remove" => Ok(UnresponsiveDeviceActionType::Remove),
+            "TopologyMonitorProbe" => Ok(UnresponsiveDeviceActionType::TopologyMonitorProbe),
+            "VerifyThenRemoveSystemwide" => {
+                Ok(UnresponsiveDeviceActionType::VerifyThenRemoveSystemwide)
+            }
+            _ => Err(crate::Error::InvalidEnumVariantValue),
+        }
+    }
+}
+
+impl instant_xml::ToXml for UnresponsiveDeviceActionType {
+    fn serialize<W: std::fmt::Write + ?Sized>(
+        &self,
+        field: Option<instant_xml::Id<'_>>,
+        serializer: &mut instant_xml::Serializer<W>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        self.to_string().serialize(field, serializer)
+    }
+
+    fn present(&self) -> bool {
+        true
+    }
+}
+
+impl<'xml> instant_xml::FromXml<'xml> for UnresponsiveDeviceActionType {
+    #[inline]
+    fn matches(id: instant_xml::Id<'_>, field: Option<instant_xml::Id<'_>>) -> bool {
+        match field {
+            Some(field) => id == field,
+            None => false,
+        }
+    }
+
+    fn deserialize<'cx>(
+        into: &mut Self::Accumulator,
+        field: &'static str,
+        deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        if into.is_some() {
+            return Err(instant_xml::Error::DuplicateValue);
+        }
+
+        match deserializer.take_str()? {
+            Some(value) => {
+                let parsed: UnresponsiveDeviceActionType = value.parse().map_err(|err| {
+                    instant_xml::Error::Other(format!(
+                        "invalid value for field {field}: {value}: {err:#}"
+                    ))
+                })?;
+                *into = Some(parsed);
+                Ok(())
+            }
+            None => Err(instant_xml::Error::MissingValue(field)),
+        }
+    }
+
+    type Accumulator = Option<UnresponsiveDeviceActionType>;
+    const KIND: instant_xml::Kind = instant_xml::Kind::Scalar;
+}
+
+#[derive(PartialEq, Debug, Clone, Eq, Default)]
+pub enum UpdateType {
+    #[default]
+    All,
+    Software,
+}
+
+impl ToString for UpdateType {
+    fn to_string(&self) -> String {
+        match self {
+            UpdateType::All => "All".to_string(),
+            UpdateType::Software => "Software".to_string(),
+        }
+    }
+}
+
+impl FromStr for UpdateType {
+    type Err = crate::Error;
+    fn from_str(s: &str) -> Result<UpdateType> {
+        match s {
+            "All" => Ok(UpdateType::All),
+            "Software" => Ok(UpdateType::Software),
+            _ => Err(crate::Error::InvalidEnumVariantValue),
+        }
+    }
+}
+
+impl instant_xml::ToXml for UpdateType {
+    fn serialize<W: std::fmt::Write + ?Sized>(
+        &self,
+        field: Option<instant_xml::Id<'_>>,
+        serializer: &mut instant_xml::Serializer<W>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        self.to_string().serialize(field, serializer)
+    }
+
+    fn present(&self) -> bool {
+        true
+    }
+}
+
+impl<'xml> instant_xml::FromXml<'xml> for UpdateType {
+    #[inline]
+    fn matches(id: instant_xml::Id<'_>, field: Option<instant_xml::Id<'_>>) -> bool {
+        match field {
+            Some(field) => id == field,
+            None => false,
+        }
+    }
+
+    fn deserialize<'cx>(
+        into: &mut Self::Accumulator,
+        field: &'static str,
+        deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        if into.is_some() {
+            return Err(instant_xml::Error::DuplicateValue);
+        }
+
+        match deserializer.take_str()? {
+            Some(value) => {
+                let parsed: UpdateType = value.parse().map_err(|err| {
+                    instant_xml::Error::Other(format!(
+                        "invalid value for field {field}: {value}: {err:#}"
+                    ))
+                })?;
+                *into = Some(parsed);
+                Ok(())
+            }
+            None => Err(instant_xml::Error::MissingValue(field)),
+        }
+    }
+
+    type Accumulator = Option<UpdateType>;
+    const KIND: instant_xml::Kind = instant_xml::Kind::Scalar;
 }
 
 #[allow(async_fn_in_trait)]

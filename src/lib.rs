@@ -38,6 +38,8 @@ pub enum Error {
     NoName,
     #[error("I/O Error: {0:#}")]
     Io(#[from] std::io::Error),
+    #[error("Invalid enum variant value")]
+    InvalidEnumVariantValue,
 }
 
 #[derive(Debug)]

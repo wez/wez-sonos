@@ -24,16 +24,28 @@ impl VersionedService {
             .state_variables
             .get(&param.param.related_state_variable_name)
         {
-            Some(sv) => match sv.data_type.as_str() {
-                "string" => "String",
-                "ui4" => "u32",
-                "ui2" => "u16",
-                "i4" => "i32",
-                "i2" => "i16",
-                "boolean" => "bool",
-                dt => unimplemented!("unhandled type {dt}"),
+            Some(sv) => {
+                if let Some(Value::Array(allowed)) = &sv.allowed_values {
+                    // Use an enum
+                    let enum_name = param
+                        .param
+                        .related_state_variable_name
+                        .replace("A_ARG_TYPE_", "");
+
+                    format!("super::{enum_name}")
+                } else {
+                    match sv.data_type.as_str() {
+                        "string" => "String",
+                        "ui4" => "u32",
+                        "ui2" => "u16",
+                        "i4" => "i32",
+                        "i2" => "i16",
+                        "boolean" => "bool",
+                        dt => unimplemented!("unhandled type {dt}"),
+                    }
+                    .to_string()
+                }
             }
-            .to_string(),
             None => "String".to_string(),
         };
 
@@ -333,12 +345,122 @@ use instant_xml::{{FromXml, ToXml}};
         writeln!(&mut impls, "}}\n").ok();
         writeln!(&mut types, "}}\n").ok();
 
-        /*
-        for (name, _sv) in &service.state_variables {
-            let field_name = to_snake_case(name);
-            println!("  var {name} {field_name}");
+        for (name, sv) in &service.state_variables {
+            if let Some(Value::Array(allowed)) = &sv.allowed_values {
+                let enum_name = name.replace("A_ARG_TYPE_", "");
+
+                writeln!(
+                    &mut types,
+                    "#[derive(PartialEq, Debug, Clone, Eq, Default)]"
+                )
+                .ok();
+                writeln!(&mut types, "pub enum {enum_name} {{").ok();
+                for (idx, item) in allowed.iter().enumerate() {
+                    let variant = item.to_string().to_pascal_case();
+                    if idx == 0 {
+                        writeln!(&mut types, "  #[default]").ok();
+                    }
+                    writeln!(&mut types, "  {variant},").ok();
+                }
+                writeln!(&mut types, "}}\n").ok();
+
+                writeln!(&mut types, "impl ToString for {enum_name} {{").ok();
+                writeln!(&mut types, "fn to_string(&self) -> String {{").ok();
+                writeln!(&mut types, "match self {{").ok();
+
+                for item in allowed {
+                    let variant = item.to_string().to_pascal_case();
+                    writeln!(
+                        &mut types,
+                        "  {enum_name}::{variant} => {item}.to_string(),"
+                    )
+                    .ok();
+                }
+
+                writeln!(&mut types, "}}").ok();
+                writeln!(&mut types, "}}\n").ok();
+                writeln!(&mut types, "}}\n").ok();
+
+                writeln!(&mut types, "impl FromStr for {enum_name} {{").ok();
+                writeln!(&mut types, "type Err = crate::Error;").ok();
+                writeln!(&mut types, "fn from_str(s: &str) -> Result<{enum_name}> {{").ok();
+                writeln!(&mut types, "match s {{").ok();
+
+                for item in allowed {
+                    let variant = item.to_string().to_pascal_case();
+                    writeln!(&mut types, "  {item} => Ok({enum_name}::{variant}),").ok();
+                }
+                writeln!(
+                    &mut types,
+                    "_ => Err(crate::Error::InvalidEnumVariantValue),"
+                )
+                .ok();
+
+                writeln!(&mut types, "}}").ok();
+                writeln!(&mut types, "}}\n").ok();
+                writeln!(&mut types, "}}\n").ok();
+
+                writeln!(
+                    &mut types,
+                    "impl instant_xml::ToXml for {enum_name} {{
+fn serialize<W: std::fmt::Write + ?Sized>(
+    &self,
+    field: Option<instant_xml::Id<'_>>,
+    serializer: &mut instant_xml::Serializer<W>,
+    ) -> std::result::Result<(), instant_xml::Error> {{
+    self.to_string().serialize(field, serializer)
+}}
+
+fn present(&self) -> bool {{
+    true
+}}
+}}
+
+impl<'xml> instant_xml::FromXml<'xml> for {enum_name} {{
+    #[inline]
+    fn matches(id: instant_xml::Id<'_>, field: Option<instant_xml::Id<'_>>) -> bool {{
+        match field {{
+            Some(field) => id == field,
+            None => false,
+        }}
+    }}
+
+    fn deserialize<'cx>(
+        into: &mut Self::Accumulator,
+        field: &'static str,
+        deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
+        ) -> std::result::Result<(), instant_xml::Error> {{
+        if into.is_some() {{
+            return Err(instant_xml::Error::DuplicateValue);
+        }}
+
+        match deserializer.take_str()? {{
+            Some(value) => {{
+                let parsed: {enum_name} = value.parse().map_err(|err| {{
+                    instant_xml::Error::Other(format!(
+                            \"invalid value for field {{field}}: {{value}}: {{err:#}}\"
+                            ))
+                }})?;
+                *into = Some(parsed);
+                Ok(())
+            }}
+            None => Err(instant_xml::Error::MissingValue(field)),
+        }}
+    }}
+
+    type Accumulator = Option<{enum_name}>;
+    const KIND: instant_xml::Kind = instant_xml::Kind::Scalar;
+}}
+
+
+"
+                )
+                .ok();
+
+                let field_name = to_snake_case(name);
+                println!("  var {enum_name} {name} {field_name} {sv:?}");
+            }
         }
-        */
     }
 
     std::fs::write(
@@ -346,6 +468,7 @@ use instant_xml::{{FromXml, ToXml}};
         format!(
             "// This file was auto-generated by codegen! Do not edit!
 
+use std::str::FromStr;
 use crate::SonosDevice;
 use crate::Result;
 
