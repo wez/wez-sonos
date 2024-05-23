@@ -42,6 +42,8 @@ pub enum Error {
     Io(#[from] std::io::Error),
     #[error("Invalid enum variant value")]
     InvalidEnumVariantValue,
+    #[error("Room {0} not found")]
+    RoomNotFound(String),
 }
 
 #[derive(Debug)]
@@ -51,10 +53,34 @@ pub struct SonosDevice {
 }
 
 impl SonosDevice {
+    /// Constructs a SonosDevice from the supplied IP Address.
+    /// Validates that the device is actually a Sonos device
+    /// before returning successfully.
     pub async fn from_ip(addr: Ipv4Addr) -> Result<Self> {
         Self::from_url(format!("http://{addr}:1400/xml/device_description.xml").parse()?).await
     }
 
+    /// Resolves the SonosDevice whose name is equal to the provided
+    /// name.  If no matching device is found within a reasonably
+    /// short, unspecified, implementation-defined timeout, then
+    /// an `Error::RoomNotFound` is produced.
+    pub async fn for_room(room_name: &str) -> Result<Self> {
+        let mut rx = discover(std::time::Duration::from_secs(15)).await?;
+        while let Some(device) = rx.recv().await {
+            if let Ok(name) = device.name().await {
+                if name == room_name {
+                    return Ok(device);
+                }
+            }
+        }
+
+        Err(Error::RoomNotFound(room_name.to_string()))
+    }
+
+    /// Constructs a SonosDevice from the supplied URL, which must
+    /// be the device_description.xml URL for that device.
+    /// Validates that the device is actually a Sonos device
+    /// before returning successfully.
     pub async fn from_url(url: Url) -> Result<Self> {
         let response = reqwest::get(url.clone()).await?;
 
@@ -74,11 +100,13 @@ impl SonosDevice {
         Ok(Self { url, device })
     }
 
+    /// Returns the room/zone name of the device
     pub async fn name(&self) -> Result<String> {
         let attr = self.get_zone_attributes().await?;
         attr.current_zone_name.ok_or(Error::NoName)
     }
 
+    /// Returns information about the zone to which this device belongs
     pub async fn get_zone_group_state(&self) -> Result<Vec<ZoneGroup>> {
         let state = <Self as ZoneGroupTopology>::get_zone_group_state(self).await?;
         ZoneGroup::parse_xml(&state.zone_group_state.as_deref().unwrap_or(""))
@@ -102,7 +130,7 @@ impl SonosDevice {
     }
 
     /// Clears the queue
-    pub async fn remove_all_tracks_from_queue(&self) -> Result<()> {
+    pub async fn queue_clear(&self) -> Result<()> {
         <Self as AVTransport>::remove_all_tracks_from_queue(self, Default::default()).await
     }
 
