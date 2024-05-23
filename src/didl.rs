@@ -200,7 +200,7 @@ mod test {
     #[test]
     fn test_didl() {
         let didl = DidlLite {
-            item: UpnpItem {
+            item: vec![UpnpItem {
                 album_art: Some(AlbumArtUri {
                     uri: "http://art".to_string(),
                 }),
@@ -222,7 +222,7 @@ mod test {
                 title: Some(Title {
                     title: "Track Title".to_string(),
                 }),
-            },
+            }],
         };
         k9::snapshot!(
             instant_xml::to_string(&didl).unwrap(),
