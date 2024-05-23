@@ -153,14 +153,27 @@ pub struct Service {
 }
 
 impl Service {
-    pub fn control_url(&self, url: &Url) -> Url {
-        match url.join(&self.control_url) {
+    fn join_url(&self, base_url: &Url, url: &str) -> Url {
+        match base_url.join(url) {
             Ok(url) => url,
             Err(err) => {
-                log::error!("Cannot join {url} with {}: {err:#}", self.control_url);
-                url.clone()
+                log::error!("Cannot join {base_url} with {url}: {err:#}");
+                url.parse().expect("URL to be valid")
             }
         }
+    }
+
+    pub fn control_url(&self, url: &Url) -> Url {
+        self.join_url(url, &self.control_url)
+    }
+
+    pub fn event_sub_url(&self, url: &Url) -> Url {
+        self.join_url(url, &self.event_sub_url)
+    }
+
+    /// The URL for the Service Control Protocol Description
+    pub fn scpd_url(&self, url: &Url) -> Url {
+        self.join_url(url, &self.scpd_url)
     }
 }
 
