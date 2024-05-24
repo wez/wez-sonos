@@ -5962,7 +5962,7 @@ pub mod zone_group_topology {
     #[xml(rename = "GetZoneGroupStateResponse", ns(SERVICE_TYPE))]
     pub struct GetZoneGroupStateResponse {
         #[xml(rename = "ZoneGroupState", ns(""))]
-        pub zone_group_state: Option<String>,
+        pub zone_group_state: Option<crate::xmlutil::DecodeXmlString<crate::ZoneGroupState>>,
     }
 
     impl crate::DecodeSoapResponse for GetZoneGroupStateResponse {
@@ -6029,7 +6029,7 @@ pub mod zone_group_topology {
         pub third_party_media_servers_x: Option<String>,
         pub zone_group_id: Option<String>,
         pub zone_group_name: Option<String>,
-        pub zone_group_state: Option<String>,
+        pub zone_group_state: Option<crate::xmlutil::DecodeXmlString<crate::ZoneGroupState>>,
         pub zone_player_uuids_in_group: Option<String>,
     }
 
@@ -6061,7 +6061,7 @@ pub mod zone_group_topology {
         #[xml(rename = "ZoneGroupName", ns(""))]
         pub zone_group_name: Option<String>,
         #[xml(rename = "ZoneGroupState", ns(""))]
-        pub zone_group_state: Option<String>,
+        pub zone_group_state: Option<crate::xmlutil::DecodeXmlString<crate::ZoneGroupState>>,
         #[xml(rename = "ZonePlayerUUIDsInGroup", ns(""))]
         pub zone_player_uuids_in_group: Option<String>,
     }

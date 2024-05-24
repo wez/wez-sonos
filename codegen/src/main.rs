@@ -20,22 +20,29 @@ pub struct VersionedService {
 
 impl VersionedService {
     fn resolve_type_for_sv(&self, name: &str, sv: &StateVariable, always_optional: bool) -> String {
+        let refined_name = name.replace("A_ARG_TYPE_", "");
+
         let target = if let Some(Value::Array(_)) = &sv.allowed_values {
             // Use an enum
-            let enum_name = name.replace("A_ARG_TYPE_", "");
-
-            format!("super::{enum_name}")
+            format!("super::{refined_name}")
         } else {
-            match sv.data_type.as_str() {
-                "string" => "String",
-                "ui4" => "u32",
-                "ui2" => "u16",
-                "i4" => "i32",
-                "i2" => "i16",
-                "boolean" => "bool",
-                dt => unimplemented!("unhandled type {dt}"),
+            let known_types = ["ZoneGroupState"];
+
+            if sv.data_type == "string" && known_types.contains(&refined_name.as_str()) {
+                // Use a wrapped version of this type
+                format!("crate::xmlutil::DecodeXmlString<crate::{refined_name}>")
+            } else {
+                match sv.data_type.as_str() {
+                    "string" => "String",
+                    "ui4" => "u32",
+                    "ui2" => "u16",
+                    "i4" => "i32",
+                    "i2" => "i16",
+                    "boolean" => "bool",
+                    dt => unimplemented!("unhandled type {dt}"),
+                }
+                .to_string()
             }
-            .to_string()
         };
         if always_optional {
             format!("Option<{target}>")
@@ -369,12 +376,16 @@ impl crate::DecodeSoapResponse for {response_type_name} {{
         writeln!(&mut impls, "}}\n").ok();
 
         if !event_fields.is_empty() {
-            writeln!(&mut types, "
+            writeln!(
+                &mut types,
+                "
 /// A parsed event produced by the `{service_name}` service.
 /// Use `SonosDevice::subscribe_{service_module}()` to obtain an event
 /// stream that produces these.
 #[derive(Debug, Clone, PartialEq, Default)]
-pub struct {service_name}Event {{").ok();
+pub struct {service_name}Event {{"
+            )
+            .ok();
             for (name, sv) in &event_fields {
                 let field_name = to_snake_case(name);
 
@@ -387,7 +398,9 @@ pub struct {service_name}Event {{").ok();
             // Generate a helper for decoding the xml into the above
             // ergonomic form
 
-            writeln!(&mut types, r#"
+            writeln!(
+                &mut types,
+                r#"
 #[derive(FromXml, Debug, Clone, PartialEq)]
 #[xml(rename="propertyset", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
 struct {service_name}PropertySet {{
@@ -397,7 +410,9 @@ struct {service_name}PropertySet {{
 #[derive(FromXml, Debug, Clone, PartialEq)]
 #[xml(rename="property", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
 struct {service_name}Property {{
-"#).ok();
+"#
+            )
+            .ok();
 
             for (name, sv) in &event_fields {
                 let field_name = to_snake_case(name);
@@ -409,21 +424,29 @@ struct {service_name}Property {{
             }
             writeln!(&mut types, "}}").ok();
 
-            writeln!(&mut types, r#"
+            writeln!(
+                &mut types,
+                r#"
 impl crate::upnp::DecodeXml for {service_name}Event {{
     fn decode_xml(xml: &str) -> crate::Result<Self> {{
         let mut result = Self::default();
         let set: {service_name}PropertySet = instant_xml::from_str(xml)?;
         for prop in set.properties {{
-"#).ok();
+"#
+            )
+            .ok();
 
             for (name, _sv) in &event_fields {
                 let field_name = to_snake_case(name);
-                writeln!(&mut types, r#"
+                writeln!(
+                    &mut types,
+                    r#"
                     if let Some(v) = prop.{field_name} {{
                         result.{field_name}.replace(v);
                     }}
-                    "#).ok();
+                    "#
+                )
+                .ok();
             }
 
             writeln!(&mut types, r#"
@@ -439,7 +462,6 @@ impl crate::SonosDevice {{
     }}
 }}
 "#).ok();
-
         }
 
         writeln!(&mut types, "}}\n").ok();
@@ -600,7 +622,10 @@ pub mod prelude {{
 
 fn to_snake_case(s: &str) -> String {
     // Fixup some special cases
-    let s = s.replace("URIs", "Uris").replace("UUIDs", "Uuids").replace("IDs", "Ids");
+    let s = s
+        .replace("URIs", "Uris")
+        .replace("UUIDs", "Uuids")
+        .replace("IDs", "Ids");
     let result = s.to_snake_case();
     if result == "type" {
         "type_".to_string()

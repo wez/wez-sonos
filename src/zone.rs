@@ -1,7 +1,27 @@
 use instant_xml::FromXml;
 
+#[derive(Debug, PartialEq, Clone)]
+pub struct ZoneGroupState {
+    pub groups: Vec<ZoneGroup>,
+}
+
+impl crate::DecodeXml for ZoneGroupState {
+    fn decode_xml(xml: &str) -> crate::Result<Self> {
+        let mut parsed: ZoneGroupStateHelper = instant_xml::from_str(xml)?;
+
+        for group in &mut parsed.group_list.groups {
+            group.members.sort_by(|a, b| a.uuid.cmp(&b.uuid));
+        }
+
+        Ok(Self {
+            groups: parsed.group_list.groups,
+        })
+    }
+}
+
 #[derive(Debug, FromXml)]
-struct ZoneGroupState {
+#[xml(rename = "ZoneGroupState")]
+struct ZoneGroupStateHelper {
     group_list: ZoneGroups,
     // There's a <VanishedDevices> element but I don't
     // know what it contains
@@ -9,10 +29,10 @@ struct ZoneGroupState {
 
 #[derive(Debug, FromXml)]
 struct ZoneGroups {
-    groups: Vec<ZoneGroup>,
+    pub groups: Vec<ZoneGroup>,
 }
 
-#[derive(Debug, FromXml, PartialEq, Eq)]
+#[derive(Debug, FromXml, PartialEq, Eq, Clone)]
 pub struct ZoneGroup {
     #[xml(rename = "Coordinator", attribute)]
     pub coordinator: String,
@@ -22,24 +42,12 @@ pub struct ZoneGroup {
     pub members: Vec<ZoneGroupMember>,
 }
 
-impl ZoneGroup {
-    pub fn parse_xml(xml: &str) -> crate::Result<Vec<Self>> {
-        let mut parsed: ZoneGroupState = instant_xml::from_str(xml)?;
-
-        for group in &mut parsed.group_list.groups {
-            group.members.sort_by(|a, b| a.uuid.cmp(&b.uuid));
-        }
-
-        Ok(parsed.group_list.groups)
-    }
-}
-
 /// Helper for DRY; Satellite and ZoneGroupMember are almost
 /// identical structs but have to be separate in order for
 /// instant_xml to generate appropriate serde logic
 macro_rules! machine_info {
     (pub struct $ty:ident { $($inner:tt)* }) => {
-#[derive(Debug, FromXml, PartialEq, Eq)]
+#[derive(Debug, FromXml, PartialEq, Eq, Clone)]
 pub struct $ty {
     $($inner)*
 

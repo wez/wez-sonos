@@ -9,6 +9,7 @@ mod didl;
 mod discovery;
 mod generated;
 mod upnp;
+mod xmlutil;
 mod zone;
 
 pub use didl::*;
@@ -16,6 +17,7 @@ pub use discovery::*;
 pub use generated::*;
 pub use upnp::*;
 pub use zone::*;
+pub use xmlutil::DecodeXmlString;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -134,7 +136,10 @@ impl SonosDevice {
     /// Returns information about the zone to which this device belongs
     pub async fn get_zone_group_state(&self) -> Result<Vec<ZoneGroup>> {
         let state = <Self as ZoneGroupTopology>::get_zone_group_state(self).await?;
-        ZoneGroup::parse_xml(&state.zone_group_state.as_deref().unwrap_or(""))
+        Ok(match state.zone_group_state {
+            Some(state) => state.0.groups,
+            None => vec![]
+        })
     }
 
     /// Stops playback
