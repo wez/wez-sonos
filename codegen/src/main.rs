@@ -342,12 +342,8 @@ use instant_xml::{{FromXml, ToXml}};
                 if !action.inputs.is_empty() {
                     writeln!(
                         &mut types,
-                        "#[derive(ToXml, Debug, Clone, PartialEq, Default)]"
-                    )
-                    .ok();
-                    writeln!(
-                        &mut types,
-                        "#[xml(rename=\"{action_name}\", ns(SERVICE_TYPE))]",
+                        "#[derive(ToXml, Debug, Clone, PartialEq, Default)]
+                        #[xml(rename=\"{action_name}\", ns(SERVICE_TYPE))]",
                     )
                     .ok();
                     writeln!(&mut types, "pub struct {request_type_name} {{").ok();
