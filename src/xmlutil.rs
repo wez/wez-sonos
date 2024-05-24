@@ -38,7 +38,10 @@ where
                 target.replace(DecodeXmlString(parsed));
                 Ok(())
             }
-            None => Err(instant_xml::Error::MissingValue(field)),
+            None => {
+                // There is no value
+                Ok(())
+            }
         }
     }
 

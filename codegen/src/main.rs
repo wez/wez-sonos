@@ -115,10 +115,7 @@ impl VersionedService {
             .find(|e| e.matches(name, containing_struct_name))
         {
             // Use a wrapped version of this type
-            format!(
-                "DecodeXmlString<crate::{}>",
-                entry.type_name()
-            )
+            format!("DecodeXmlString<crate::{}>", entry.type_name())
         } else {
             "String".to_string()
         }
@@ -228,6 +225,33 @@ struct ActionDocs {
     #[serde(default)]
     params: BTreeMap<String, String>,
 }
+
+struct LastMeta {
+    service_name: &'static str,
+    ns: &'static str,
+    root_object: &'static str,
+}
+
+const LAST_NS: &[LastMeta] = &[
+    LastMeta {
+        service_name: "AVTransport",
+        ns: "urn:schemas-upnp-org:metadata-1-0/AVT/",
+        root_object: "InstanceID",
+    },
+    LastMeta {
+        service_name: "Queue",
+        ns: "urn:schemas-sonos-com:metadata-1-0/Queue/",
+        root_object: "QueueID",
+    },
+    // FIXME: There are things like `<Volume channel="RF" val="100"/><Mute
+    // channel="Master" val="0"/>` in the RCS data, that we cannot
+    // handle here.
+    LastMeta {
+        service_name: "RenderingControl",
+        ns: "urn:schemas-upnp-org:metadata-1-0/RCS/",
+        root_object: "InstanceID",
+    },
+];
 
 fn main() {
     let mut models = BTreeMap::new();
@@ -466,25 +490,21 @@ pub struct {service_name}Event {{"
             )
             .ok();
 
-            let mut has_last_change = false;
+            let last_change_meta = LAST_NS.iter().find(|m| m.service_name == service_name);
 
             for (name, sv) in &event_fields {
-                if *name == "LastChange" {
-                    has_last_change = true;
-                }
-
                 let field_name = to_snake_case(name);
 
-                let field_type = if name.as_str() == "LastChange" {
-                    format!("Option<DecodeXmlString<{service_name}LastChange>>")
+                let field_type = if name.as_str() == "LastChange" && last_change_meta.is_some() {
+                    format!("Option<DecodeXmlString<{service_name}LastChangeMap>>")
                 } else {
                     service.resolve_type_for_sv(
-                    &name,
-                    &name,
-                    sv,
-                    true,
-                    &format!("{service_name}Event"),
-                )
+                        &name,
+                        &name,
+                        sv,
+                        true,
+                        &format!("{service_name}Event"),
+                    )
                 };
 
                 writeln!(&mut types, "  pub {field_name}: {field_type},").ok();
@@ -513,16 +533,16 @@ struct {service_name}Property {{
             for (name, sv) in &event_fields {
                 let field_name = to_snake_case(name);
 
-                let field_type = if name.as_str() == "LastChange" {
-                    format!("Option<DecodeXmlString<{service_name}LastChange>>")
+                let field_type = if name.as_str() == "LastChange" && last_change_meta.is_some() {
+                    format!("Option<DecodeXmlString<{service_name}LastChangeMap>>")
                 } else {
                     service.resolve_type_for_sv(
-                    &name,
-                    &name,
-                    sv,
-                    true,
-                    &format!("{service_name}Event"),
-                )
+                        &name,
+                        &name,
+                        sv,
+                        true,
+                        &format!("{service_name}Event"),
+                    )
                 };
 
                 writeln!(&mut types, "  #[xml(rename=\"{name}\", ns(\"\"))]",).ok();
@@ -569,7 +589,7 @@ impl crate::SonosDevice {{
 }}
 "#).ok();
 
-            if has_last_change {
+            if let Some(last_change) = &last_change_meta {
                 writeln!(
                     &mut types,
                     r#"
@@ -579,18 +599,25 @@ impl crate::SonosDevice {{
                 )
                 .ok();
 
-                let last_change_ns = "urn:schemas-upnp-org:metadata-1-0/AVT/";
+                let last_change_ns = last_change.ns;
+                let last_change_root = last_change.root_object;
 
                 let mut instance_wrapper = String::new();
                 let mut attributes = String::new();
                 let mut decode_logic = String::new();
-                writeln!(&mut instance_wrapper, r#"
+                writeln!(
+                    &mut instance_wrapper,
+                    r#"
 const LAST_CHANGE_NS: &str = "{last_change_ns}";
 
 #[derive(FromXml)]
-#[xml(rename="InstanceID", ns(LAST_CHANGE_NS))]
-struct {service_name}LastChangeInstanceId {{
-                "#).ok();
+#[xml(rename="{last_change_root}", ns(LAST_CHANGE_NS))]
+struct {service_name}LastChangeRootObject {{
+    #[xml(rename="val", attribute)]
+    object_instance_id_: u32,
+                "#
+                )
+                .ok();
 
                 let mut names_done = BTreeSet::new();
                 for (name, sv) in &service.state_variables {
@@ -614,9 +641,15 @@ struct {service_name}LastChangeInstanceId {{
 
                     writeln!(&mut types, "  pub {field_name}: {field_type},").ok();
 
-                    writeln!(&mut instance_wrapper, "  {field_name}: Option<{service_name}LastChange{name}>,").ok();
+                    writeln!(
+                        &mut instance_wrapper,
+                        "  {field_name}: Option<{service_name}LastChange{name}>,"
+                    )
+                    .ok();
 
-                    writeln!(&mut attributes, r#"
+                    writeln!(
+                        &mut attributes,
+                        r#"
 #[derive(FromXml)]
 #[xml(rename="{name}", ns(LAST_CHANGE_NS))]
 #[allow(non_camel_case_types)]
@@ -624,14 +657,19 @@ struct {service_name}LastChange{name} {{
     #[xml(attribute)]
     val: {field_type},
 }}
-                "#).ok();
+                "#
+                    )
+                    .ok();
 
-                    writeln!(&mut decode_logic, r#"
-result.{field_name} = last_change.instance.{field_name}.and_then(|v| v.val);
-                    "#).ok();
-
+                    writeln!(
+                        &mut decode_logic,
+                        r#"
+result.{field_name} = item.{field_name}.and_then(|v| v.val);
+                    "#
+                    )
+                    .ok();
                 }
-writeln!(&mut instance_wrapper, "}}").ok();
+                writeln!(&mut instance_wrapper, "}}").ok();
 
                 writeln!(
                     &mut types,
@@ -640,26 +678,37 @@ writeln!(&mut instance_wrapper, "}}").ok();
 
 {instance_wrapper}
 
-impl DecodeXml for {service_name}LastChange {{
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct {service_name}LastChangeMap {{
+    pub map: std::collections::BTreeMap<u32, {service_name}LastChange>,
+}}
+
+impl DecodeXml for {service_name}LastChangeMap {{
     fn decode_xml(xml: &str) -> crate::Result<Self> {{
         #[derive(FromXml)]
         #[xml(ns(LAST_CHANGE_NS, r="urn:schemas-rinconnetworks-com:metadata-1-0/"))]
         struct Event {{
-            instance: {service_name}LastChangeInstanceId,
+            instance: Vec<{service_name}LastChangeRootObject>,
         }}
 
         let last_change: Event = instant_xml::from_str(xml)?;
-        let mut result = Self::default();
+        let mut map = std::collections::BTreeMap::new();
 
-        {decode_logic}
+        for item in last_change.instance {{
+            let mut result = {service_name}LastChange::default();
 
-        Ok(result)
+            {decode_logic}
+
+            map.insert(item.object_instance_id_, result);
+        }}
+
+        Ok({service_name}LastChangeMap{{map}})
     }}
 }}
 "#
                 )
                 .ok();
-            }
+            } // if has_last_change
         }
 
         // close `mod service_module`

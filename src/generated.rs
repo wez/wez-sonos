@@ -823,7 +823,7 @@ pub mod av_transport {
     /// stream that produces these.
     #[derive(Debug, Clone, PartialEq, Default)]
     pub struct AVTransportEvent {
-        pub last_change: Option<DecodeXmlString<AVTransportLastChange>>,
+        pub last_change: Option<DecodeXmlString<AVTransportLastChangeMap>>,
     }
 
     #[derive(FromXml, Debug, Clone, PartialEq)]
@@ -836,7 +836,7 @@ pub mod av_transport {
     #[xml(rename="property", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
     struct AVTransportProperty {
         #[xml(rename = "LastChange", ns(""))]
-        pub last_change: Option<DecodeXmlString<AVTransportLastChange>>,
+        pub last_change: Option<DecodeXmlString<AVTransportLastChangeMap>>,
     }
 
     impl DecodeXml for AVTransportEvent {
@@ -1589,7 +1589,10 @@ pub mod av_transport {
 
     #[derive(FromXml)]
     #[xml(rename = "InstanceID", ns(LAST_CHANGE_NS))]
-    struct AVTransportLastChangeInstanceId {
+    struct AVTransportLastChangeRootObject {
+        #[xml(rename = "val", attribute)]
+        object_instance_id_: u32,
+
         av_transport_uri: Option<AVTransportLastChangeAVTransportURI>,
         av_transport_uri_meta_data: Option<AVTransportLastChangeAVTransportURIMetaData>,
         alarm_include_linked_zones: Option<AVTransportLastChangeAlarmIncludeLinkedZones>,
@@ -1672,284 +1675,206 @@ pub mod av_transport {
         transport_status: Option<AVTransportLastChangeTransportStatus>,
     }
 
-    impl DecodeXml for AVTransportLastChange {
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct AVTransportLastChangeMap {
+        pub map: std::collections::BTreeMap<u32, AVTransportLastChange>,
+    }
+
+    impl DecodeXml for AVTransportLastChangeMap {
         fn decode_xml(xml: &str) -> crate::Result<Self> {
             #[derive(FromXml)]
             #[xml(ns(LAST_CHANGE_NS, r = "urn:schemas-rinconnetworks-com:metadata-1-0/"))]
             struct Event {
-                instance: AVTransportLastChangeInstanceId,
+                instance: Vec<AVTransportLastChangeRootObject>,
             }
 
             let last_change: Event = instant_xml::from_str(xml)?;
-            let mut result = Self::default();
+            let mut map = std::collections::BTreeMap::new();
 
-            result.av_transport_uri = last_change.instance.av_transport_uri.and_then(|v| v.val);
+            for item in last_change.instance {
+                let mut result = AVTransportLastChange::default();
 
-            result.av_transport_uri_meta_data = last_change
-                .instance
-                .av_transport_uri_meta_data
-                .and_then(|v| v.val);
+                result.av_transport_uri = item.av_transport_uri.and_then(|v| v.val);
 
-            result.alarm_include_linked_zones = last_change
-                .instance
-                .alarm_include_linked_zones
-                .and_then(|v| v.val);
+                result.av_transport_uri_meta_data =
+                    item.av_transport_uri_meta_data.and_then(|v| v.val);
 
-            result.alarm_state = last_change.instance.alarm_state.and_then(|v| v.val);
+                result.alarm_include_linked_zones =
+                    item.alarm_include_linked_zones.and_then(|v| v.val);
 
-            result.alarm_volume = last_change.instance.alarm_volume.and_then(|v| v.val);
+                result.alarm_state = item.alarm_state.and_then(|v| v.val);
 
-            result.current_av_transport_uri = last_change
-                .instance
-                .current_av_transport_uri
-                .and_then(|v| v.val);
+                result.alarm_volume = item.alarm_volume.and_then(|v| v.val);
 
-            result.enqueue_as_next = last_change.instance.enqueue_as_next.and_then(|v| v.val);
+                result.current_av_transport_uri = item.current_av_transport_uri.and_then(|v| v.val);
 
-            result.group_id = last_change.instance.group_id.and_then(|v| v.val);
+                result.enqueue_as_next = item.enqueue_as_next.and_then(|v| v.val);
 
-            result.iso8601_time = last_change.instance.iso8601_time.and_then(|v| v.val);
+                result.group_id = item.group_id.and_then(|v| v.val);
 
-            result.instance_id = last_change.instance.instance_id.and_then(|v| v.val);
+                result.iso8601_time = item.iso8601_time.and_then(|v| v.val);
 
-            result.list_uri = last_change.instance.list_uri.and_then(|v| v.val);
+                result.instance_id = item.instance_id.and_then(|v| v.val);
 
-            result.list_uri_meta_data = last_change.instance.list_uri_meta_data.and_then(|v| v.val);
+                result.list_uri = item.list_uri.and_then(|v| v.val);
 
-            result.member_id = last_change.instance.member_id.and_then(|v| v.val);
+                result.list_uri_meta_data = item.list_uri_meta_data.and_then(|v| v.val);
 
-            result.member_list = last_change.instance.member_list.and_then(|v| v.val);
+                result.member_id = item.member_id.and_then(|v| v.val);
 
-            result.num_tracks = last_change.instance.num_tracks.and_then(|v| v.val);
+                result.member_list = item.member_list.and_then(|v| v.val);
 
-            result.num_tracks_change = last_change.instance.num_tracks_change.and_then(|v| v.val);
+                result.num_tracks = item.num_tracks.and_then(|v| v.val);
 
-            result.object_id = last_change.instance.object_id.and_then(|v| v.val);
+                result.num_tracks_change = item.num_tracks_change.and_then(|v| v.val);
 
-            result.player_id = last_change.instance.player_id.and_then(|v| v.val);
+                result.object_id = item.object_id.and_then(|v| v.val);
 
-            result.queue = last_change.instance.queue.and_then(|v| v.val);
+                result.player_id = item.player_id.and_then(|v| v.val);
 
-            result.rejoin_group = last_change.instance.rejoin_group.and_then(|v| v.val);
+                result.queue = item.queue.and_then(|v| v.val);
 
-            result.reset_volume_after = last_change.instance.reset_volume_after.and_then(|v| v.val);
+                result.rejoin_group = item.rejoin_group.and_then(|v| v.val);
 
-            result.resume_playback = last_change.instance.resume_playback.and_then(|v| v.val);
+                result.reset_volume_after = item.reset_volume_after.and_then(|v| v.val);
 
-            result.saved_queue_title = last_change.instance.saved_queue_title.and_then(|v| v.val);
+                result.resume_playback = item.resume_playback.and_then(|v| v.val);
 
-            result.seek_mode = last_change.instance.seek_mode.and_then(|v| v.val);
+                result.saved_queue_title = item.saved_queue_title.and_then(|v| v.val);
 
-            result.seek_target = last_change.instance.seek_target.and_then(|v| v.val);
+                result.seek_mode = item.seek_mode.and_then(|v| v.val);
 
-            result.sleep_timer_state = last_change.instance.sleep_timer_state.and_then(|v| v.val);
+                result.seek_target = item.seek_target.and_then(|v| v.val);
 
-            result.source_state = last_change.instance.source_state.and_then(|v| v.val);
+                result.sleep_timer_state = item.sleep_timer_state.and_then(|v| v.val);
 
-            result.stream_restart_state = last_change
-                .instance
-                .stream_restart_state
-                .and_then(|v| v.val);
+                result.source_state = item.source_state.and_then(|v| v.val);
 
-            result.track_list = last_change.instance.track_list.and_then(|v| v.val);
+                result.stream_restart_state = item.stream_restart_state.and_then(|v| v.val);
 
-            result.track_number = last_change.instance.track_number.and_then(|v| v.val);
+                result.track_list = item.track_list.and_then(|v| v.val);
 
-            result.transport_settings = last_change.instance.transport_settings.and_then(|v| v.val);
+                result.track_number = item.track_number.and_then(|v| v.val);
 
-            result.uri = last_change.instance.uri.and_then(|v| v.val);
+                result.transport_settings = item.transport_settings.and_then(|v| v.val);
 
-            result.uri_meta_data = last_change.instance.uri_meta_data.and_then(|v| v.val);
+                result.uri = item.uri.and_then(|v| v.val);
 
-            result.vli_state = last_change.instance.vli_state.and_then(|v| v.val);
+                result.uri_meta_data = item.uri_meta_data.and_then(|v| v.val);
 
-            result.absolute_counter_position = last_change
-                .instance
-                .absolute_counter_position
-                .and_then(|v| v.val);
+                result.vli_state = item.vli_state.and_then(|v| v.val);
 
-            result.absolute_time_position = last_change
-                .instance
-                .absolute_time_position
-                .and_then(|v| v.val);
+                result.absolute_counter_position =
+                    item.absolute_counter_position.and_then(|v| v.val);
 
-            result.alarm_id_running = last_change.instance.alarm_id_running.and_then(|v| v.val);
+                result.absolute_time_position = item.absolute_time_position.and_then(|v| v.val);
 
-            result.alarm_logged_start_time = last_change
-                .instance
-                .alarm_logged_start_time
-                .and_then(|v| v.val);
+                result.alarm_id_running = item.alarm_id_running.and_then(|v| v.val);
 
-            result.alarm_running = last_change.instance.alarm_running.and_then(|v| v.val);
+                result.alarm_logged_start_time = item.alarm_logged_start_time.and_then(|v| v.val);
 
-            result.current_crossfade_mode = last_change
-                .instance
-                .current_crossfade_mode
-                .and_then(|v| v.val);
-
-            result.current_media_duration = last_change
-                .instance
-                .current_media_duration
-                .and_then(|v| v.val);
-
-            result.current_play_mode = last_change.instance.current_play_mode.and_then(|v| v.val);
+                result.alarm_running = item.alarm_running.and_then(|v| v.val);
 
-            result.current_record_quality_mode = last_change
-                .instance
-                .current_record_quality_mode
-                .and_then(|v| v.val);
-
-            result.current_section = last_change.instance.current_section.and_then(|v| v.val);
-
-            result.current_track = last_change.instance.current_track.and_then(|v| v.val);
-
-            result.current_track_duration = last_change
-                .instance
-                .current_track_duration
-                .and_then(|v| v.val);
-
-            result.current_track_meta_data = last_change
-                .instance
-                .current_track_meta_data
-                .and_then(|v| v.val);
-
-            result.current_track_uri = last_change.instance.current_track_uri.and_then(|v| v.val);
-
-            result.current_transport_actions = last_change
-                .instance
-                .current_transport_actions
-                .and_then(|v| v.val);
-
-            result.current_valid_play_modes = last_change
-                .instance
-                .current_valid_play_modes
-                .and_then(|v| v.val);
-
-            result.direct_control_account_id = last_change
-                .instance
-                .direct_control_account_id
-                .and_then(|v| v.val);
-
-            result.direct_control_client_id = last_change
-                .instance
-                .direct_control_client_id
-                .and_then(|v| v.val);
-
-            result.direct_control_is_suspended = last_change
-                .instance
-                .direct_control_is_suspended
-                .and_then(|v| v.val);
-
-            result.enqueued_transport_uri = last_change
-                .instance
-                .enqueued_transport_uri
-                .and_then(|v| v.val);
-
-            result.enqueued_transport_uri_meta_data = last_change
-                .instance
-                .enqueued_transport_uri_meta_data
-                .and_then(|v| v.val);
+                result.current_crossfade_mode = item.current_crossfade_mode.and_then(|v| v.val);
 
-            result.muse_sessions = last_change.instance.muse_sessions.and_then(|v| v.val);
-
-            result.next_av_transport_uri = last_change
-                .instance
-                .next_av_transport_uri
-                .and_then(|v| v.val);
-
-            result.next_av_transport_uri_meta_data = last_change
-                .instance
-                .next_av_transport_uri_meta_data
-                .and_then(|v| v.val);
-
-            result.next_track_meta_data = last_change
-                .instance
-                .next_track_meta_data
-                .and_then(|v| v.val);
-
-            result.next_track_uri = last_change.instance.next_track_uri.and_then(|v| v.val);
-
-            result.number_of_tracks = last_change.instance.number_of_tracks.and_then(|v| v.val);
-
-            result.playback_storage_medium = last_change
-                .instance
-                .playback_storage_medium
-                .and_then(|v| v.val);
-
-            result.possible_playback_storage_media = last_change
-                .instance
-                .possible_playback_storage_media
-                .and_then(|v| v.val);
-
-            result.possible_record_quality_modes = last_change
-                .instance
-                .possible_record_quality_modes
-                .and_then(|v| v.val);
-
-            result.possible_record_storage_media = last_change
-                .instance
-                .possible_record_storage_media
-                .and_then(|v| v.val);
-
-            result.queue_update_id = last_change.instance.queue_update_id.and_then(|v| v.val);
-
-            result.record_medium_write_status = last_change
-                .instance
-                .record_medium_write_status
-                .and_then(|v| v.val);
-
-            result.record_storage_medium = last_change
-                .instance
-                .record_storage_medium
-                .and_then(|v| v.val);
-
-            result.relative_counter_position = last_change
-                .instance
-                .relative_counter_position
-                .and_then(|v| v.val);
-
-            result.relative_time_position = last_change
-                .instance
-                .relative_time_position
-                .and_then(|v| v.val);
-
-            result.restart_pending = last_change.instance.restart_pending.and_then(|v| v.val);
-
-            result.sleep_timer_generation = last_change
-                .instance
-                .sleep_timer_generation
-                .and_then(|v| v.val);
-
-            result.snooze_running = last_change.instance.snooze_running.and_then(|v| v.val);
-
-            result.transport_error_description = last_change
-                .instance
-                .transport_error_description
-                .and_then(|v| v.val);
-
-            result.transport_error_http_code = last_change
-                .instance
-                .transport_error_http_code
-                .and_then(|v| v.val);
-
-            result.transport_error_http_headers = last_change
-                .instance
-                .transport_error_http_headers
-                .and_then(|v| v.val);
-
-            result.transport_error_uri =
-                last_change.instance.transport_error_uri.and_then(|v| v.val);
-
-            result.transport_play_speed = last_change
-                .instance
-                .transport_play_speed
-                .and_then(|v| v.val);
-
-            result.transport_state = last_change.instance.transport_state.and_then(|v| v.val);
-
-            result.transport_status = last_change.instance.transport_status.and_then(|v| v.val);
-
-            Ok(result)
+                result.current_media_duration = item.current_media_duration.and_then(|v| v.val);
+
+                result.current_play_mode = item.current_play_mode.and_then(|v| v.val);
+
+                result.current_record_quality_mode =
+                    item.current_record_quality_mode.and_then(|v| v.val);
+
+                result.current_section = item.current_section.and_then(|v| v.val);
+
+                result.current_track = item.current_track.and_then(|v| v.val);
+
+                result.current_track_duration = item.current_track_duration.and_then(|v| v.val);
+
+                result.current_track_meta_data = item.current_track_meta_data.and_then(|v| v.val);
+
+                result.current_track_uri = item.current_track_uri.and_then(|v| v.val);
+
+                result.current_transport_actions =
+                    item.current_transport_actions.and_then(|v| v.val);
+
+                result.current_valid_play_modes = item.current_valid_play_modes.and_then(|v| v.val);
+
+                result.direct_control_account_id =
+                    item.direct_control_account_id.and_then(|v| v.val);
+
+                result.direct_control_client_id = item.direct_control_client_id.and_then(|v| v.val);
+
+                result.direct_control_is_suspended =
+                    item.direct_control_is_suspended.and_then(|v| v.val);
+
+                result.enqueued_transport_uri = item.enqueued_transport_uri.and_then(|v| v.val);
+
+                result.enqueued_transport_uri_meta_data =
+                    item.enqueued_transport_uri_meta_data.and_then(|v| v.val);
+
+                result.muse_sessions = item.muse_sessions.and_then(|v| v.val);
+
+                result.next_av_transport_uri = item.next_av_transport_uri.and_then(|v| v.val);
+
+                result.next_av_transport_uri_meta_data =
+                    item.next_av_transport_uri_meta_data.and_then(|v| v.val);
+
+                result.next_track_meta_data = item.next_track_meta_data.and_then(|v| v.val);
+
+                result.next_track_uri = item.next_track_uri.and_then(|v| v.val);
+
+                result.number_of_tracks = item.number_of_tracks.and_then(|v| v.val);
+
+                result.playback_storage_medium = item.playback_storage_medium.and_then(|v| v.val);
+
+                result.possible_playback_storage_media =
+                    item.possible_playback_storage_media.and_then(|v| v.val);
+
+                result.possible_record_quality_modes =
+                    item.possible_record_quality_modes.and_then(|v| v.val);
+
+                result.possible_record_storage_media =
+                    item.possible_record_storage_media.and_then(|v| v.val);
+
+                result.queue_update_id = item.queue_update_id.and_then(|v| v.val);
+
+                result.record_medium_write_status =
+                    item.record_medium_write_status.and_then(|v| v.val);
+
+                result.record_storage_medium = item.record_storage_medium.and_then(|v| v.val);
+
+                result.relative_counter_position =
+                    item.relative_counter_position.and_then(|v| v.val);
+
+                result.relative_time_position = item.relative_time_position.and_then(|v| v.val);
+
+                result.restart_pending = item.restart_pending.and_then(|v| v.val);
+
+                result.sleep_timer_generation = item.sleep_timer_generation.and_then(|v| v.val);
+
+                result.snooze_running = item.snooze_running.and_then(|v| v.val);
+
+                result.transport_error_description =
+                    item.transport_error_description.and_then(|v| v.val);
+
+                result.transport_error_http_code =
+                    item.transport_error_http_code.and_then(|v| v.val);
+
+                result.transport_error_http_headers =
+                    item.transport_error_http_headers.and_then(|v| v.val);
+
+                result.transport_error_uri = item.transport_error_uri.and_then(|v| v.val);
+
+                result.transport_play_speed = item.transport_play_speed.and_then(|v| v.val);
+
+                result.transport_state = item.transport_state.and_then(|v| v.val);
+
+                result.transport_status = item.transport_status.and_then(|v| v.val);
+
+                map.insert(item.object_instance_id_, result);
+            }
+
+            Ok(AVTransportLastChangeMap { map })
         }
     }
 }
@@ -5675,7 +5600,7 @@ pub mod queue {
     /// stream that produces these.
     #[derive(Debug, Clone, PartialEq, Default)]
     pub struct QueueEvent {
-        pub last_change: Option<DecodeXmlString<QueueLastChange>>,
+        pub last_change: Option<DecodeXmlString<QueueLastChangeMap>>,
     }
 
     #[derive(FromXml, Debug, Clone, PartialEq)]
@@ -5688,7 +5613,7 @@ pub mod queue {
     #[xml(rename="property", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
     struct QueueProperty {
         #[xml(rename = "LastChange", ns(""))]
-        pub last_change: Option<DecodeXmlString<QueueLastChange>>,
+        pub last_change: Option<DecodeXmlString<QueueLastChangeMap>>,
     }
 
     impl DecodeXml for QueueEvent {
@@ -5886,11 +5811,14 @@ pub mod queue {
         val: Option<bool>,
     }
 
-    const LAST_CHANGE_NS: &str = "urn:schemas-upnp-org:metadata-1-0/AVT/";
+    const LAST_CHANGE_NS: &str = "urn:schemas-sonos-com:metadata-1-0/Queue/";
 
     #[derive(FromXml)]
-    #[xml(rename = "InstanceID", ns(LAST_CHANGE_NS))]
-    struct QueueLastChangeInstanceId {
+    #[xml(rename = "QueueID", ns(LAST_CHANGE_NS))]
+    struct QueueLastChangeRootObject {
+        #[xml(rename = "val", attribute)]
+        object_instance_id_: u32,
+
         count: Option<QueueLastChangeCount>,
         enqueue_as_next: Option<QueueLastChangeEnqueueAsNext>,
         index: Option<QueueLastChangeIndex>,
@@ -5912,60 +5840,67 @@ pub mod queue {
         curated: Option<QueueLastChangeCurated>,
     }
 
-    impl DecodeXml for QueueLastChange {
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct QueueLastChangeMap {
+        pub map: std::collections::BTreeMap<u32, QueueLastChange>,
+    }
+
+    impl DecodeXml for QueueLastChangeMap {
         fn decode_xml(xml: &str) -> crate::Result<Self> {
             #[derive(FromXml)]
             #[xml(ns(LAST_CHANGE_NS, r = "urn:schemas-rinconnetworks-com:metadata-1-0/"))]
             struct Event {
-                instance: QueueLastChangeInstanceId,
+                instance: Vec<QueueLastChangeRootObject>,
             }
 
             let last_change: Event = instant_xml::from_str(xml)?;
-            let mut result = Self::default();
+            let mut map = std::collections::BTreeMap::new();
 
-            result.count = last_change.instance.count.and_then(|v| v.val);
+            for item in last_change.instance {
+                let mut result = QueueLastChange::default();
 
-            result.enqueue_as_next = last_change.instance.enqueue_as_next.and_then(|v| v.val);
+                result.count = item.count.and_then(|v| v.val);
 
-            result.index = last_change.instance.index.and_then(|v| v.val);
+                result.enqueue_as_next = item.enqueue_as_next.and_then(|v| v.val);
 
-            result.list_uri = last_change.instance.list_uri.and_then(|v| v.val);
+                result.index = item.index.and_then(|v| v.val);
 
-            result.list_uri_and_metadata = last_change
-                .instance
-                .list_uri_and_metadata
-                .and_then(|v| v.val);
+                result.list_uri = item.list_uri.and_then(|v| v.val);
 
-            result.num_tracks = last_change.instance.num_tracks.and_then(|v| v.val);
+                result.list_uri_and_metadata = item.list_uri_and_metadata.and_then(|v| v.val);
 
-            result.object_id = last_change.instance.object_id.and_then(|v| v.val);
+                result.num_tracks = item.num_tracks.and_then(|v| v.val);
 
-            result.queue_id = last_change.instance.queue_id.and_then(|v| v.val);
+                result.object_id = item.object_id.and_then(|v| v.val);
 
-            result.queue_owner_context =
-                last_change.instance.queue_owner_context.and_then(|v| v.val);
+                result.queue_id = item.queue_id.and_then(|v| v.val);
 
-            result.queue_owner_id = last_change.instance.queue_owner_id.and_then(|v| v.val);
+                result.queue_owner_context = item.queue_owner_context.and_then(|v| v.val);
 
-            result.queue_policy = last_change.instance.queue_policy.and_then(|v| v.val);
+                result.queue_owner_id = item.queue_owner_id.and_then(|v| v.val);
 
-            result.result = last_change.instance.result.and_then(|v| v.val);
+                result.queue_policy = item.queue_policy.and_then(|v| v.val);
 
-            result.saved_queue_title = last_change.instance.saved_queue_title.and_then(|v| v.val);
+                result.result = item.result.and_then(|v| v.val);
 
-            result.track_number = last_change.instance.track_number.and_then(|v| v.val);
+                result.saved_queue_title = item.saved_queue_title.and_then(|v| v.val);
 
-            result.track_numbers_csv = last_change.instance.track_numbers_csv.and_then(|v| v.val);
+                result.track_number = item.track_number.and_then(|v| v.val);
 
-            result.uri = last_change.instance.uri.and_then(|v| v.val);
+                result.track_numbers_csv = item.track_numbers_csv.and_then(|v| v.val);
 
-            result.uri_meta_data = last_change.instance.uri_meta_data.and_then(|v| v.val);
+                result.uri = item.uri.and_then(|v| v.val);
 
-            result.update_id = last_change.instance.update_id.and_then(|v| v.val);
+                result.uri_meta_data = item.uri_meta_data.and_then(|v| v.val);
 
-            result.curated = last_change.instance.curated.and_then(|v| v.val);
+                result.update_id = item.update_id.and_then(|v| v.val);
 
-            Ok(result)
+                result.curated = item.curated.and_then(|v| v.val);
+
+                map.insert(item.object_instance_id_, result);
+            }
+
+            Ok(QueueLastChangeMap { map })
         }
     }
 }
@@ -6471,7 +6406,7 @@ pub mod rendering_control {
     /// stream that produces these.
     #[derive(Debug, Clone, PartialEq, Default)]
     pub struct RenderingControlEvent {
-        pub last_change: Option<DecodeXmlString<RenderingControlLastChange>>,
+        pub last_change: Option<DecodeXmlString<RenderingControlLastChangeMap>>,
     }
 
     #[derive(FromXml, Debug, Clone, PartialEq)]
@@ -6484,7 +6419,7 @@ pub mod rendering_control {
     #[xml(rename="property", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
     struct RenderingControlProperty {
         #[xml(rename = "LastChange", ns(""))]
-        pub last_change: Option<DecodeXmlString<RenderingControlLastChange>>,
+        pub last_change: Option<DecodeXmlString<RenderingControlLastChangeMap>>,
     }
 
     impl DecodeXml for RenderingControlEvent {
@@ -6891,11 +6826,14 @@ pub mod rendering_control {
         val: Option<i16>,
     }
 
-    const LAST_CHANGE_NS: &str = "urn:schemas-upnp-org:metadata-1-0/AVT/";
+    const LAST_CHANGE_NS: &str = "urn:schemas-upnp-org:metadata-1-0/RCS/";
 
     #[derive(FromXml)]
     #[xml(rename = "InstanceID", ns(LAST_CHANGE_NS))]
-    struct RenderingControlLastChangeInstanceId {
+    struct RenderingControlLastChangeRootObject {
+        #[xml(rename = "val", attribute)]
+        object_instance_id_: u32,
+
         channel: Option<RenderingControlLastChangeChannel>,
         channel_map: Option<RenderingControlLastChangeChannelMap>,
         eq_type: Option<RenderingControlLastChangeEQType>,
@@ -6942,128 +6880,116 @@ pub mod rendering_control {
         volume_db: Option<RenderingControlLastChangeVolumeDB>,
     }
 
-    impl DecodeXml for RenderingControlLastChange {
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct RenderingControlLastChangeMap {
+        pub map: std::collections::BTreeMap<u32, RenderingControlLastChange>,
+    }
+
+    impl DecodeXml for RenderingControlLastChangeMap {
         fn decode_xml(xml: &str) -> crate::Result<Self> {
             #[derive(FromXml)]
             #[xml(ns(LAST_CHANGE_NS, r = "urn:schemas-rinconnetworks-com:metadata-1-0/"))]
             struct Event {
-                instance: RenderingControlLastChangeInstanceId,
+                instance: Vec<RenderingControlLastChangeRootObject>,
             }
 
             let last_change: Event = instant_xml::from_str(xml)?;
-            let mut result = Self::default();
+            let mut map = std::collections::BTreeMap::new();
 
-            result.channel = last_change.instance.channel.and_then(|v| v.val);
+            for item in last_change.instance {
+                let mut result = RenderingControlLastChange::default();
 
-            result.channel_map = last_change.instance.channel_map.and_then(|v| v.val);
+                result.channel = item.channel.and_then(|v| v.val);
 
-            result.eq_type = last_change.instance.eq_type.and_then(|v| v.val);
+                result.channel_map = item.channel_map.and_then(|v| v.val);
 
-            result.instance_id = last_change.instance.instance_id.and_then(|v| v.val);
+                result.eq_type = item.eq_type.and_then(|v| v.val);
 
-            result.left_volume = last_change.instance.left_volume.and_then(|v| v.val);
+                result.instance_id = item.instance_id.and_then(|v| v.val);
 
-            result.mute_channel = last_change.instance.mute_channel.and_then(|v| v.val);
+                result.left_volume = item.left_volume.and_then(|v| v.val);
 
-            result.program_uri = last_change.instance.program_uri.and_then(|v| v.val);
+                result.mute_channel = item.mute_channel.and_then(|v| v.val);
 
-            result.ramp_time_seconds = last_change.instance.ramp_time_seconds.and_then(|v| v.val);
+                result.program_uri = item.program_uri.and_then(|v| v.val);
 
-            result.ramp_type = last_change.instance.ramp_type.and_then(|v| v.val);
+                result.ramp_time_seconds = item.ramp_time_seconds.and_then(|v| v.val);
 
-            result.reset_volume_after = last_change.instance.reset_volume_after.and_then(|v| v.val);
+                result.ramp_type = item.ramp_type.and_then(|v| v.val);
 
-            result.right_volume = last_change.instance.right_volume.and_then(|v| v.val);
+                result.reset_volume_after = item.reset_volume_after.and_then(|v| v.val);
 
-            result.volume_adjustment = last_change.instance.volume_adjustment.and_then(|v| v.val);
+                result.right_volume = item.right_volume.and_then(|v| v.val);
 
-            result.audio_delay = last_change.instance.audio_delay.and_then(|v| v.val);
+                result.volume_adjustment = item.volume_adjustment.and_then(|v| v.val);
 
-            result.audio_delay_left_rear = last_change
-                .instance
-                .audio_delay_left_rear
-                .and_then(|v| v.val);
+                result.audio_delay = item.audio_delay.and_then(|v| v.val);
 
-            result.audio_delay_right_rear = last_change
-                .instance
-                .audio_delay_right_rear
-                .and_then(|v| v.val);
+                result.audio_delay_left_rear = item.audio_delay_left_rear.and_then(|v| v.val);
 
-            result.bass = last_change.instance.bass.and_then(|v| v.val);
+                result.audio_delay_right_rear = item.audio_delay_right_rear.and_then(|v| v.val);
 
-            result.dialog_level = last_change.instance.dialog_level.and_then(|v| v.val);
+                result.bass = item.bass.and_then(|v| v.val);
 
-            result.eq_value = last_change.instance.eq_value.and_then(|v| v.val);
+                result.dialog_level = item.dialog_level.and_then(|v| v.val);
 
-            result.headphone_connected =
-                last_change.instance.headphone_connected.and_then(|v| v.val);
+                result.eq_value = item.eq_value.and_then(|v| v.val);
 
-            result.loudness = last_change.instance.loudness.and_then(|v| v.val);
+                result.headphone_connected = item.headphone_connected.and_then(|v| v.val);
 
-            result.music_surround_level = last_change
-                .instance
-                .music_surround_level
-                .and_then(|v| v.val);
+                result.loudness = item.loudness.and_then(|v| v.val);
 
-            result.mute = last_change.instance.mute.and_then(|v| v.val);
+                result.music_surround_level = item.music_surround_level.and_then(|v| v.val);
 
-            result.night_mode = last_change.instance.night_mode.and_then(|v| v.val);
+                result.mute = item.mute.and_then(|v| v.val);
 
-            result.output_fixed = last_change.instance.output_fixed.and_then(|v| v.val);
+                result.night_mode = item.night_mode.and_then(|v| v.val);
 
-            result.preset_name_list = last_change.instance.preset_name_list.and_then(|v| v.val);
+                result.output_fixed = item.output_fixed.and_then(|v| v.val);
 
-            result.room_calibration_available = last_change
-                .instance
-                .room_calibration_available
-                .and_then(|v| v.val);
+                result.preset_name_list = item.preset_name_list.and_then(|v| v.val);
 
-            result.room_calibration_calibration_mode = last_change
-                .instance
-                .room_calibration_calibration_mode
-                .and_then(|v| v.val);
+                result.room_calibration_available =
+                    item.room_calibration_available.and_then(|v| v.val);
 
-            result.room_calibration_coefficients = last_change
-                .instance
-                .room_calibration_coefficients
-                .and_then(|v| v.val);
+                result.room_calibration_calibration_mode =
+                    item.room_calibration_calibration_mode.and_then(|v| v.val);
 
-            result.room_calibration_enabled = last_change
-                .instance
-                .room_calibration_enabled
-                .and_then(|v| v.val);
+                result.room_calibration_coefficients =
+                    item.room_calibration_coefficients.and_then(|v| v.val);
 
-            result.room_calibration_id =
-                last_change.instance.room_calibration_id.and_then(|v| v.val);
+                result.room_calibration_enabled = item.room_calibration_enabled.and_then(|v| v.val);
 
-            result.speaker_size = last_change.instance.speaker_size.and_then(|v| v.val);
+                result.room_calibration_id = item.room_calibration_id.and_then(|v| v.val);
 
-            result.sub_crossover = last_change.instance.sub_crossover.and_then(|v| v.val);
+                result.speaker_size = item.speaker_size.and_then(|v| v.val);
 
-            result.sub_enabled = last_change.instance.sub_enabled.and_then(|v| v.val);
+                result.sub_crossover = item.sub_crossover.and_then(|v| v.val);
 
-            result.sub_gain = last_change.instance.sub_gain.and_then(|v| v.val);
+                result.sub_enabled = item.sub_enabled.and_then(|v| v.val);
 
-            result.sub_polarity = last_change.instance.sub_polarity.and_then(|v| v.val);
+                result.sub_gain = item.sub_gain.and_then(|v| v.val);
 
-            result.supports_output_fixed = last_change
-                .instance
-                .supports_output_fixed
-                .and_then(|v| v.val);
+                result.sub_polarity = item.sub_polarity.and_then(|v| v.val);
 
-            result.surround_enabled = last_change.instance.surround_enabled.and_then(|v| v.val);
+                result.supports_output_fixed = item.supports_output_fixed.and_then(|v| v.val);
 
-            result.surround_level = last_change.instance.surround_level.and_then(|v| v.val);
+                result.surround_enabled = item.surround_enabled.and_then(|v| v.val);
 
-            result.surround_mode = last_change.instance.surround_mode.and_then(|v| v.val);
+                result.surround_level = item.surround_level.and_then(|v| v.val);
 
-            result.treble = last_change.instance.treble.and_then(|v| v.val);
+                result.surround_mode = item.surround_mode.and_then(|v| v.val);
 
-            result.volume = last_change.instance.volume.and_then(|v| v.val);
+                result.treble = item.treble.and_then(|v| v.val);
 
-            result.volume_db = last_change.instance.volume_db.and_then(|v| v.val);
+                result.volume = item.volume.and_then(|v| v.val);
 
-            Ok(result)
+                result.volume_db = item.volume_db.and_then(|v| v.val);
+
+                map.insert(item.object_instance_id_, result);
+            }
+
+            Ok(RenderingControlLastChangeMap { map })
         }
     }
 }
@@ -7759,7 +7685,7 @@ pub mod virtual_line_in {
     #[derive(Debug, Clone, PartialEq, Default)]
     pub struct VirtualLineInEvent {
         pub current_track_meta_data: Option<DecodeXmlString<crate::TrackMetaData>>,
-        pub last_change: Option<DecodeXmlString<VirtualLineInLastChange>>,
+        pub last_change: Option<String>,
     }
 
     #[derive(FromXml, Debug, Clone, PartialEq)]
@@ -7774,7 +7700,7 @@ pub mod virtual_line_in {
         #[xml(rename = "CurrentTrackMetaData", ns(""))]
         pub current_track_meta_data: Option<DecodeXmlString<crate::TrackMetaData>>,
         #[xml(rename = "LastChange", ns(""))]
-        pub last_change: Option<DecodeXmlString<VirtualLineInLastChange>>,
+        pub last_change: Option<String>,
     }
 
     impl DecodeXml for VirtualLineInEvent {
@@ -7800,156 +7726,6 @@ pub mod virtual_line_in {
             &self,
         ) -> crate::Result<crate::upnp::EventStream<VirtualLineInEvent>> {
             self.subscribe_helper(&SERVICE_TYPE).await
-        }
-    }
-
-    #[derive(Debug, Clone, PartialEq, Default)]
-    pub struct VirtualLineInLastChange {
-        pub av_transport_uri_meta_data: Option<String>,
-        pub current_transport_settings: Option<String>,
-        pub instance_id: Option<u32>,
-        pub player_id: Option<String>,
-        pub speed: Option<String>,
-        pub volume: Option<u16>,
-        pub current_track_meta_data: Option<DecodeXmlString<crate::TrackMetaData>>,
-        pub current_transport_actions: Option<String>,
-        pub enqueued_transport_uri_meta_data: Option<String>,
-    }
-
-    #[derive(FromXml)]
-    #[xml(rename = "AVTransportURIMetaData", ns(LAST_CHANGE_NS))]
-    #[allow(non_camel_case_types)]
-    struct VirtualLineInLastChangeAVTransportURIMetaData {
-        #[xml(attribute)]
-        val: Option<String>,
-    }
-
-    #[derive(FromXml)]
-    #[xml(rename = "CurrentTransportSettings", ns(LAST_CHANGE_NS))]
-    #[allow(non_camel_case_types)]
-    struct VirtualLineInLastChangeCurrentTransportSettings {
-        #[xml(attribute)]
-        val: Option<String>,
-    }
-
-    #[derive(FromXml)]
-    #[xml(rename = "InstanceID", ns(LAST_CHANGE_NS))]
-    #[allow(non_camel_case_types)]
-    struct VirtualLineInLastChangeInstanceID {
-        #[xml(attribute)]
-        val: Option<u32>,
-    }
-
-    #[derive(FromXml)]
-    #[xml(rename = "PlayerID", ns(LAST_CHANGE_NS))]
-    #[allow(non_camel_case_types)]
-    struct VirtualLineInLastChangePlayerID {
-        #[xml(attribute)]
-        val: Option<String>,
-    }
-
-    #[derive(FromXml)]
-    #[xml(rename = "Speed", ns(LAST_CHANGE_NS))]
-    #[allow(non_camel_case_types)]
-    struct VirtualLineInLastChangeSpeed {
-        #[xml(attribute)]
-        val: Option<String>,
-    }
-
-    #[derive(FromXml)]
-    #[xml(rename = "Volume", ns(LAST_CHANGE_NS))]
-    #[allow(non_camel_case_types)]
-    struct VirtualLineInLastChangeVolume {
-        #[xml(attribute)]
-        val: Option<u16>,
-    }
-
-    #[derive(FromXml)]
-    #[xml(rename = "CurrentTrackMetaData", ns(LAST_CHANGE_NS))]
-    #[allow(non_camel_case_types)]
-    struct VirtualLineInLastChangeCurrentTrackMetaData {
-        #[xml(attribute)]
-        val: Option<DecodeXmlString<crate::TrackMetaData>>,
-    }
-
-    #[derive(FromXml)]
-    #[xml(rename = "CurrentTransportActions", ns(LAST_CHANGE_NS))]
-    #[allow(non_camel_case_types)]
-    struct VirtualLineInLastChangeCurrentTransportActions {
-        #[xml(attribute)]
-        val: Option<String>,
-    }
-
-    #[derive(FromXml)]
-    #[xml(rename = "EnqueuedTransportURIMetaData", ns(LAST_CHANGE_NS))]
-    #[allow(non_camel_case_types)]
-    struct VirtualLineInLastChangeEnqueuedTransportURIMetaData {
-        #[xml(attribute)]
-        val: Option<String>,
-    }
-
-    const LAST_CHANGE_NS: &str = "urn:schemas-upnp-org:metadata-1-0/AVT/";
-
-    #[derive(FromXml)]
-    #[xml(rename = "InstanceID", ns(LAST_CHANGE_NS))]
-    struct VirtualLineInLastChangeInstanceId {
-        av_transport_uri_meta_data: Option<VirtualLineInLastChangeAVTransportURIMetaData>,
-        current_transport_settings: Option<VirtualLineInLastChangeCurrentTransportSettings>,
-        instance_id: Option<VirtualLineInLastChangeInstanceID>,
-        player_id: Option<VirtualLineInLastChangePlayerID>,
-        speed: Option<VirtualLineInLastChangeSpeed>,
-        volume: Option<VirtualLineInLastChangeVolume>,
-        current_track_meta_data: Option<VirtualLineInLastChangeCurrentTrackMetaData>,
-        current_transport_actions: Option<VirtualLineInLastChangeCurrentTransportActions>,
-        enqueued_transport_uri_meta_data:
-            Option<VirtualLineInLastChangeEnqueuedTransportURIMetaData>,
-    }
-
-    impl DecodeXml for VirtualLineInLastChange {
-        fn decode_xml(xml: &str) -> crate::Result<Self> {
-            #[derive(FromXml)]
-            #[xml(ns(LAST_CHANGE_NS, r = "urn:schemas-rinconnetworks-com:metadata-1-0/"))]
-            struct Event {
-                instance: VirtualLineInLastChangeInstanceId,
-            }
-
-            let last_change: Event = instant_xml::from_str(xml)?;
-            let mut result = Self::default();
-
-            result.av_transport_uri_meta_data = last_change
-                .instance
-                .av_transport_uri_meta_data
-                .and_then(|v| v.val);
-
-            result.current_transport_settings = last_change
-                .instance
-                .current_transport_settings
-                .and_then(|v| v.val);
-
-            result.instance_id = last_change.instance.instance_id.and_then(|v| v.val);
-
-            result.player_id = last_change.instance.player_id.and_then(|v| v.val);
-
-            result.speed = last_change.instance.speed.and_then(|v| v.val);
-
-            result.volume = last_change.instance.volume.and_then(|v| v.val);
-
-            result.current_track_meta_data = last_change
-                .instance
-                .current_track_meta_data
-                .and_then(|v| v.val);
-
-            result.current_transport_actions = last_change
-                .instance
-                .current_transport_actions
-                .and_then(|v| v.val);
-
-            result.enqueued_transport_uri_meta_data = last_change
-                .instance
-                .enqueued_transport_uri_meta_data
-                .and_then(|v| v.val);
-
-            Ok(result)
         }
     }
 }
