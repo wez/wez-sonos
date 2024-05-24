@@ -1,4 +1,3 @@
-use crate::upnp::DeviceSpec;
 use instant_xml::FromXmlOwned;
 use instant_xml::ToXml;
 use reqwest::StatusCode;
@@ -15,6 +14,7 @@ mod zone;
 pub use didl::*;
 pub use discovery::*;
 pub use generated::*;
+pub use upnp::*;
 pub use zone::*;
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -35,7 +35,11 @@ pub enum Error {
     #[error("Reqwest Error: {0:#?}")]
     Reqwest(#[from] reqwest::Error),
     #[error("Failed Request: {status:?} {body}")]
-    FailedRequest { status: StatusCode, body: String },
+    FailedRequest {
+        status: StatusCode,
+        body: String,
+        headers: reqwest::header::HeaderMap,
+    },
     #[error("Device has no name!?")]
     NoName,
     #[error("I/O Error: {0:#}")]
@@ -44,6 +48,36 @@ pub enum Error {
     InvalidEnumVariantValue,
     #[error("Room {0} not found")]
     RoomNotFound(String),
+    #[error("Cannot find IP from device URL! {0:?}")]
+    NoIpInDeviceUrl(Url),
+    #[error("Subscription failed because SID header is missing")]
+    SubscriptionFailedNoSid,
+}
+
+impl Error {
+    pub async fn with_failed_http_response(response: reqwest::Response) -> Error {
+        let status = response.status();
+        let headers = response.headers().clone();
+        let body = match response.bytes().await {
+            Ok(bytes) => String::from_utf8_lossy(&bytes).to_string(),
+            Err(err) => format!("Failed to retrieve body from failed request: {err:#}"),
+        };
+
+        return Error::FailedRequest {
+            status,
+            body,
+            headers,
+        };
+    }
+
+    pub async fn check_response(response: reqwest::Response) -> Result<reqwest::Response> {
+        let status = response.status();
+        if !status.is_success() {
+            Err(Self::with_failed_http_response(response).await)
+        } else {
+            Ok(response)
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -84,16 +118,7 @@ impl SonosDevice {
     pub async fn from_url(url: Url) -> Result<Self> {
         let response = reqwest::get(url.clone()).await?;
 
-        let status = response.status();
-        if !status.is_success() {
-            let body = match response.bytes().await {
-                Ok(bytes) => String::from_utf8_lossy(&bytes).to_string(),
-                Err(err) => format!("Failed to retrieve body from failed request: {err:#}"),
-            };
-
-            return Err(Error::FailedRequest { status, body });
-        }
-
+        let response = Error::check_response(response).await?;
         let body = response.text().await?;
         let device = DeviceSpec::parse_xml(&body)?;
 
@@ -311,6 +336,15 @@ impl SonosDevice {
         &self.device
     }
 
+    pub async fn subscribe(&self, service: &str) -> Result<EventSubscription> {
+        let service = self
+            .device
+            .get_service(service)
+            .ok_or_else(|| Error::UnsupportedService(service.to_string()))?;
+
+        service.subscribe(&self.url).await
+    }
+
     /// This is a low level helper function for performing a SOAP Action
     /// request. You most likely want to use one of the methods
     /// implemented by the various service traits instead of this.
@@ -347,15 +381,7 @@ impl SonosDevice {
             .send()
             .await?;
 
-        let status = response.status();
-        if !status.is_success() {
-            let body = match response.bytes().await {
-                Ok(bytes) => String::from_utf8_lossy(&bytes).to_string(),
-                Err(err) => format!("Failed to retrieve body from failed request: {err:#}"),
-            };
-
-            return Err(Error::FailedRequest { status, body });
-        }
+        let response = Error::check_response(response).await?;
 
         let body = response.text().await?;
         log::trace!("Got response: {body}");

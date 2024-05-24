@@ -1,67 +1,17 @@
+use crate::Error;
 use instant_xml::FromXml;
-use instant_xml::Id;
-use instant_xml::Kind;
+use reqwest::Method;
+use reqwest::Response;
 use reqwest::Url;
+use std::collections::BTreeMap;
+use std::net::IpAddr;
+use tokio::io::AsyncReadExt;
+use tokio::net::TcpListener;
+use tokio::net::TcpStream;
+use tokio::sync::mpsc::{channel, Receiver, Sender};
+use url::Host;
 
 const UPNP_DEVICE: &str = "urn:schemas-upnp-org:device-1-0";
-
-#[derive(Debug, PartialEq, Eq, Clone)]
-#[repr(transparent)]
-pub struct XmlWrapped<T>(T)
-where
-    T: std::str::FromStr,
-    <T as std::str::FromStr>::Err: std::fmt::Display;
-
-impl<T> std::ops::Deref for XmlWrapped<T>
-where
-    T: std::str::FromStr,
-    <T as std::str::FromStr>::Err: std::fmt::Display,
-{
-    type Target = T;
-    fn deref(&self) -> &T {
-        &self.0
-    }
-}
-
-impl<'xml, T> FromXml<'xml> for XmlWrapped<T>
-where
-    T: std::str::FromStr,
-    <T as std::str::FromStr>::Err: std::fmt::Display,
-{
-    #[inline]
-    fn matches(id: Id<'_>, field: Option<Id<'_>>) -> bool {
-        match field {
-            Some(field) => id == field,
-            None => false,
-        }
-    }
-
-    fn deserialize<'cx>(
-        into: &mut Self::Accumulator,
-        field: &'static str,
-        deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
-    ) -> Result<(), instant_xml::Error> {
-        if into.is_some() {
-            return Err(instant_xml::Error::DuplicateValue);
-        }
-
-        match deserializer.take_str()? {
-            Some(value) => {
-                let parsed: T = value.parse().map_err(|err| {
-                    instant_xml::Error::Other(format!(
-                        "invalid URN for field {field}: {value}: {err:#}"
-                    ))
-                })?;
-                *into = Some(XmlWrapped(parsed));
-                Ok(())
-            }
-            None => Err(instant_xml::Error::MissingValue(field)),
-        }
-    }
-
-    type Accumulator = Option<XmlWrapped<T>>;
-    const KIND: Kind = Kind::Scalar;
-}
 
 #[derive(Debug, FromXml)]
 #[xml(rename = "device", ns(UPNP_DEVICE))]
@@ -175,11 +125,332 @@ impl Service {
     pub fn scpd_url(&self, url: &Url) -> Url {
         self.join_url(url, &self.scpd_url)
     }
+
+    pub async fn subscribe(&self, url: &Url) -> crate::Result<EventSubscription> {
+        let sub_url = self.event_sub_url(url);
+
+        // Figure out an appropriate local address to talk to
+        // this device
+        let host = url
+            .host()
+            .ok_or_else(|| Error::NoIpInDeviceUrl(url.clone()))?;
+        let ip: IpAddr = match host {
+            Host::Domain(_s) => return Err(Error::NoIpInDeviceUrl(url.clone())),
+            Host::Ipv4(v4) => v4.into(),
+            Host::Ipv6(v6) => v6.into(),
+        };
+
+        let probe = TcpStream::connect((ip, url.port().unwrap_or(80))).await?;
+        let listener = TcpListener::bind((probe.local_addr()?.ip(), 0)).await?;
+        let local = listener.local_addr()?;
+
+        let response = reqwest::Client::new()
+            .request(
+                Method::from_bytes(b"SUBSCRIBE").expect("SUBSCRIBE to be a valid method"),
+                sub_url.clone(),
+            )
+            .header("CALLBACK", format!("<http://{local}>"))
+            .header("NT", "upnp:event")
+            .header("TIMEOUT", format!("Second-{SUBSCRIPTION_TIMEOUT}"))
+            .send()
+            .await?;
+
+        let response = Error::check_response(response).await?;
+
+        println!("response: {response:?}");
+
+        let sid = response
+            .headers()
+            .get("sid")
+            .ok_or(Error::SubscriptionFailedNoSid)?
+            .to_str()
+            .map_err(|_| Error::SubscriptionFailedNoSid)?
+            .to_string();
+
+        let body = response.text().await?;
+        println!("Got response: {body}");
+
+        let (tx, rx) = channel(16);
+        {
+            let sid = sid.clone();
+            let sub_url = sub_url.clone();
+            tokio::spawn(async move { process_subscription(listener, tx, sid, sub_url).await });
+        }
+
+        Ok(EventSubscription { sid, rx, sub_url })
+    }
+}
+
+const SUBSCRIPTION_TIMEOUT: u64 = 60;
+
+async fn process_subscription(
+    listener: TcpListener,
+    tx: Sender<SubscriptionMessage>,
+    sid: String,
+    sub_url: Url,
+) -> crate::Result<()> {
+    let mut deadline =
+        tokio::time::Instant::now() + tokio::time::Duration::from_secs(SUBSCRIPTION_TIMEOUT - 10);
+    loop {
+        match tokio::time::timeout_at(deadline, listener.accept()).await {
+            Ok(Ok((client, _addr))) => {
+                let tx = tx.clone();
+                tokio::spawn(async move { handle_subscription_request(client, tx).await });
+            }
+            Ok(Err(err)) => {
+                log::error!("accept failed: {err:#}");
+                return Ok(());
+            }
+            Err(_) => {
+                println!("time to renew!");
+                // Time to renew subscription
+                let renew = match dbg!(tx.try_send(SubscriptionMessage::Ping)) {
+                    Ok(_) | Err(tokio::sync::mpsc::error::TrySendError::Full(_)) => true,
+                    Err(tokio::sync::mpsc::error::TrySendError::Closed(_)) => {
+                        // It's dead; don't bother renewing
+                        false
+                    }
+                };
+
+                dbg!(renew_or_cancel_sub(&sub_url, renew, &sid).await)?;
+
+                if renew {
+                    deadline = tokio::time::Instant::now()
+                        + tokio::time::Duration::from_secs(SUBSCRIPTION_TIMEOUT - 10);
+                } else {
+                    return Ok(());
+                }
+            }
+        }
+    }
+}
+
+async fn handle_subscription_request(
+    mut client: TcpStream,
+    tx: Sender<SubscriptionMessage>,
+) -> crate::Result<()> {
+    let mut reqbuf = vec![];
+    let mut buf = [0u8; 4096];
+
+    while let Ok(len) = client.read(&mut buf).await {
+        reqbuf.extend_from_slice(&buf[0..len]);
+
+        let mut headers = [httparse::EMPTY_HEADER; 16];
+        let mut req = httparse::Request::new(&mut headers);
+
+        match req.parse(&reqbuf) {
+            Err(err) => {
+                log::error!("Error parsing request: {err:#}");
+                break;
+            }
+            Ok(httparse::Status::Partial) => continue,
+            Ok(httparse::Status::Complete(body_start)) => {
+                // It's only *maybe* complete; check the content-length
+                // vs. the data in the buffer
+                if let Some(cl) = req
+                    .headers
+                    .iter()
+                    .find(|h| h.name.eq_ignore_ascii_case("Content-Length"))
+                {
+                    match std::str::from_utf8(cl.value)
+                        .ok()
+                        .and_then(|s| s.parse::<usize>().ok())
+                    {
+                        Some(cl) => {
+                            let avail = reqbuf.len() - body_start;
+                            if avail < cl {
+                                // We need more data
+                                continue;
+                            }
+                        }
+                        None => {
+                            log::error!("Invalid header: {cl:?}");
+                            break;
+                        }
+                    }
+                }
+                let body = String::from_utf8_lossy(&reqbuf[body_start..]).to_string();
+
+                log::trace!("{req:#?}");
+                log::trace!("{body}");
+
+                match instant_xml::from_str::<PropertySet>(&body) {
+                    Ok(set) => {
+                        for (key, value) in set.normalize() {
+                            if let Err(err) =
+                                tx.send(SubscriptionMessage::Data { key, value }).await
+                            {
+                                log::error!("Channel is dead {err:#}");
+                                return Ok(());
+                            }
+                        }
+                    }
+                    Err(err) => {
+                        log::error!("Failed to parse PropertySet: {err:#} from {body}");
+                    }
+                }
+
+                break;
+            }
+        }
+    }
+    Ok(())
+}
+
+async fn renew_or_cancel_sub(sub_url: &Url, subscribe: bool, sid: &str) -> crate::Result<Response> {
+    eprintln!("renew_or_cancel_sub {subscribe} {sid}");
+    let mut request = reqwest::Client::new()
+        .request(
+            Method::from_bytes(if subscribe {
+                b"SUBSCRIBE"
+            } else {
+                b"UNSUBSCRIBE"
+            })
+            .expect("SUBSCRIBE to be a valid method"),
+            sub_url.clone(),
+        )
+        .header("SID", sid);
+    if subscribe {
+        request = request.header("TIMEOUT", format!("Second-{SUBSCRIPTION_TIMEOUT}"));
+    }
+    let response = request.send().await?;
+
+    let response = Error::check_response(response).await?;
+
+    Ok(response)
+}
+
+enum SubscriptionMessage {
+    Ping,
+    Data { key: String, value: String },
+}
+
+pub struct EventSubscription {
+    rx: Receiver<SubscriptionMessage>,
+    sid: String,
+    sub_url: Url,
+}
+
+impl EventSubscription {
+    pub async fn recv(&mut self) -> Option<(String, String)> {
+        loop {
+            let msg = self.rx.recv().await?;
+            match msg {
+                SubscriptionMessage::Ping => {}
+                SubscriptionMessage::Data { key, value } => {
+                    return Some((key, value));
+                }
+            }
+        }
+    }
+
+    pub async fn unsubscribe(self) {
+        renew_or_cancel_sub(&self.sub_url, false, &self.sid)
+            .await
+            .ok();
+    }
+}
+
+const UPNP_EVENT: &str = "urn:schemas-upnp-org:event-1-0";
+
+#[derive(Debug, FromXml)]
+#[xml(rename="propertyset", ns(UPNP_EVENT, e=UPNP_EVENT))]
+struct PropertySet {
+    pub properties: Vec<Property>,
+}
+
+impl PropertySet {
+    pub fn normalize(self) -> BTreeMap<String, String> {
+        let mut result = BTreeMap::new();
+        for prop in self.properties {
+            result.extend(prop.map.into_iter());
+        }
+        result
+    }
+}
+
+#[derive(Debug, Default)]
+struct Property {
+    pub map: BTreeMap<String, String>,
+}
+
+/// Custom FromXml to collect elements into an arbitrary map.
+/// There is no compile-time hints we can use for this; we just
+/// have to do it all at runtime and build a map
+impl<'xml> FromXml<'xml> for Property {
+    fn matches(id: instant_xml::Id<'_>, _field: Option<instant_xml::Id<'_>>) -> bool {
+        println!("Property::matches {id:?} {_field:?}");
+        id == instant_xml::Id {
+            ns: UPNP_EVENT,
+            name: "property",
+        }
+    }
+
+    fn deserialize<'cx>(
+        accumulator: &mut <Self as FromXml<'xml>>::Accumulator,
+        field: &'static str,
+        deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
+    ) -> std::result::Result<(), instant_xml::Error> {
+        let mut map = BTreeMap::new();
+        println!("Property::deserialize {field}");
+
+        loop {
+            let node = match dbg!(deserializer.next()) {
+                Some(result) => result?,
+                None => break,
+            };
+
+            match node {
+                instant_xml::de::Node::Open(data) => {
+                    let id = deserializer.element_id(&data)?;
+                    let mut nested = deserializer.nested(data);
+                    match dbg!(nested.take_str())? {
+                        Some(value) => {
+                            map.insert(id.name.to_string(), value.to_string());
+                            nested.ignore()?;
+                        }
+                        None => {
+                            // We hit this case for eg: `<SourceAreasUpdateID/>`,
+                            // an empty element. We choose to skip this, rather
+                            // than raising an error.
+                            // return Err(instant_xml::Error::MissingValue(id.name.to_string()));
+                            nested.ignore()?;
+                        }
+                    }
+                }
+                instant_xml::de::Node::Text(_) => {}
+                node => {
+                    return Err(instant_xml::Error::UnexpectedNode(format!(
+                        "{:?} in property",
+                        node
+                    )))
+                }
+            }
+        }
+
+        accumulator.replace(dbg!(Property { map }));
+        Ok(())
+    }
+    type Accumulator = Option<Self>;
+    const KIND: instant_xml::Kind = instant_xml::Kind::Element;
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
+
+    #[test]
+    fn parse_property_set() {
+        let set: PropertySet = instant_xml::from_str(r#"<e:propertyset xmlns:e="urn:schemas-upnp-org:event-1-0"><e:property><LastChange>something</LastChange></e:property></e:propertyset>"#).unwrap();
+        k9::snapshot!(
+            set.normalize(),
+            r#"
+{
+    "LastChange": "something",
+}
+"#
+        );
+    }
 
     #[test]
     fn parse_device_spec() {
