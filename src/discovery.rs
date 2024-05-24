@@ -1,5 +1,4 @@
-use crate::Result;
-use crate::SonosDevice;
+use crate::{Result, SonosDevice};
 use std::collections::BTreeMap;
 use std::time::Duration;
 use tokio::net::UdpSocket;

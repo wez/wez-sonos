@@ -1,12 +1,9 @@
 use crate::Error;
 use instant_xml::FromXml;
-use reqwest::Method;
-use reqwest::Response;
-use reqwest::Url;
+use reqwest::{Method, Response, Url};
 use std::net::IpAddr;
 use tokio::io::AsyncReadExt;
-use tokio::net::TcpListener;
-use tokio::net::TcpStream;
+use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::mpsc::{channel, Receiver, Sender};
 use url::Host;
 

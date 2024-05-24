@@ -1,12 +1,8 @@
-use crate::schema::ModelInfo;
-use crate::schema::Parameter;
-use crate::schema::ServiceInfo;
-use crate::schema::StateVariable;
+use crate::schema::{ModelInfo, Parameter, ServiceInfo, StateVariable};
 use inflector::Inflector;
 use serde::Deserialize;
 use serde_json::Value;
-use std::collections::BTreeMap;
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::Write;
 
 mod schema;

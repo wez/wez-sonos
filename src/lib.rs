@@ -1,7 +1,5 @@
-use instant_xml::FromXmlOwned;
-use instant_xml::ToXml;
-use reqwest::StatusCode;
-use reqwest::Url;
+use instant_xml::{FromXmlOwned, ToXml};
+use reqwest::{StatusCode, Url};
 use std::net::Ipv4Addr;
 use thiserror::Error;
 
