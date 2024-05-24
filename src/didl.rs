@@ -1,4 +1,4 @@
-use crate::Result;
+use crate::{DecodeXml, Error, Result};
 use instant_xml::{FromXml, ToXml};
 use std::time::Duration;
 
@@ -20,6 +20,19 @@ pub struct TrackMetaData {
     pub mime_type: Option<String>,
     pub art_url: Option<String>,
     pub class: ObjectClass,
+}
+
+impl DecodeXml for TrackMetaData {
+    fn decode_xml(xml: &str) -> Result<Self> {
+        let mut list = Self::from_didl_str(xml)?;
+        if list.len() == 1 {
+            Ok(list.pop().expect("have 1"))
+        } else if list.is_empty() {
+            Err(Error::EmptyTrackMetaData)
+        } else {
+            Err(Error::MoreThanOneTrackMetaData)
+        }
+    }
 }
 
 const HMS_FACTORS: &[u64] = &[86400, 3600, 60, 1];

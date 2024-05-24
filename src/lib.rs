@@ -16,8 +16,8 @@ pub use didl::*;
 pub use discovery::*;
 pub use generated::*;
 pub use upnp::*;
-pub use zone::*;
 pub use xmlutil::DecodeXmlString;
+pub use zone::*;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -54,6 +54,10 @@ pub enum Error {
     NoIpInDeviceUrl(Url),
     #[error("Subscription failed because SID header is missing")]
     SubscriptionFailedNoSid,
+    #[error("TrackMetaData list is empty!?")]
+    EmptyTrackMetaData,
+    #[error("TrackMetaData has multiple items but expect a single item")]
+    MoreThanOneTrackMetaData,
 }
 
 impl Error {
@@ -138,7 +142,7 @@ impl SonosDevice {
         let state = <Self as ZoneGroupTopology>::get_zone_group_state(self).await?;
         Ok(match state.zone_group_state {
             Some(state) => state.0.groups,
-            None => vec![]
+            None => vec![],
         })
     }
 

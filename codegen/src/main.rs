@@ -19,18 +19,26 @@ pub struct VersionedService {
 }
 
 impl VersionedService {
-    fn resolve_type_for_sv(&self, name: &str, sv: &StateVariable, always_optional: bool) -> String {
+    fn resolve_type_for_sv(
+        &self,
+        name: &str,
+        field_name: &str,
+        sv: &StateVariable,
+        always_optional: bool,
+    ) -> String {
         let refined_name = name.replace("A_ARG_TYPE_", "");
 
         let target = if let Some(Value::Array(_)) = &sv.allowed_values {
             // Use an enum
             format!("super::{refined_name}")
         } else {
-            let known_types = ["ZoneGroupState"];
-
-            if sv.data_type == "string" && known_types.contains(&refined_name.as_str()) {
-                // Use a wrapped version of this type
-                format!("crate::xmlutil::DecodeXmlString<crate::{refined_name}>")
+            if sv.data_type == "string" {
+                let target = self.maybe_decode_xml(&refined_name);
+                if target == "String" {
+                    self.maybe_decode_xml(field_name)
+                } else {
+                    target
+                }
             } else {
                 match sv.data_type.as_str() {
                     "string" => "String",
@@ -51,15 +59,29 @@ impl VersionedService {
         }
     }
 
+    fn maybe_decode_xml(&self, name: &str) -> String {
+        let known_types = ["ZoneGroupState", "TrackMetaData"];
+
+        if known_types.contains(&name) {
+            // Use a wrapped version of this type
+            format!("crate::xmlutil::DecodeXmlString<crate::{name}>")
+        } else {
+            "String".to_string()
+        }
+    }
+
     fn resolve_type_for_param(&self, param: &VersionedParameter, always_optional: bool) -> String {
         let target = match self
             .state_variables
             .get(&param.param.related_state_variable_name)
         {
-            Some(sv) => {
-                self.resolve_type_for_sv(&param.param.related_state_variable_name, sv, false)
-            }
-            None => "String".to_string(),
+            Some(sv) => self.resolve_type_for_sv(
+                &param.param.related_state_variable_name,
+                &param.param.name,
+                sv,
+                false,
+            ),
+            None => self.maybe_decode_xml(&param.param.name),
         };
 
         if param.optional || always_optional {
@@ -389,7 +411,7 @@ pub struct {service_name}Event {{"
             for (name, sv) in &event_fields {
                 let field_name = to_snake_case(name);
 
-                let field_type = service.resolve_type_for_sv(&name, sv, true);
+                let field_type = service.resolve_type_for_sv(&name, &name, sv, true);
 
                 writeln!(&mut types, "  pub {field_name}: {field_type},").ok();
             }
@@ -417,7 +439,7 @@ struct {service_name}Property {{
             for (name, sv) in &event_fields {
                 let field_name = to_snake_case(name);
 
-                let field_type = service.resolve_type_for_sv(&name, sv, true);
+                let field_type = service.resolve_type_for_sv(&name, &name, sv, true);
 
                 writeln!(&mut types, "  #[xml(rename=\"{name}\", ns(\"\"))]",).ok();
                 writeln!(&mut types, "  pub {field_name}: {field_type},").ok();

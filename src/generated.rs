@@ -425,7 +425,7 @@ pub mod av_transport {
         #[xml(rename = "TrackDuration", ns(""))]
         pub track_duration: Option<String>,
         #[xml(rename = "TrackMetaData", ns(""))]
-        pub track_meta_data: Option<String>,
+        pub track_meta_data: Option<crate::xmlutil::DecodeXmlString<crate::TrackMetaData>>,
         #[xml(rename = "TrackURI", ns(""))]
         pub track_uri: Option<String>,
         #[xml(rename = "RelTime", ns(""))]
