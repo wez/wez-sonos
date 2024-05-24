@@ -371,21 +371,6 @@ mod test {
     use super::*;
 
     #[test]
-    fn parse_property_set() {
-        let event= crate::av_transport::AVTransportEvent ::decode_xml(r#"<e:propertyset xmlns:e="urn:schemas-upnp-org:event-1-0"><e:property><LastChange>something</LastChange></e:property></e:propertyset>"#).unwrap();
-        k9::snapshot!(
-            event,
-            r#"
-AVTransportEvent {
-    last_change: Some(
-        "something",
-    ),
-}
-"#
-        );
-    }
-
-    #[test]
     fn parse_device_spec() {
         let spec_text = include_str!("../data/device_spec.xml");
         let spec: Root = instant_xml::from_str(&spec_text).unwrap();

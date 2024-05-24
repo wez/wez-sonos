@@ -91,6 +91,12 @@ impl TrackMetaData {
     pub fn to_didl_string(&self) -> String {
         let didl = DidlLite {
             item: vec![UpnpItem {
+                queue_item_id: None,
+                mime_type: self
+                    .mime_type
+                    .clone()
+                    .map(|mime_type| MimeType { mime_type }),
+                duration: None,
                 id: "-1".to_string(),
                 parent_id: "-1".to_string(),
                 restricted: true,
@@ -115,6 +121,7 @@ impl TrackMetaData {
                     .clone()
                     .map(|album_title| AlbumTitle { album_title }),
                 creator: self.creator.clone().map(|artist| Creator { artist }),
+                artist: self.creator.clone().map(|artist| Artist { artist }),
                 class: Some(ObjectClass::MusicTrack),
             }],
         };
@@ -131,7 +138,10 @@ impl TrackMetaData {
                 creator: item.creator.map(|a| a.artist),
                 art_url: item.album_art.map(|a| a.uri),
                 title: item.title.map(|a| a.title).unwrap_or_else(String::new),
-                duration: item.res.as_ref().map(|r| hms_to_duration(&r.duration)),
+                duration: match item.duration {
+                    Some(d) => Some(Duration::from_secs(d.duration)),
+                    None => item.res.as_ref().map(|r| hms_to_duration(&r.duration)),
+                },
                 url: item
                     .res
                     .as_ref()
@@ -164,11 +174,15 @@ pub struct UpnpItem {
     pub restricted: bool,
 
     pub res: Option<Res>,
+    pub duration: Option<UpnpDuration>,
     pub album_art: Option<AlbumArtUri>,
     pub album_title: Option<AlbumTitle>,
+    pub artist: Option<Artist>,
     pub creator: Option<Creator>,
     pub title: Option<Title>,
     pub class: Option<ObjectClass>,
+    pub mime_type: Option<MimeType>,
+    pub queue_item_id: Option<QueueItemId>,
 }
 
 #[derive(Debug, FromXml, ToXml)]
@@ -180,6 +194,13 @@ pub struct Res {
     pub duration: String,
     #[xml(direct)]
     pub url: String,
+}
+
+#[derive(Debug, FromXml, ToXml)]
+#[xml(rename="mimeType", ns(XMLNS_UPNP, upnp=XMLNS_UPNP))]
+pub struct MimeType {
+    #[xml(direct)]
+    pub mime_type: String,
 }
 
 #[derive(Debug, FromXml, ToXml)]
@@ -197,6 +218,20 @@ pub struct AlbumTitle {
 }
 
 #[derive(Debug, FromXml, ToXml)]
+#[xml(rename="artist", ns(XMLNS_UPNP, upnp=XMLNS_UPNP))]
+pub struct Artist {
+    #[xml(direct)]
+    pub artist: String,
+}
+
+#[derive(Debug, FromXml, ToXml)]
+#[xml(rename="duration", ns(XMLNS_UPNP, upnp=XMLNS_UPNP))]
+pub struct UpnpDuration {
+    #[xml(direct)]
+    pub duration: u64,
+}
+
+#[derive(Debug, FromXml, ToXml)]
 #[xml(rename="creator", ns(XMLNS_DC_ELEMENTS, dc=XMLNS_DC_ELEMENTS))]
 pub struct Creator {
     #[xml(direct)]
@@ -210,12 +245,21 @@ pub struct Title {
     pub title: String,
 }
 
+#[derive(Debug, FromXml, ToXml)]
+#[xml(rename="queueItemId", ns(XMLNS_DC_ELEMENTS, dc=XMLNS_DC_ELEMENTS))]
+pub struct QueueItemId {
+    #[xml(direct)]
+    pub id: String,
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Eq, FromXml, ToXml)]
 #[xml(rename="class", scalar, ns(XMLNS_UPNP, upnp=XMLNS_UPNP))]
 pub enum ObjectClass {
     #[xml(rename = "object.item.audioItem.musicTrack")]
     #[default]
     MusicTrack,
+    #[xml(rename = "object.item.audioItem.audioBroadcast")]
+    AudioBroadcast,
 }
 
 #[cfg(test)]
@@ -226,12 +270,15 @@ mod test {
     fn test_didl() {
         let didl = DidlLite {
             item: vec![UpnpItem {
+                queue_item_id: None,
+                mime_type: None,
                 album_art: Some(AlbumArtUri {
                     uri: "http://art".to_string(),
                 }),
                 album_title: Some(AlbumTitle {
                     album_title: "My Album".to_string(),
                 }),
+                artist: None,
                 creator: Some(Creator {
                     artist: "Some Guy".to_string(),
                 }),
@@ -243,6 +290,7 @@ mod test {
                     duration: "0:30:31".to_string(),
                     url: "http://track.mp3".to_string(),
                 }),
+                duration: None,
                 restricted: true,
                 title: Some(Title {
                     title: "Track Title".to_string(),
@@ -252,6 +300,76 @@ mod test {
         k9::snapshot!(
             instant_xml::to_string(&didl).unwrap(),
             r#"<DIDL-Lite xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/" xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/"><item id="-1" parentID="-1" restricted="true"><res protocolInfo="http-get:*:audio/mpeg" duration="0:30:31">http://track.mp3</res><upnp:albumArtURI>http://art</upnp:albumArtURI><upnp:album>My Album</upnp:album><dc:creator>Some Guy</dc:creator><dc:title>Track Title</dc:title><upnp:class>object.item.audioItem.musicTrack</upnp:class></item></DIDL-Lite>"#
+        );
+    }
+
+    #[test]
+    fn test_real_didl() {
+        let input = r#"<DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/" xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/" xmlns:dlna="urn:schemas-dlna-org:metadata-1-0/"><item id="1" parentID="0" restricted="1"><dc:title>Late Nights and Sneaky Moms</dc:title><dc:creator>DJ Birchy</dc:creator><upnp:album>[Unknown Album]</upnp:album><upnp:artist>DJ Borchy</upnp:artist><upnp:duration>4364</upnp:duration><dc:queueItemId>http://192.168.1.214:8097/single/RINCON_XXX/51f8b02b9d3b4a88b97dd385ba2b572b.flac?ts=1716507641</dc:queueItemId><upnp:albumArtURI>http://192.168.1.214:8097/imageproxy?path=al-573b45a1bde2b333c07b41545898da44_59330182&amp;provider=opensubsonic--EcQ6qYKn&amp;size=0&amp;fmt=png</upnp:albumArtURI><upnp:class>object.item.audioItem.audioBroadcast</upnp:class><upnp:mimeType>audio/flac</upnp:mimeType><res duration="1:12:44.000" protocolInfo="http-get:*:audio/flac:DLNA.ORG_PN=FLAC;DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=0d500000000000000000000000000000">http://192.168.1.214:8097/single/RINCON_XXX/51f8b02b9d3b4a88b97dd385ba2b572b.flac?ts=1716507641</res></item></DIDL-Lite>"#;
+        let didl: DidlLite = instant_xml::from_str(&input).unwrap();
+        k9::snapshot!(
+            didl,
+            r#"
+DidlLite {
+    item: [
+        UpnpItem {
+            id: "1",
+            parent_id: "0",
+            restricted: true,
+            res: Some(
+                Res {
+                    protocol_info: "http-get:*:audio/flac:DLNA.ORG_PN=FLAC;DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=0d500000000000000000000000000000",
+                    duration: "1:12:44.000",
+                    url: "http://192.168.1.214:8097/single/RINCON_XXX/51f8b02b9d3b4a88b97dd385ba2b572b.flac?ts=1716507641",
+                },
+            ),
+            duration: Some(
+                UpnpDuration {
+                    duration: 4364,
+                },
+            ),
+            album_art: Some(
+                AlbumArtUri {
+                    uri: "http://192.168.1.214:8097/imageproxy?path=al-573b45a1bde2b333c07b41545898da44_59330182&provider=opensubsonic--EcQ6qYKn&size=0&fmt=png",
+                },
+            ),
+            album_title: Some(
+                AlbumTitle {
+                    album_title: "[Unknown Album]",
+                },
+            ),
+            artist: Some(
+                Artist {
+                    artist: "DJ Borchy",
+                },
+            ),
+            creator: Some(
+                Creator {
+                    artist: "DJ Birchy",
+                },
+            ),
+            title: Some(
+                Title {
+                    title: "Late Nights and Sneaky Moms",
+                },
+            ),
+            class: Some(
+                AudioBroadcast,
+            ),
+            mime_type: Some(
+                MimeType {
+                    mime_type: "audio/flac",
+                },
+            ),
+            queue_item_id: Some(
+                QueueItemId {
+                    id: "http://192.168.1.214:8097/single/RINCON_XXX/51f8b02b9d3b4a88b97dd385ba2b572b.flac?ts=1716507641",
+                },
+            ),
+        },
+    ],
+}
+"#
         );
     }
 

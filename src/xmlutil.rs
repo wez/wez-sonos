@@ -32,7 +32,7 @@ where
             Some(value) => {
                 let parsed = T::decode_xml(&value).map_err(|err| {
                     instant_xml::Error::Other(format!(
-                        "failed to decode_xml for {field}: {value}: {err:#}"
+                        "failed to decode_xml for {field}: `{err:#}` {value}"
                     ))
                 })?;
                 target.replace(DecodeXmlString(parsed));

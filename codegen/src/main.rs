@@ -14,6 +14,10 @@ pub struct VersionedService {
     pub actions: BTreeMap<String, VersionedAction>,
 }
 
+fn refine_name(name: &str) -> String {
+    name.replace("A_ARG_TYPE_", "")
+}
+
 impl VersionedService {
     fn resolve_type_for_sv(
         &self,
@@ -23,7 +27,7 @@ impl VersionedService {
         always_optional: bool,
         containing_struct_name: &str,
     ) -> String {
-        let refined_name = name.replace("A_ARG_TYPE_", "");
+        let refined_name = refine_name(name);
 
         let target = if let Some(Value::Array(_)) = &sv.allowed_values {
             // Use an enum
@@ -112,7 +116,7 @@ impl VersionedService {
         {
             // Use a wrapped version of this type
             format!(
-                "crate::xmlutil::DecodeXmlString<crate::{}>",
+                "DecodeXmlString<crate::{}>",
                 entry.type_name()
             )
         } else {
@@ -312,7 +316,7 @@ fn main() {
             &mut types,
             "/// Request and Response types for the `{service_name}` service.
             pub mod {service_module} {{
-use instant_xml::{{FromXml, ToXml}};
+use super::*;
 "
         )
         .ok();
@@ -461,16 +465,27 @@ impl crate::DecodeSoapResponse for {response_type_name} {{
 pub struct {service_name}Event {{"
             )
             .ok();
+
+            let mut has_last_change = false;
+
             for (name, sv) in &event_fields {
+                if *name == "LastChange" {
+                    has_last_change = true;
+                }
+
                 let field_name = to_snake_case(name);
 
-                let field_type = service.resolve_type_for_sv(
+                let field_type = if name.as_str() == "LastChange" {
+                    format!("Option<DecodeXmlString<{service_name}LastChange>>")
+                } else {
+                    service.resolve_type_for_sv(
                     &name,
                     &name,
                     sv,
                     true,
                     &format!("{service_name}Event"),
-                );
+                )
+                };
 
                 writeln!(&mut types, "  pub {field_name}: {field_type},").ok();
             }
@@ -498,13 +513,17 @@ struct {service_name}Property {{
             for (name, sv) in &event_fields {
                 let field_name = to_snake_case(name);
 
-                let field_type = service.resolve_type_for_sv(
+                let field_type = if name.as_str() == "LastChange" {
+                    format!("Option<DecodeXmlString<{service_name}LastChange>>")
+                } else {
+                    service.resolve_type_for_sv(
                     &name,
                     &name,
                     sv,
                     true,
                     &format!("{service_name}Event"),
-                );
+                )
+                };
 
                 writeln!(&mut types, "  #[xml(rename=\"{name}\", ns(\"\"))]",).ok();
                 writeln!(&mut types, "  pub {field_name}: {field_type},").ok();
@@ -514,7 +533,7 @@ struct {service_name}Property {{
             writeln!(
                 &mut types,
                 r#"
-impl crate::upnp::DecodeXml for {service_name}Event {{
+impl DecodeXml for {service_name}Event {{
     fn decode_xml(xml: &str) -> crate::Result<Self> {{
         let mut result = Self::default();
         let set: {service_name}PropertySet = instant_xml::from_str(xml)?;
@@ -549,13 +568,106 @@ impl crate::SonosDevice {{
     }}
 }}
 "#).ok();
+
+            if has_last_change {
+                writeln!(
+                    &mut types,
+                    r#"
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct {service_name}LastChange {{
+    "#
+                )
+                .ok();
+
+                let last_change_ns = "urn:schemas-upnp-org:metadata-1-0/AVT/";
+
+                let mut instance_wrapper = String::new();
+                let mut attributes = String::new();
+                let mut decode_logic = String::new();
+                writeln!(&mut instance_wrapper, r#"
+const LAST_CHANGE_NS: &str = "{last_change_ns}";
+
+#[derive(FromXml)]
+#[xml(rename="InstanceID", ns(LAST_CHANGE_NS))]
+struct {service_name}LastChangeInstanceId {{
+                "#).ok();
+
+                let mut names_done = BTreeSet::new();
+                for (name, sv) in &service.state_variables {
+                    if name == "LastChange" {
+                        continue;
+                    }
+                    let name = refine_name(&name);
+                    if names_done.contains(&name) {
+                        continue;
+                    }
+                    names_done.insert(name.to_string());
+
+                    let field_name = to_snake_case(&name);
+                    let field_type = service.resolve_type_for_sv(
+                        &name,
+                        &name,
+                        sv,
+                        true,
+                        &format!("{service_name}Event"),
+                    );
+
+                    writeln!(&mut types, "  pub {field_name}: {field_type},").ok();
+
+                    writeln!(&mut instance_wrapper, "  {field_name}: Option<{service_name}LastChange{name}>,").ok();
+
+                    writeln!(&mut attributes, r#"
+#[derive(FromXml)]
+#[xml(rename="{name}", ns(LAST_CHANGE_NS))]
+#[allow(non_camel_case_types)]
+struct {service_name}LastChange{name} {{
+    #[xml(attribute)]
+    val: {field_type},
+}}
+                "#).ok();
+
+                    writeln!(&mut decode_logic, r#"
+result.{field_name} = last_change.instance.{field_name}.and_then(|v| v.val);
+                    "#).ok();
+
+                }
+writeln!(&mut instance_wrapper, "}}").ok();
+
+                writeln!(
+                    &mut types,
+                    r#"}}
+{attributes}
+
+{instance_wrapper}
+
+impl DecodeXml for {service_name}LastChange {{
+    fn decode_xml(xml: &str) -> crate::Result<Self> {{
+        #[derive(FromXml)]
+        #[xml(ns(LAST_CHANGE_NS, r="urn:schemas-rinconnetworks-com:metadata-1-0/"))]
+        struct Event {{
+            instance: {service_name}LastChangeInstanceId,
+        }}
+
+        let last_change: Event = instant_xml::from_str(xml)?;
+        let mut result = Self::default();
+
+        {decode_logic}
+
+        Ok(result)
+    }}
+}}
+"#
+                )
+                .ok();
+            }
         }
 
+        // close `mod service_module`
         writeln!(&mut types, "}}\n").ok();
 
         for (name, sv) in &service.state_variables {
             if let Some(Value::Array(allowed)) = &sv.allowed_values {
-                let enum_name = name.replace("A_ARG_TYPE_", "");
+                let enum_name = refine_name(name);
 
                 writeln!(
                     &mut types,
@@ -690,6 +802,9 @@ impl<'xml> instant_xml::FromXml<'xml> for {enum_name} {{
 use std::str::FromStr;
 use crate::SonosDevice;
 use crate::Result;
+use instant_xml::{{FromXml, ToXml}};
+use crate::upnp::DecodeXml;
+use crate::xmlutil::DecodeXmlString;
 
 {types}
 {traits}

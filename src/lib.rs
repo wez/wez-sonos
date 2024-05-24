@@ -56,6 +56,8 @@ pub enum Error {
     EmptyTrackMetaData,
     #[error("TrackMetaData has multiple items but expect a single item")]
     MoreThanOneTrackMetaData,
+    #[error("LastChange format unexpected {0}")]
+    LastChangeFormatUnexpected(String),
 }
 
 impl Error {
