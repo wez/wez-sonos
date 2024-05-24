@@ -6,13 +6,10 @@ async fn main() -> sonos::Result<()> {
 
     let device = SonosDevice::for_room("Study").await?;
 
-    //let mut events = device.subscribe(sonos::av_transport::SERVICE_TYPE).await?;
-    let mut events = device
-        .subscribe(sonos::zone_group_topology::SERVICE_TYPE)
-        .await?;
+    let mut events = device.subscribe_zone_group_topology().await?;
 
-    while let Some((k, v)) = events.recv().await {
-        println!("{k}: {v}");
+    while let Some(event) = events.recv().await {
+        println!("{event:?}");
     }
 
     Ok(())

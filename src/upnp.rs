@@ -3,7 +3,6 @@ use instant_xml::FromXml;
 use reqwest::Method;
 use reqwest::Response;
 use reqwest::Url;
-use std::collections::BTreeMap;
 use std::net::IpAddr;
 use tokio::io::AsyncReadExt;
 use tokio::net::TcpListener;
@@ -126,7 +125,10 @@ impl Service {
         self.join_url(url, &self.scpd_url)
     }
 
-    pub async fn subscribe(&self, url: &Url) -> crate::Result<EventSubscription> {
+    pub async fn subscribe<T: DecodeXml + 'static>(
+        &self,
+        url: &Url,
+    ) -> crate::Result<EventStream<T>> {
         let sub_url = self.event_sub_url(url);
 
         // Figure out an appropriate local address to talk to
@@ -157,7 +159,7 @@ impl Service {
 
         let response = Error::check_response(response).await?;
 
-        println!("response: {response:?}");
+        log::trace!("response: {response:?}");
 
         let sid = response
             .headers()
@@ -168,7 +170,7 @@ impl Service {
             .to_string();
 
         let body = response.text().await?;
-        println!("Got response: {body}");
+        log::trace!("Got response: {body}");
 
         let (tx, rx) = channel(16);
         {
@@ -177,15 +179,15 @@ impl Service {
             tokio::spawn(async move { process_subscription(listener, tx, sid, sub_url).await });
         }
 
-        Ok(EventSubscription { sid, rx, sub_url })
+        Ok(EventStream { sid, rx, sub_url })
     }
 }
 
 const SUBSCRIPTION_TIMEOUT: u64 = 60;
 
-async fn process_subscription(
+async fn process_subscription<T: DecodeXml + 'static>(
     listener: TcpListener,
-    tx: Sender<SubscriptionMessage>,
+    tx: Sender<SubscriptionMessage<T>>,
     sid: String,
     sub_url: Url,
 ) -> crate::Result<()> {
@@ -202,7 +204,7 @@ async fn process_subscription(
                 return Ok(());
             }
             Err(_) => {
-                println!("time to renew!");
+                log::debug!("time to renew!");
                 // Time to renew subscription
                 let renew = match dbg!(tx.try_send(SubscriptionMessage::Ping)) {
                     Ok(_) | Err(tokio::sync::mpsc::error::TrySendError::Full(_)) => true,
@@ -225,9 +227,9 @@ async fn process_subscription(
     }
 }
 
-async fn handle_subscription_request(
+async fn handle_subscription_request<T: DecodeXml>(
     mut client: TcpStream,
-    tx: Sender<SubscriptionMessage>,
+    tx: Sender<SubscriptionMessage<T>>,
 ) -> crate::Result<()> {
     let mut reqbuf = vec![];
     let mut buf = [0u8; 4096];
@@ -274,15 +276,11 @@ async fn handle_subscription_request(
                 log::trace!("{req:#?}");
                 log::trace!("{body}");
 
-                match instant_xml::from_str::<PropertySet>(&body) {
-                    Ok(set) => {
-                        for (key, value) in set.normalize() {
-                            if let Err(err) =
-                                tx.send(SubscriptionMessage::Data { key, value }).await
-                            {
-                                log::error!("Channel is dead {err:#}");
-                                return Ok(());
-                            }
+                match T::decode_xml(&body) {
+                    Ok(event) => {
+                        if let Err(err) = tx.send(SubscriptionMessage::Event(event)).await {
+                            log::error!("Channel is dead {err:#}");
+                            return Ok(());
                         }
                     }
                     Err(err) => {
@@ -298,7 +296,6 @@ async fn handle_subscription_request(
 }
 
 async fn renew_or_cancel_sub(sub_url: &Url, subscribe: bool, sid: &str) -> crate::Result<Response> {
-    eprintln!("renew_or_cancel_sub {subscribe} {sid}");
     let mut request = reqwest::Client::new()
         .request(
             Method::from_bytes(if subscribe {
@@ -320,30 +317,49 @@ async fn renew_or_cancel_sub(sub_url: &Url, subscribe: bool, sid: &str) -> crate
     Ok(response)
 }
 
-enum SubscriptionMessage {
+enum SubscriptionMessage<T> {
     Ping,
-    Data { key: String, value: String },
+    Event(T),
 }
 
-pub struct EventSubscription {
-    rx: Receiver<SubscriptionMessage>,
+/// A helper trait for parsing a uPNP event stream into
+/// a more ergonomic Rust type
+pub trait DecodeXml: Send {
+    fn decode_xml(xml: &str) -> crate::Result<Self>
+    where
+        Self: Sized;
+}
+
+/// Manages a live subscription to an event stream for a service.
+/// While this object is live, the event stream will be renewed
+/// every minute.
+/// The stream isn't automatically cancelled on Drop because there
+/// is no async-Drop, but you can call the `unsubscribe` method
+/// to explicitly cancel it.
+/// The stream dispatching machinery has liveness checking that will ping
+/// the internal receiver and will cancel the subscription after about
+/// a minute or so of the EventStream being dropped.
+pub struct EventStream<T: DecodeXml> {
+    rx: Receiver<SubscriptionMessage<T>>,
     sid: String,
     sub_url: Url,
 }
 
-impl EventSubscription {
-    pub async fn recv(&mut self) -> Option<(String, String)> {
+impl<T: DecodeXml> EventStream<T> {
+    /// Receives the next event from the stream
+    pub async fn recv(&mut self) -> Option<T> {
         loop {
             let msg = self.rx.recv().await?;
             match msg {
                 SubscriptionMessage::Ping => {}
-                SubscriptionMessage::Data { key, value } => {
-                    return Some((key, value));
+                SubscriptionMessage::Event(v) => {
+                    return Some(v);
                 }
             }
         }
     }
 
+    /// Explicitly cancel the subscription
     pub async fn unsubscribe(self) {
         renew_or_cancel_sub(&self.sub_url, false, &self.sid)
             .await
@@ -351,89 +367,7 @@ impl EventSubscription {
     }
 }
 
-const UPNP_EVENT: &str = "urn:schemas-upnp-org:event-1-0";
-
-#[derive(Debug, FromXml)]
-#[xml(rename="propertyset", ns(UPNP_EVENT, e=UPNP_EVENT))]
-struct PropertySet {
-    pub properties: Vec<Property>,
-}
-
-impl PropertySet {
-    pub fn normalize(self) -> BTreeMap<String, String> {
-        let mut result = BTreeMap::new();
-        for prop in self.properties {
-            result.extend(prop.map.into_iter());
-        }
-        result
-    }
-}
-
-#[derive(Debug, Default)]
-struct Property {
-    pub map: BTreeMap<String, String>,
-}
-
-/// Custom FromXml to collect elements into an arbitrary map.
-/// There is no compile-time hints we can use for this; we just
-/// have to do it all at runtime and build a map
-impl<'xml> FromXml<'xml> for Property {
-    fn matches(id: instant_xml::Id<'_>, _field: Option<instant_xml::Id<'_>>) -> bool {
-        println!("Property::matches {id:?} {_field:?}");
-        id == instant_xml::Id {
-            ns: UPNP_EVENT,
-            name: "property",
-        }
-    }
-
-    fn deserialize<'cx>(
-        accumulator: &mut <Self as FromXml<'xml>>::Accumulator,
-        field: &'static str,
-        deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
-    ) -> std::result::Result<(), instant_xml::Error> {
-        let mut map = BTreeMap::new();
-        println!("Property::deserialize {field}");
-
-        loop {
-            let node = match dbg!(deserializer.next()) {
-                Some(result) => result?,
-                None => break,
-            };
-
-            match node {
-                instant_xml::de::Node::Open(data) => {
-                    let id = deserializer.element_id(&data)?;
-                    let mut nested = deserializer.nested(data);
-                    match dbg!(nested.take_str())? {
-                        Some(value) => {
-                            map.insert(id.name.to_string(), value.to_string());
-                            nested.ignore()?;
-                        }
-                        None => {
-                            // We hit this case for eg: `<SourceAreasUpdateID/>`,
-                            // an empty element. We choose to skip this, rather
-                            // than raising an error.
-                            // return Err(instant_xml::Error::MissingValue(id.name.to_string()));
-                            nested.ignore()?;
-                        }
-                    }
-                }
-                instant_xml::de::Node::Text(_) => {}
-                node => {
-                    return Err(instant_xml::Error::UnexpectedNode(format!(
-                        "{:?} in property",
-                        node
-                    )))
-                }
-            }
-        }
-
-        accumulator.replace(dbg!(Property { map }));
-        Ok(())
-    }
-    type Accumulator = Option<Self>;
-    const KIND: instant_xml::Kind = instant_xml::Kind::Element;
-}
+pub(crate) const UPNP_EVENT: &str = "urn:schemas-upnp-org:event-1-0";
 
 #[cfg(test)]
 mod test {
@@ -441,12 +375,14 @@ mod test {
 
     #[test]
     fn parse_property_set() {
-        let set: PropertySet = instant_xml::from_str(r#"<e:propertyset xmlns:e="urn:schemas-upnp-org:event-1-0"><e:property><LastChange>something</LastChange></e:property></e:propertyset>"#).unwrap();
+        let event= crate::av_transport::AVTransportEvent ::decode_xml(r#"<e:propertyset xmlns:e="urn:schemas-upnp-org:event-1-0"><e:property><LastChange>something</LastChange></e:property></e:propertyset>"#).unwrap();
         k9::snapshot!(
-            set.normalize(),
+            event,
             r#"
-{
-    "LastChange": "something",
+AVTransportEvent {
+    last_change: Some(
+        "something",
+    ),
 }
 "#
         );

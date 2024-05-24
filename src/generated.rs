@@ -815,6 +815,49 @@ pub mod av_transport {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
+
+    /// A parsed event produced by the `AVTransport` service.
+    /// Use `SonosDevice::subscribe_av_transport()` to obtain an event
+    /// stream that produces these.
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct AVTransportEvent {
+        pub last_change: Option<String>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="propertyset", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct AVTransportPropertySet {
+        pub properties: Vec<AVTransportProperty>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="property", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct AVTransportProperty {
+        #[xml(rename = "LastChange", ns(""))]
+        pub last_change: Option<String>,
+    }
+
+    impl crate::upnp::DecodeXml for AVTransportEvent {
+        fn decode_xml(xml: &str) -> crate::Result<Self> {
+            let mut result = Self::default();
+            let set: AVTransportPropertySet = instant_xml::from_str(xml)?;
+            for prop in set.properties {
+                if let Some(v) = prop.last_change {
+                    result.last_change.replace(v);
+                }
+            }
+            Ok(result)
+        }
+    }
+
+    impl crate::SonosDevice {
+        /// Subscribe to events from the `AVTransport` service on this device
+        pub async fn subscribe_av_transport(
+            &self,
+        ) -> crate::Result<crate::upnp::EventStream<AVTransportEvent>> {
+            self.subscribe_helper(&SERVICE_TYPE).await
+        }
+    }
 }
 
 #[derive(PartialEq, Debug, Clone, Eq, Default)]
@@ -1469,6 +1512,91 @@ pub mod alarm_clock {
         #[xml(rename = "IncludeLinkedZones", ns(""))]
         pub include_linked_zones: bool,
     }
+
+    /// A parsed event produced by the `AlarmClock` service.
+    /// Use `SonosDevice::subscribe_alarm_clock()` to obtain an event
+    /// stream that produces these.
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct AlarmClockEvent {
+        pub alarm_list_version: Option<String>,
+        pub daily_index_refresh_time: Option<String>,
+        pub date_format: Option<String>,
+        pub time_format: Option<String>,
+        pub time_generation: Option<u32>,
+        pub time_server: Option<String>,
+        pub time_zone: Option<String>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="propertyset", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct AlarmClockPropertySet {
+        pub properties: Vec<AlarmClockProperty>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="property", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct AlarmClockProperty {
+        #[xml(rename = "AlarmListVersion", ns(""))]
+        pub alarm_list_version: Option<String>,
+        #[xml(rename = "DailyIndexRefreshTime", ns(""))]
+        pub daily_index_refresh_time: Option<String>,
+        #[xml(rename = "DateFormat", ns(""))]
+        pub date_format: Option<String>,
+        #[xml(rename = "TimeFormat", ns(""))]
+        pub time_format: Option<String>,
+        #[xml(rename = "TimeGeneration", ns(""))]
+        pub time_generation: Option<u32>,
+        #[xml(rename = "TimeServer", ns(""))]
+        pub time_server: Option<String>,
+        #[xml(rename = "TimeZone", ns(""))]
+        pub time_zone: Option<String>,
+    }
+
+    impl crate::upnp::DecodeXml for AlarmClockEvent {
+        fn decode_xml(xml: &str) -> crate::Result<Self> {
+            let mut result = Self::default();
+            let set: AlarmClockPropertySet = instant_xml::from_str(xml)?;
+            for prop in set.properties {
+                if let Some(v) = prop.alarm_list_version {
+                    result.alarm_list_version.replace(v);
+                }
+
+                if let Some(v) = prop.daily_index_refresh_time {
+                    result.daily_index_refresh_time.replace(v);
+                }
+
+                if let Some(v) = prop.date_format {
+                    result.date_format.replace(v);
+                }
+
+                if let Some(v) = prop.time_format {
+                    result.time_format.replace(v);
+                }
+
+                if let Some(v) = prop.time_generation {
+                    result.time_generation.replace(v);
+                }
+
+                if let Some(v) = prop.time_server {
+                    result.time_server.replace(v);
+                }
+
+                if let Some(v) = prop.time_zone {
+                    result.time_zone.replace(v);
+                }
+            }
+            Ok(result)
+        }
+    }
+
+    impl crate::SonosDevice {
+        /// Subscribe to events from the `AlarmClock` service on this device
+        pub async fn subscribe_alarm_clock(
+            &self,
+        ) -> crate::Result<crate::upnp::EventStream<AlarmClockEvent>> {
+            self.subscribe_helper(&SERVICE_TYPE).await
+        }
+    }
 }
 
 #[derive(PartialEq, Debug, Clone, Eq, Default)]
@@ -1741,6 +1869,84 @@ pub mod audio_in {
         #[xml(rename = "CoordinatorID", ns(""))]
         pub coordinator_id: String,
     }
+
+    /// A parsed event produced by the `AudioIn` service.
+    /// Use `SonosDevice::subscribe_audio_in()` to obtain an event
+    /// stream that produces these.
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct AudioInEvent {
+        pub audio_input_name: Option<String>,
+        pub icon: Option<String>,
+        pub left_line_in_level: Option<i32>,
+        pub line_in_connected: Option<bool>,
+        pub playing: Option<bool>,
+        pub right_line_in_level: Option<i32>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="propertyset", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct AudioInPropertySet {
+        pub properties: Vec<AudioInProperty>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="property", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct AudioInProperty {
+        #[xml(rename = "AudioInputName", ns(""))]
+        pub audio_input_name: Option<String>,
+        #[xml(rename = "Icon", ns(""))]
+        pub icon: Option<String>,
+        #[xml(rename = "LeftLineInLevel", ns(""))]
+        pub left_line_in_level: Option<i32>,
+        #[xml(rename = "LineInConnected", ns(""))]
+        pub line_in_connected: Option<bool>,
+        #[xml(rename = "Playing", ns(""))]
+        pub playing: Option<bool>,
+        #[xml(rename = "RightLineInLevel", ns(""))]
+        pub right_line_in_level: Option<i32>,
+    }
+
+    impl crate::upnp::DecodeXml for AudioInEvent {
+        fn decode_xml(xml: &str) -> crate::Result<Self> {
+            let mut result = Self::default();
+            let set: AudioInPropertySet = instant_xml::from_str(xml)?;
+            for prop in set.properties {
+                if let Some(v) = prop.audio_input_name {
+                    result.audio_input_name.replace(v);
+                }
+
+                if let Some(v) = prop.icon {
+                    result.icon.replace(v);
+                }
+
+                if let Some(v) = prop.left_line_in_level {
+                    result.left_line_in_level.replace(v);
+                }
+
+                if let Some(v) = prop.line_in_connected {
+                    result.line_in_connected.replace(v);
+                }
+
+                if let Some(v) = prop.playing {
+                    result.playing.replace(v);
+                }
+
+                if let Some(v) = prop.right_line_in_level {
+                    result.right_line_in_level.replace(v);
+                }
+            }
+            Ok(result)
+        }
+    }
+
+    impl crate::SonosDevice {
+        /// Subscribe to events from the `AudioIn` service on this device
+        pub async fn subscribe_audio_in(
+            &self,
+        ) -> crate::Result<crate::upnp::EventStream<AudioInEvent>> {
+            self.subscribe_helper(&SERVICE_TYPE).await
+        }
+    }
 }
 
 /// Request and Response types for the `ConnectionManager` service.
@@ -1811,6 +2017,63 @@ pub mod connection_manager {
         fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
             let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
             Ok(envelope.body.payload)
+        }
+    }
+
+    /// A parsed event produced by the `ConnectionManager` service.
+    /// Use `SonosDevice::subscribe_connection_manager()` to obtain an event
+    /// stream that produces these.
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct ConnectionManagerEvent {
+        pub current_connection_ids: Option<String>,
+        pub sink_protocol_info: Option<String>,
+        pub source_protocol_info: Option<String>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="propertyset", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct ConnectionManagerPropertySet {
+        pub properties: Vec<ConnectionManagerProperty>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="property", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct ConnectionManagerProperty {
+        #[xml(rename = "CurrentConnectionIDs", ns(""))]
+        pub current_connection_ids: Option<String>,
+        #[xml(rename = "SinkProtocolInfo", ns(""))]
+        pub sink_protocol_info: Option<String>,
+        #[xml(rename = "SourceProtocolInfo", ns(""))]
+        pub source_protocol_info: Option<String>,
+    }
+
+    impl crate::upnp::DecodeXml for ConnectionManagerEvent {
+        fn decode_xml(xml: &str) -> crate::Result<Self> {
+            let mut result = Self::default();
+            let set: ConnectionManagerPropertySet = instant_xml::from_str(xml)?;
+            for prop in set.properties {
+                if let Some(v) = prop.current_connection_ids {
+                    result.current_connection_ids.replace(v);
+                }
+
+                if let Some(v) = prop.sink_protocol_info {
+                    result.sink_protocol_info.replace(v);
+                }
+
+                if let Some(v) = prop.source_protocol_info {
+                    result.source_protocol_info.replace(v);
+                }
+            }
+            Ok(result)
+        }
+    }
+
+    impl crate::SonosDevice {
+        /// Subscribe to events from the `ConnectionManager` service on this device
+        pub async fn subscribe_connection_manager(
+            &self,
+        ) -> crate::Result<crate::upnp::EventStream<ConnectionManagerEvent>> {
+            self.subscribe_helper(&SERVICE_TYPE).await
         }
     }
 }
@@ -2252,6 +2515,133 @@ pub mod content_directory {
         pub current_tag_value: String,
         #[xml(rename = "NewTagValue", ns(""))]
         pub new_tag_value: String,
+    }
+
+    /// A parsed event produced by the `ContentDirectory` service.
+    /// Use `SonosDevice::subscribe_content_directory()` to obtain an event
+    /// stream that produces these.
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct ContentDirectoryEvent {
+        pub browseable: Option<bool>,
+        pub container_update_ids: Option<String>,
+        pub favorite_presets_update_id: Option<String>,
+        pub favorites_update_id: Option<String>,
+        pub radio_favorites_update_id: Option<u32>,
+        pub radio_location_update_id: Option<u32>,
+        pub recently_played_update_id: Option<String>,
+        pub saved_queues_update_id: Option<String>,
+        pub share_index_in_progress: Option<bool>,
+        pub share_index_last_error: Option<String>,
+        pub share_list_update_id: Option<String>,
+        pub system_update_id: Option<u32>,
+        pub user_radio_update_id: Option<String>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="propertyset", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct ContentDirectoryPropertySet {
+        pub properties: Vec<ContentDirectoryProperty>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="property", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct ContentDirectoryProperty {
+        #[xml(rename = "Browseable", ns(""))]
+        pub browseable: Option<bool>,
+        #[xml(rename = "ContainerUpdateIDs", ns(""))]
+        pub container_update_ids: Option<String>,
+        #[xml(rename = "FavoritePresetsUpdateID", ns(""))]
+        pub favorite_presets_update_id: Option<String>,
+        #[xml(rename = "FavoritesUpdateID", ns(""))]
+        pub favorites_update_id: Option<String>,
+        #[xml(rename = "RadioFavoritesUpdateID", ns(""))]
+        pub radio_favorites_update_id: Option<u32>,
+        #[xml(rename = "RadioLocationUpdateID", ns(""))]
+        pub radio_location_update_id: Option<u32>,
+        #[xml(rename = "RecentlyPlayedUpdateID", ns(""))]
+        pub recently_played_update_id: Option<String>,
+        #[xml(rename = "SavedQueuesUpdateID", ns(""))]
+        pub saved_queues_update_id: Option<String>,
+        #[xml(rename = "ShareIndexInProgress", ns(""))]
+        pub share_index_in_progress: Option<bool>,
+        #[xml(rename = "ShareIndexLastError", ns(""))]
+        pub share_index_last_error: Option<String>,
+        #[xml(rename = "ShareListUpdateID", ns(""))]
+        pub share_list_update_id: Option<String>,
+        #[xml(rename = "SystemUpdateID", ns(""))]
+        pub system_update_id: Option<u32>,
+        #[xml(rename = "UserRadioUpdateID", ns(""))]
+        pub user_radio_update_id: Option<String>,
+    }
+
+    impl crate::upnp::DecodeXml for ContentDirectoryEvent {
+        fn decode_xml(xml: &str) -> crate::Result<Self> {
+            let mut result = Self::default();
+            let set: ContentDirectoryPropertySet = instant_xml::from_str(xml)?;
+            for prop in set.properties {
+                if let Some(v) = prop.browseable {
+                    result.browseable.replace(v);
+                }
+
+                if let Some(v) = prop.container_update_ids {
+                    result.container_update_ids.replace(v);
+                }
+
+                if let Some(v) = prop.favorite_presets_update_id {
+                    result.favorite_presets_update_id.replace(v);
+                }
+
+                if let Some(v) = prop.favorites_update_id {
+                    result.favorites_update_id.replace(v);
+                }
+
+                if let Some(v) = prop.radio_favorites_update_id {
+                    result.radio_favorites_update_id.replace(v);
+                }
+
+                if let Some(v) = prop.radio_location_update_id {
+                    result.radio_location_update_id.replace(v);
+                }
+
+                if let Some(v) = prop.recently_played_update_id {
+                    result.recently_played_update_id.replace(v);
+                }
+
+                if let Some(v) = prop.saved_queues_update_id {
+                    result.saved_queues_update_id.replace(v);
+                }
+
+                if let Some(v) = prop.share_index_in_progress {
+                    result.share_index_in_progress.replace(v);
+                }
+
+                if let Some(v) = prop.share_index_last_error {
+                    result.share_index_last_error.replace(v);
+                }
+
+                if let Some(v) = prop.share_list_update_id {
+                    result.share_list_update_id.replace(v);
+                }
+
+                if let Some(v) = prop.system_update_id {
+                    result.system_update_id.replace(v);
+                }
+
+                if let Some(v) = prop.user_radio_update_id {
+                    result.user_radio_update_id.replace(v);
+                }
+            }
+            Ok(result)
+        }
+    }
+
+    impl crate::SonosDevice {
+        /// Subscribe to events from the `ContentDirectory` service on this device
+        pub async fn subscribe_content_directory(
+            &self,
+        ) -> crate::Result<crate::upnp::EventStream<ContentDirectoryEvent>> {
+            self.subscribe_helper(&SERVICE_TYPE).await
+        }
     }
 }
 
@@ -2726,6 +3116,266 @@ pub mod device_properties {
         #[xml(rename = "DesiredTargetRoomName", ns(""))]
         pub desired_target_room_name: String,
     }
+
+    /// A parsed event produced by the `DeviceProperties` service.
+    /// Use `SonosDevice::subscribe_device_properties()` to obtain an event
+    /// stream that produces these.
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct DevicePropertiesEvent {
+        pub air_play_enabled: Option<bool>,
+        pub available_room_calibration: Option<String>,
+        pub behind_wifi_extender: Option<u32>,
+        pub channel_freq: Option<u32>,
+        pub channel_map_set: Option<String>,
+        pub config_mode: Option<String>,
+        pub configuration: Option<String>,
+        pub eth_link: Option<bool>,
+        pub ht_bonded_zone_commit_state: Option<u32>,
+        pub ht_freq: Option<u32>,
+        pub ht_sat_chan_map_set: Option<String>,
+        pub has_configured_ssid: Option<bool>,
+        pub hdmi_cec_available: Option<bool>,
+        pub icon: Option<String>,
+        pub invisible: Option<bool>,
+        pub is_idle: Option<bool>,
+        pub is_zone_bridge: Option<bool>,
+        pub last_changed_play_state: Option<String>,
+        pub mic_enabled: Option<u32>,
+        pub more_info: Option<String>,
+        pub orientation: Option<i32>,
+        pub room_calibration_state: Option<i32>,
+        pub secure_reg_state: Option<u32>,
+        pub settings_replication_state: Option<String>,
+        pub supports_audio_clip: Option<bool>,
+        pub supports_audio_in: Option<bool>,
+        pub tv_configuration_error: Option<bool>,
+        pub voice_config_state: Option<u32>,
+        pub wifi_enabled: Option<bool>,
+        pub wireless_leaf_only: Option<bool>,
+        pub wireless_mode: Option<u32>,
+        pub zone_name: Option<String>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="propertyset", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct DevicePropertiesPropertySet {
+        pub properties: Vec<DevicePropertiesProperty>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="property", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct DevicePropertiesProperty {
+        #[xml(rename = "AirPlayEnabled", ns(""))]
+        pub air_play_enabled: Option<bool>,
+        #[xml(rename = "AvailableRoomCalibration", ns(""))]
+        pub available_room_calibration: Option<String>,
+        #[xml(rename = "BehindWifiExtender", ns(""))]
+        pub behind_wifi_extender: Option<u32>,
+        #[xml(rename = "ChannelFreq", ns(""))]
+        pub channel_freq: Option<u32>,
+        #[xml(rename = "ChannelMapSet", ns(""))]
+        pub channel_map_set: Option<String>,
+        #[xml(rename = "ConfigMode", ns(""))]
+        pub config_mode: Option<String>,
+        #[xml(rename = "Configuration", ns(""))]
+        pub configuration: Option<String>,
+        #[xml(rename = "EthLink", ns(""))]
+        pub eth_link: Option<bool>,
+        #[xml(rename = "HTBondedZoneCommitState", ns(""))]
+        pub ht_bonded_zone_commit_state: Option<u32>,
+        #[xml(rename = "HTFreq", ns(""))]
+        pub ht_freq: Option<u32>,
+        #[xml(rename = "HTSatChanMapSet", ns(""))]
+        pub ht_sat_chan_map_set: Option<String>,
+        #[xml(rename = "HasConfiguredSSID", ns(""))]
+        pub has_configured_ssid: Option<bool>,
+        #[xml(rename = "HdmiCecAvailable", ns(""))]
+        pub hdmi_cec_available: Option<bool>,
+        #[xml(rename = "Icon", ns(""))]
+        pub icon: Option<String>,
+        #[xml(rename = "Invisible", ns(""))]
+        pub invisible: Option<bool>,
+        #[xml(rename = "IsIdle", ns(""))]
+        pub is_idle: Option<bool>,
+        #[xml(rename = "IsZoneBridge", ns(""))]
+        pub is_zone_bridge: Option<bool>,
+        #[xml(rename = "LastChangedPlayState", ns(""))]
+        pub last_changed_play_state: Option<String>,
+        #[xml(rename = "MicEnabled", ns(""))]
+        pub mic_enabled: Option<u32>,
+        #[xml(rename = "MoreInfo", ns(""))]
+        pub more_info: Option<String>,
+        #[xml(rename = "Orientation", ns(""))]
+        pub orientation: Option<i32>,
+        #[xml(rename = "RoomCalibrationState", ns(""))]
+        pub room_calibration_state: Option<i32>,
+        #[xml(rename = "SecureRegState", ns(""))]
+        pub secure_reg_state: Option<u32>,
+        #[xml(rename = "SettingsReplicationState", ns(""))]
+        pub settings_replication_state: Option<String>,
+        #[xml(rename = "SupportsAudioClip", ns(""))]
+        pub supports_audio_clip: Option<bool>,
+        #[xml(rename = "SupportsAudioIn", ns(""))]
+        pub supports_audio_in: Option<bool>,
+        #[xml(rename = "TVConfigurationError", ns(""))]
+        pub tv_configuration_error: Option<bool>,
+        #[xml(rename = "VoiceConfigState", ns(""))]
+        pub voice_config_state: Option<u32>,
+        #[xml(rename = "WifiEnabled", ns(""))]
+        pub wifi_enabled: Option<bool>,
+        #[xml(rename = "WirelessLeafOnly", ns(""))]
+        pub wireless_leaf_only: Option<bool>,
+        #[xml(rename = "WirelessMode", ns(""))]
+        pub wireless_mode: Option<u32>,
+        #[xml(rename = "ZoneName", ns(""))]
+        pub zone_name: Option<String>,
+    }
+
+    impl crate::upnp::DecodeXml for DevicePropertiesEvent {
+        fn decode_xml(xml: &str) -> crate::Result<Self> {
+            let mut result = Self::default();
+            let set: DevicePropertiesPropertySet = instant_xml::from_str(xml)?;
+            for prop in set.properties {
+                if let Some(v) = prop.air_play_enabled {
+                    result.air_play_enabled.replace(v);
+                }
+
+                if let Some(v) = prop.available_room_calibration {
+                    result.available_room_calibration.replace(v);
+                }
+
+                if let Some(v) = prop.behind_wifi_extender {
+                    result.behind_wifi_extender.replace(v);
+                }
+
+                if let Some(v) = prop.channel_freq {
+                    result.channel_freq.replace(v);
+                }
+
+                if let Some(v) = prop.channel_map_set {
+                    result.channel_map_set.replace(v);
+                }
+
+                if let Some(v) = prop.config_mode {
+                    result.config_mode.replace(v);
+                }
+
+                if let Some(v) = prop.configuration {
+                    result.configuration.replace(v);
+                }
+
+                if let Some(v) = prop.eth_link {
+                    result.eth_link.replace(v);
+                }
+
+                if let Some(v) = prop.ht_bonded_zone_commit_state {
+                    result.ht_bonded_zone_commit_state.replace(v);
+                }
+
+                if let Some(v) = prop.ht_freq {
+                    result.ht_freq.replace(v);
+                }
+
+                if let Some(v) = prop.ht_sat_chan_map_set {
+                    result.ht_sat_chan_map_set.replace(v);
+                }
+
+                if let Some(v) = prop.has_configured_ssid {
+                    result.has_configured_ssid.replace(v);
+                }
+
+                if let Some(v) = prop.hdmi_cec_available {
+                    result.hdmi_cec_available.replace(v);
+                }
+
+                if let Some(v) = prop.icon {
+                    result.icon.replace(v);
+                }
+
+                if let Some(v) = prop.invisible {
+                    result.invisible.replace(v);
+                }
+
+                if let Some(v) = prop.is_idle {
+                    result.is_idle.replace(v);
+                }
+
+                if let Some(v) = prop.is_zone_bridge {
+                    result.is_zone_bridge.replace(v);
+                }
+
+                if let Some(v) = prop.last_changed_play_state {
+                    result.last_changed_play_state.replace(v);
+                }
+
+                if let Some(v) = prop.mic_enabled {
+                    result.mic_enabled.replace(v);
+                }
+
+                if let Some(v) = prop.more_info {
+                    result.more_info.replace(v);
+                }
+
+                if let Some(v) = prop.orientation {
+                    result.orientation.replace(v);
+                }
+
+                if let Some(v) = prop.room_calibration_state {
+                    result.room_calibration_state.replace(v);
+                }
+
+                if let Some(v) = prop.secure_reg_state {
+                    result.secure_reg_state.replace(v);
+                }
+
+                if let Some(v) = prop.settings_replication_state {
+                    result.settings_replication_state.replace(v);
+                }
+
+                if let Some(v) = prop.supports_audio_clip {
+                    result.supports_audio_clip.replace(v);
+                }
+
+                if let Some(v) = prop.supports_audio_in {
+                    result.supports_audio_in.replace(v);
+                }
+
+                if let Some(v) = prop.tv_configuration_error {
+                    result.tv_configuration_error.replace(v);
+                }
+
+                if let Some(v) = prop.voice_config_state {
+                    result.voice_config_state.replace(v);
+                }
+
+                if let Some(v) = prop.wifi_enabled {
+                    result.wifi_enabled.replace(v);
+                }
+
+                if let Some(v) = prop.wireless_leaf_only {
+                    result.wireless_leaf_only.replace(v);
+                }
+
+                if let Some(v) = prop.wireless_mode {
+                    result.wireless_mode.replace(v);
+                }
+
+                if let Some(v) = prop.zone_name {
+                    result.zone_name.replace(v);
+                }
+            }
+            Ok(result)
+        }
+    }
+
+    impl crate::SonosDevice {
+        /// Subscribe to events from the `DeviceProperties` service on this device
+        pub async fn subscribe_device_properties(
+            &self,
+        ) -> crate::Result<crate::upnp::EventStream<DevicePropertiesEvent>> {
+            self.subscribe_helper(&SERVICE_TYPE).await
+        }
+    }
 }
 
 #[derive(PartialEq, Debug, Clone, Eq, Default)]
@@ -2955,6 +3605,77 @@ pub mod group_management {
         #[xml(rename = "DesiredSourceAreaIds", ns(""))]
         pub desired_source_area_ids: String,
     }
+
+    /// A parsed event produced by the `GroupManagement` service.
+    /// Use `SonosDevice::subscribe_group_management()` to obtain an event
+    /// stream that produces these.
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct GroupManagementEvent {
+        pub group_coordinator_is_local: Option<bool>,
+        pub local_group_uuid: Option<String>,
+        pub reset_volume_after: Option<bool>,
+        pub virtual_line_in_group_id: Option<String>,
+        pub volume_av_transport_uri: Option<String>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="propertyset", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct GroupManagementPropertySet {
+        pub properties: Vec<GroupManagementProperty>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="property", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct GroupManagementProperty {
+        #[xml(rename = "GroupCoordinatorIsLocal", ns(""))]
+        pub group_coordinator_is_local: Option<bool>,
+        #[xml(rename = "LocalGroupUUID", ns(""))]
+        pub local_group_uuid: Option<String>,
+        #[xml(rename = "ResetVolumeAfter", ns(""))]
+        pub reset_volume_after: Option<bool>,
+        #[xml(rename = "VirtualLineInGroupID", ns(""))]
+        pub virtual_line_in_group_id: Option<String>,
+        #[xml(rename = "VolumeAVTransportURI", ns(""))]
+        pub volume_av_transport_uri: Option<String>,
+    }
+
+    impl crate::upnp::DecodeXml for GroupManagementEvent {
+        fn decode_xml(xml: &str) -> crate::Result<Self> {
+            let mut result = Self::default();
+            let set: GroupManagementPropertySet = instant_xml::from_str(xml)?;
+            for prop in set.properties {
+                if let Some(v) = prop.group_coordinator_is_local {
+                    result.group_coordinator_is_local.replace(v);
+                }
+
+                if let Some(v) = prop.local_group_uuid {
+                    result.local_group_uuid.replace(v);
+                }
+
+                if let Some(v) = prop.reset_volume_after {
+                    result.reset_volume_after.replace(v);
+                }
+
+                if let Some(v) = prop.virtual_line_in_group_id {
+                    result.virtual_line_in_group_id.replace(v);
+                }
+
+                if let Some(v) = prop.volume_av_transport_uri {
+                    result.volume_av_transport_uri.replace(v);
+                }
+            }
+            Ok(result)
+        }
+    }
+
+    impl crate::SonosDevice {
+        /// Subscribe to events from the `GroupManagement` service on this device
+        pub async fn subscribe_group_management(
+            &self,
+        ) -> crate::Result<crate::upnp::EventStream<GroupManagementEvent>> {
+            self.subscribe_helper(&SERVICE_TYPE).await
+        }
+    }
 }
 
 /// Request and Response types for the `GroupRenderingControl` service.
@@ -3056,6 +3777,63 @@ pub mod group_rendering_control {
         #[xml(rename = "InstanceID", ns(""))]
         pub instance_id: u32,
     }
+
+    /// A parsed event produced by the `GroupRenderingControl` service.
+    /// Use `SonosDevice::subscribe_group_rendering_control()` to obtain an event
+    /// stream that produces these.
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct GroupRenderingControlEvent {
+        pub group_mute: Option<bool>,
+        pub group_volume: Option<u16>,
+        pub group_volume_changeable: Option<bool>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="propertyset", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct GroupRenderingControlPropertySet {
+        pub properties: Vec<GroupRenderingControlProperty>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="property", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct GroupRenderingControlProperty {
+        #[xml(rename = "GroupMute", ns(""))]
+        pub group_mute: Option<bool>,
+        #[xml(rename = "GroupVolume", ns(""))]
+        pub group_volume: Option<u16>,
+        #[xml(rename = "GroupVolumeChangeable", ns(""))]
+        pub group_volume_changeable: Option<bool>,
+    }
+
+    impl crate::upnp::DecodeXml for GroupRenderingControlEvent {
+        fn decode_xml(xml: &str) -> crate::Result<Self> {
+            let mut result = Self::default();
+            let set: GroupRenderingControlPropertySet = instant_xml::from_str(xml)?;
+            for prop in set.properties {
+                if let Some(v) = prop.group_mute {
+                    result.group_mute.replace(v);
+                }
+
+                if let Some(v) = prop.group_volume {
+                    result.group_volume.replace(v);
+                }
+
+                if let Some(v) = prop.group_volume_changeable {
+                    result.group_volume_changeable.replace(v);
+                }
+            }
+            Ok(result)
+        }
+    }
+
+    impl crate::SonosDevice {
+        /// Subscribe to events from the `GroupRenderingControl` service on this device
+        pub async fn subscribe_group_rendering_control(
+            &self,
+        ) -> crate::Result<crate::upnp::EventStream<GroupRenderingControlEvent>> {
+            self.subscribe_helper(&SERVICE_TYPE).await
+        }
+    }
 }
 
 /// Request and Response types for the `HTControl` service.
@@ -3143,6 +3921,56 @@ pub mod ht_control {
     pub struct SetLedFeedbackStateRequest {
         #[xml(rename = "LEDFeedbackState", ns(""))]
         pub led_feedback_state: super::LEDFeedbackState,
+    }
+
+    /// A parsed event produced by the `HTControl` service.
+    /// Use `SonosDevice::subscribe_ht_control()` to obtain an event
+    /// stream that produces these.
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct HTControlEvent {
+        pub ir_repeater_state: Option<super::IRRepeaterState>,
+        pub tos_link_connected: Option<bool>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="propertyset", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct HTControlPropertySet {
+        pub properties: Vec<HTControlProperty>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="property", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct HTControlProperty {
+        #[xml(rename = "IRRepeaterState", ns(""))]
+        pub ir_repeater_state: Option<super::IRRepeaterState>,
+        #[xml(rename = "TOSLinkConnected", ns(""))]
+        pub tos_link_connected: Option<bool>,
+    }
+
+    impl crate::upnp::DecodeXml for HTControlEvent {
+        fn decode_xml(xml: &str) -> crate::Result<Self> {
+            let mut result = Self::default();
+            let set: HTControlPropertySet = instant_xml::from_str(xml)?;
+            for prop in set.properties {
+                if let Some(v) = prop.ir_repeater_state {
+                    result.ir_repeater_state.replace(v);
+                }
+
+                if let Some(v) = prop.tos_link_connected {
+                    result.tos_link_connected.replace(v);
+                }
+            }
+            Ok(result)
+        }
+    }
+
+    impl crate::SonosDevice {
+        /// Subscribe to events from the `HTControl` service on this device
+        pub async fn subscribe_ht_control(
+            &self,
+        ) -> crate::Result<crate::upnp::EventStream<HTControlEvent>> {
+            self.subscribe_helper(&SERVICE_TYPE).await
+        }
     }
 }
 
@@ -3361,6 +4189,49 @@ pub mod music_services {
         fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
             let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
             Ok(envelope.body.payload)
+        }
+    }
+
+    /// A parsed event produced by the `MusicServices` service.
+    /// Use `SonosDevice::subscribe_music_services()` to obtain an event
+    /// stream that produces these.
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct MusicServicesEvent {
+        pub service_list_version: Option<String>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="propertyset", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct MusicServicesPropertySet {
+        pub properties: Vec<MusicServicesProperty>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="property", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct MusicServicesProperty {
+        #[xml(rename = "ServiceListVersion", ns(""))]
+        pub service_list_version: Option<String>,
+    }
+
+    impl crate::upnp::DecodeXml for MusicServicesEvent {
+        fn decode_xml(xml: &str) -> crate::Result<Self> {
+            let mut result = Self::default();
+            let set: MusicServicesPropertySet = instant_xml::from_str(xml)?;
+            for prop in set.properties {
+                if let Some(v) = prop.service_list_version {
+                    result.service_list_version.replace(v);
+                }
+            }
+            Ok(result)
+        }
+    }
+
+    impl crate::SonosDevice {
+        /// Subscribe to events from the `MusicServices` service on this device
+        pub async fn subscribe_music_services(
+            &self,
+        ) -> crate::Result<crate::upnp::EventStream<MusicServicesEvent>> {
+            self.subscribe_helper(&SERVICE_TYPE).await
         }
     }
 }
@@ -3702,6 +4573,47 @@ pub mod queue {
         fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
             let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
             Ok(envelope.body.payload)
+        }
+    }
+
+    /// A parsed event produced by the `Queue` service.
+    /// Use `SonosDevice::subscribe_queue()` to obtain an event
+    /// stream that produces these.
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct QueueEvent {
+        pub last_change: Option<String>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="propertyset", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct QueuePropertySet {
+        pub properties: Vec<QueueProperty>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="property", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct QueueProperty {
+        #[xml(rename = "LastChange", ns(""))]
+        pub last_change: Option<String>,
+    }
+
+    impl crate::upnp::DecodeXml for QueueEvent {
+        fn decode_xml(xml: &str) -> crate::Result<Self> {
+            let mut result = Self::default();
+            let set: QueuePropertySet = instant_xml::from_str(xml)?;
+            for prop in set.properties {
+                if let Some(v) = prop.last_change {
+                    result.last_change.replace(v);
+                }
+            }
+            Ok(result)
+        }
+    }
+
+    impl crate::SonosDevice {
+        /// Subscribe to events from the `Queue` service on this device
+        pub async fn subscribe_queue(&self) -> crate::Result<crate::upnp::EventStream<QueueEvent>> {
+            self.subscribe_helper(&SERVICE_TYPE).await
         }
     }
 }
@@ -4200,6 +5112,49 @@ pub mod rendering_control {
         pub channel: super::Channel,
         #[xml(rename = "DesiredVolume", ns(""))]
         pub desired_volume: i16,
+    }
+
+    /// A parsed event produced by the `RenderingControl` service.
+    /// Use `SonosDevice::subscribe_rendering_control()` to obtain an event
+    /// stream that produces these.
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct RenderingControlEvent {
+        pub last_change: Option<String>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="propertyset", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct RenderingControlPropertySet {
+        pub properties: Vec<RenderingControlProperty>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="property", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct RenderingControlProperty {
+        #[xml(rename = "LastChange", ns(""))]
+        pub last_change: Option<String>,
+    }
+
+    impl crate::upnp::DecodeXml for RenderingControlEvent {
+        fn decode_xml(xml: &str) -> crate::Result<Self> {
+            let mut result = Self::default();
+            let set: RenderingControlPropertySet = instant_xml::from_str(xml)?;
+            for prop in set.properties {
+                if let Some(v) = prop.last_change {
+                    result.last_change.replace(v);
+                }
+            }
+            Ok(result)
+        }
+    }
+
+    impl crate::SonosDevice {
+        /// Subscribe to events from the `RenderingControl` service on this device
+        pub async fn subscribe_rendering_control(
+            &self,
+        ) -> crate::Result<crate::upnp::EventStream<RenderingControlEvent>> {
+            self.subscribe_helper(&SERVICE_TYPE).await
+        }
     }
 }
 
@@ -4729,6 +5684,77 @@ pub mod system_properties {
         #[xml(rename = "StringValue", ns(""))]
         pub string_value: String,
     }
+
+    /// A parsed event produced by the `SystemProperties` service.
+    /// Use `SonosDevice::subscribe_system_properties()` to obtain an event
+    /// stream that produces these.
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct SystemPropertiesEvent {
+        pub customer_id: Option<String>,
+        pub third_party_hash: Option<String>,
+        pub update_id: Option<u32>,
+        pub update_idx: Option<u32>,
+        pub voice_update_id: Option<u32>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="propertyset", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct SystemPropertiesPropertySet {
+        pub properties: Vec<SystemPropertiesProperty>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="property", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct SystemPropertiesProperty {
+        #[xml(rename = "CustomerID", ns(""))]
+        pub customer_id: Option<String>,
+        #[xml(rename = "ThirdPartyHash", ns(""))]
+        pub third_party_hash: Option<String>,
+        #[xml(rename = "UpdateID", ns(""))]
+        pub update_id: Option<u32>,
+        #[xml(rename = "UpdateIDX", ns(""))]
+        pub update_idx: Option<u32>,
+        #[xml(rename = "VoiceUpdateID", ns(""))]
+        pub voice_update_id: Option<u32>,
+    }
+
+    impl crate::upnp::DecodeXml for SystemPropertiesEvent {
+        fn decode_xml(xml: &str) -> crate::Result<Self> {
+            let mut result = Self::default();
+            let set: SystemPropertiesPropertySet = instant_xml::from_str(xml)?;
+            for prop in set.properties {
+                if let Some(v) = prop.customer_id {
+                    result.customer_id.replace(v);
+                }
+
+                if let Some(v) = prop.third_party_hash {
+                    result.third_party_hash.replace(v);
+                }
+
+                if let Some(v) = prop.update_id {
+                    result.update_id.replace(v);
+                }
+
+                if let Some(v) = prop.update_idx {
+                    result.update_idx.replace(v);
+                }
+
+                if let Some(v) = prop.voice_update_id {
+                    result.voice_update_id.replace(v);
+                }
+            }
+            Ok(result)
+        }
+    }
+
+    impl crate::SonosDevice {
+        /// Subscribe to events from the `SystemProperties` service on this device
+        pub async fn subscribe_system_properties(
+            &self,
+        ) -> crate::Result<crate::upnp::EventStream<SystemPropertiesEvent>> {
+            self.subscribe_helper(&SERVICE_TYPE).await
+        }
+    }
 }
 
 /// Request and Response types for the `VirtualLineIn` service.
@@ -4816,6 +5842,56 @@ pub mod virtual_line_in {
         #[xml(rename = "CoordinatorID", ns(""))]
         pub coordinator_id: String,
     }
+
+    /// A parsed event produced by the `VirtualLineIn` service.
+    /// Use `SonosDevice::subscribe_virtual_line_in()` to obtain an event
+    /// stream that produces these.
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct VirtualLineInEvent {
+        pub current_track_meta_data: Option<String>,
+        pub last_change: Option<String>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="propertyset", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct VirtualLineInPropertySet {
+        pub properties: Vec<VirtualLineInProperty>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="property", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct VirtualLineInProperty {
+        #[xml(rename = "CurrentTrackMetaData", ns(""))]
+        pub current_track_meta_data: Option<String>,
+        #[xml(rename = "LastChange", ns(""))]
+        pub last_change: Option<String>,
+    }
+
+    impl crate::upnp::DecodeXml for VirtualLineInEvent {
+        fn decode_xml(xml: &str) -> crate::Result<Self> {
+            let mut result = Self::default();
+            let set: VirtualLineInPropertySet = instant_xml::from_str(xml)?;
+            for prop in set.properties {
+                if let Some(v) = prop.current_track_meta_data {
+                    result.current_track_meta_data.replace(v);
+                }
+
+                if let Some(v) = prop.last_change {
+                    result.last_change.replace(v);
+                }
+            }
+            Ok(result)
+        }
+    }
+
+    impl crate::SonosDevice {
+        /// Subscribe to events from the `VirtualLineIn` service on this device
+        pub async fn subscribe_virtual_line_in(
+            &self,
+        ) -> crate::Result<crate::upnp::EventStream<VirtualLineInEvent>> {
+            self.subscribe_helper(&SERVICE_TYPE).await
+        }
+    }
 }
 
 /// Request and Response types for the `ZoneGroupTopology` service.
@@ -4870,7 +5946,7 @@ pub mod zone_group_topology {
         #[xml(rename = "CurrentZoneGroupID", ns(""))]
         pub current_zone_group_id: Option<String>,
         #[xml(rename = "CurrentZonePlayerUUIDsInGroup", ns(""))]
-        pub current_zone_player_uu_ids_in_group: Option<String>,
+        pub current_zone_player_uuids_in_group: Option<String>,
         #[xml(rename = "CurrentMuseHouseholdId", ns(""))]
         pub current_muse_household_id: Option<String>,
     }
@@ -4936,6 +6012,119 @@ pub mod zone_group_topology {
         fn decode_soap_xml(xml: &str) -> crate::Result<Self> {
             let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
             Ok(envelope.body.payload)
+        }
+    }
+
+    /// A parsed event produced by the `ZoneGroupTopology` service.
+    /// Use `SonosDevice::subscribe_zone_group_topology()` to obtain an event
+    /// stream that produces these.
+    #[derive(Debug, Clone, PartialEq, Default)]
+    pub struct ZoneGroupTopologyEvent {
+        pub alarm_run_sequence: Option<String>,
+        pub areas_update_id: Option<String>,
+        pub available_software_update: Option<String>,
+        pub muse_household_id: Option<String>,
+        pub netsettings_update_id: Option<String>,
+        pub source_areas_update_id: Option<String>,
+        pub third_party_media_servers_x: Option<String>,
+        pub zone_group_id: Option<String>,
+        pub zone_group_name: Option<String>,
+        pub zone_group_state: Option<String>,
+        pub zone_player_uuids_in_group: Option<String>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="propertyset", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct ZoneGroupTopologyPropertySet {
+        pub properties: Vec<ZoneGroupTopologyProperty>,
+    }
+
+    #[derive(FromXml, Debug, Clone, PartialEq)]
+    #[xml(rename="property", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+    struct ZoneGroupTopologyProperty {
+        #[xml(rename = "AlarmRunSequence", ns(""))]
+        pub alarm_run_sequence: Option<String>,
+        #[xml(rename = "AreasUpdateID", ns(""))]
+        pub areas_update_id: Option<String>,
+        #[xml(rename = "AvailableSoftwareUpdate", ns(""))]
+        pub available_software_update: Option<String>,
+        #[xml(rename = "MuseHouseholdId", ns(""))]
+        pub muse_household_id: Option<String>,
+        #[xml(rename = "NetsettingsUpdateID", ns(""))]
+        pub netsettings_update_id: Option<String>,
+        #[xml(rename = "SourceAreasUpdateID", ns(""))]
+        pub source_areas_update_id: Option<String>,
+        #[xml(rename = "ThirdPartyMediaServersX", ns(""))]
+        pub third_party_media_servers_x: Option<String>,
+        #[xml(rename = "ZoneGroupID", ns(""))]
+        pub zone_group_id: Option<String>,
+        #[xml(rename = "ZoneGroupName", ns(""))]
+        pub zone_group_name: Option<String>,
+        #[xml(rename = "ZoneGroupState", ns(""))]
+        pub zone_group_state: Option<String>,
+        #[xml(rename = "ZonePlayerUUIDsInGroup", ns(""))]
+        pub zone_player_uuids_in_group: Option<String>,
+    }
+
+    impl crate::upnp::DecodeXml for ZoneGroupTopologyEvent {
+        fn decode_xml(xml: &str) -> crate::Result<Self> {
+            let mut result = Self::default();
+            let set: ZoneGroupTopologyPropertySet = instant_xml::from_str(xml)?;
+            for prop in set.properties {
+                if let Some(v) = prop.alarm_run_sequence {
+                    result.alarm_run_sequence.replace(v);
+                }
+
+                if let Some(v) = prop.areas_update_id {
+                    result.areas_update_id.replace(v);
+                }
+
+                if let Some(v) = prop.available_software_update {
+                    result.available_software_update.replace(v);
+                }
+
+                if let Some(v) = prop.muse_household_id {
+                    result.muse_household_id.replace(v);
+                }
+
+                if let Some(v) = prop.netsettings_update_id {
+                    result.netsettings_update_id.replace(v);
+                }
+
+                if let Some(v) = prop.source_areas_update_id {
+                    result.source_areas_update_id.replace(v);
+                }
+
+                if let Some(v) = prop.third_party_media_servers_x {
+                    result.third_party_media_servers_x.replace(v);
+                }
+
+                if let Some(v) = prop.zone_group_id {
+                    result.zone_group_id.replace(v);
+                }
+
+                if let Some(v) = prop.zone_group_name {
+                    result.zone_group_name.replace(v);
+                }
+
+                if let Some(v) = prop.zone_group_state {
+                    result.zone_group_state.replace(v);
+                }
+
+                if let Some(v) = prop.zone_player_uuids_in_group {
+                    result.zone_player_uuids_in_group.replace(v);
+                }
+            }
+            Ok(result)
+        }
+    }
+
+    impl crate::SonosDevice {
+        /// Subscribe to events from the `ZoneGroupTopology` service on this device
+        pub async fn subscribe_zone_group_topology(
+            &self,
+        ) -> crate::Result<crate::upnp::EventStream<ZoneGroupTopologyEvent>> {
+            self.subscribe_helper(&SERVICE_TYPE).await
         }
     }
 }

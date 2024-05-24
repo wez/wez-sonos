@@ -19,32 +19,38 @@ pub struct VersionedService {
 }
 
 impl VersionedService {
+    fn resolve_type_for_sv(&self, name: &str, sv: &StateVariable, always_optional: bool) -> String {
+        let target = if let Some(Value::Array(_)) = &sv.allowed_values {
+            // Use an enum
+            let enum_name = name.replace("A_ARG_TYPE_", "");
+
+            format!("super::{enum_name}")
+        } else {
+            match sv.data_type.as_str() {
+                "string" => "String",
+                "ui4" => "u32",
+                "ui2" => "u16",
+                "i4" => "i32",
+                "i2" => "i16",
+                "boolean" => "bool",
+                dt => unimplemented!("unhandled type {dt}"),
+            }
+            .to_string()
+        };
+        if always_optional {
+            format!("Option<{target}>")
+        } else {
+            target
+        }
+    }
+
     fn resolve_type_for_param(&self, param: &VersionedParameter, always_optional: bool) -> String {
         let target = match self
             .state_variables
             .get(&param.param.related_state_variable_name)
         {
             Some(sv) => {
-                if let Some(Value::Array(_)) = &sv.allowed_values {
-                    // Use an enum
-                    let enum_name = param
-                        .param
-                        .related_state_variable_name
-                        .replace("A_ARG_TYPE_", "");
-
-                    format!("super::{enum_name}")
-                } else {
-                    match sv.data_type.as_str() {
-                        "string" => "String",
-                        "ui4" => "u32",
-                        "ui2" => "u16",
-                        "i4" => "i32",
-                        "i2" => "i16",
-                        "boolean" => "bool",
-                        dt => unimplemented!("unhandled type {dt}"),
-                    }
-                    .to_string()
-                }
+                self.resolve_type_for_sv(&param.param.related_state_variable_name, sv, false)
             }
             None => "String".to_string(),
         };
@@ -234,6 +240,12 @@ use instant_xml::{{FromXml, ToXml}};
         )
         .ok();
 
+        let mut event_fields = BTreeMap::new();
+        for (name, sv) in &service.state_variables {
+            if sv.send_events {
+                event_fields.insert(name, sv);
+            }
+        }
         for (action_name, action) in &service.actions {
             let method_name = to_snake_case(action_name);
             //            println!("{action:#?}");
@@ -303,14 +315,18 @@ use instant_xml::{{FromXml, ToXml}};
                     writeln!(&mut types, "  pub {field_name}: {field_type},").ok();
                 }
                 writeln!(&mut types, "}}\n").ok();
-                writeln!(&mut types, "
+                writeln!(
+                    &mut types,
+                    "
 impl crate::DecodeSoapResponse for {response_type_name} {{
     fn decode_soap_xml(xml: &str) -> crate::Result<Self> {{
         let envelope: crate::soap_resp::Envelope<Self> = instant_xml::from_str(xml)?;
         Ok(envelope.body.payload)
     }}
 }}
-").ok();
+"
+                )
+                .ok();
                 format!("{service_module}::{response_type_name}")
             };
 
@@ -351,6 +367,81 @@ impl crate::DecodeSoapResponse for {response_type_name} {{
 
         writeln!(&mut traits, "}}\n").ok();
         writeln!(&mut impls, "}}\n").ok();
+
+        if !event_fields.is_empty() {
+            writeln!(&mut types, "
+/// A parsed event produced by the `{service_name}` service.
+/// Use `SonosDevice::subscribe_{service_module}()` to obtain an event
+/// stream that produces these.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct {service_name}Event {{").ok();
+            for (name, sv) in &event_fields {
+                let field_name = to_snake_case(name);
+
+                let field_type = service.resolve_type_for_sv(&name, sv, true);
+
+                writeln!(&mut types, "  pub {field_name}: {field_type},").ok();
+            }
+            writeln!(&mut types, "}}").ok();
+
+            // Generate a helper for decoding the xml into the above
+            // ergonomic form
+
+            writeln!(&mut types, r#"
+#[derive(FromXml, Debug, Clone, PartialEq)]
+#[xml(rename="propertyset", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+struct {service_name}PropertySet {{
+    pub properties: Vec<{service_name}Property>,
+}}
+
+#[derive(FromXml, Debug, Clone, PartialEq)]
+#[xml(rename="property", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
+struct {service_name}Property {{
+"#).ok();
+
+            for (name, sv) in &event_fields {
+                let field_name = to_snake_case(name);
+
+                let field_type = service.resolve_type_for_sv(&name, sv, true);
+
+                writeln!(&mut types, "  #[xml(rename=\"{name}\", ns(\"\"))]",).ok();
+                writeln!(&mut types, "  pub {field_name}: {field_type},").ok();
+            }
+            writeln!(&mut types, "}}").ok();
+
+            writeln!(&mut types, r#"
+impl crate::upnp::DecodeXml for {service_name}Event {{
+    fn decode_xml(xml: &str) -> crate::Result<Self> {{
+        let mut result = Self::default();
+        let set: {service_name}PropertySet = instant_xml::from_str(xml)?;
+        for prop in set.properties {{
+"#).ok();
+
+            for (name, _sv) in &event_fields {
+                let field_name = to_snake_case(name);
+                writeln!(&mut types, r#"
+                    if let Some(v) = prop.{field_name} {{
+                        result.{field_name}.replace(v);
+                    }}
+                    "#).ok();
+            }
+
+            writeln!(&mut types, r#"
+        }}
+        Ok(result)
+    }}
+}}
+
+impl crate::SonosDevice {{
+    /// Subscribe to events from the `{service_name}` service on this device
+    pub async fn subscribe_{service_module}(&self) -> crate::Result<crate::upnp::EventStream<{service_name}Event>> {{
+        self.subscribe_helper(&SERVICE_TYPE).await
+    }}
+}}
+"#).ok();
+
+        }
+
         writeln!(&mut types, "}}\n").ok();
 
         for (name, sv) in &service.state_variables {
@@ -370,10 +461,14 @@ impl crate::DecodeSoapResponse for {response_type_name} {{
                     }
                     writeln!(&mut types, "  {variant},").ok();
                 }
-                writeln!(&mut types, "
+                writeln!(
+                    &mut types,
+                    "
 /// Allows passing a value that was not known at the
 /// time that this crate was generated from the available
-/// device descriptions").ok();
+/// device descriptions"
+                )
+                .ok();
                 writeln!(&mut types, "  Unspecified(String),").ok();
                 writeln!(&mut types, "}}\n").ok();
 
@@ -390,7 +485,11 @@ impl crate::DecodeSoapResponse for {response_type_name} {{
                     .ok();
                 }
 
-                writeln!(&mut types, "  {enum_name}::Unspecified(s) => s.to_string(),").ok();
+                writeln!(
+                    &mut types,
+                    "  {enum_name}::Unspecified(s) => s.to_string(),"
+                )
+                .ok();
                 writeln!(&mut types, "}}").ok();
                 writeln!(&mut types, "}}\n").ok();
                 writeln!(&mut types, "}}\n").ok();
@@ -470,9 +569,6 @@ impl<'xml> instant_xml::FromXml<'xml> for {enum_name} {{
 "
                 )
                 .ok();
-
-                let field_name = to_snake_case(name);
-                println!("  var {enum_name} {name} {field_name} {sv:?}");
             }
         }
     }
@@ -504,7 +600,7 @@ pub mod prelude {{
 
 fn to_snake_case(s: &str) -> String {
     // Fixup some special cases
-    let s = s.replace("URIs", "Uris").replace("IDs", "Ids");
+    let s = s.replace("URIs", "Uris").replace("UUIDs", "Uuids").replace("IDs", "Ids");
     let result = s.to_snake_case();
     if result == "type" {
         "type_".to_string()

@@ -336,12 +336,14 @@ impl SonosDevice {
         &self.device
     }
 
-    pub async fn subscribe(&self, service: &str) -> Result<EventSubscription> {
+    pub async fn subscribe_helper<T: DecodeXml + 'static>(
+        &self,
+        service: &str,
+    ) -> Result<EventStream<T>> {
         let service = self
             .device
             .get_service(service)
             .ok_or_else(|| Error::UnsupportedService(service.to_string()))?;
-
         service.subscribe(&self.url).await
     }
 
