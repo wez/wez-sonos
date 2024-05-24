@@ -47,6 +47,12 @@ where
     const KIND: Kind = Kind::Scalar;
 }
 
+impl<T: DecodeXml> DecodeXmlString<T> {
+    pub fn into_inner(self) -> T {
+        self.0
+    }
+}
+
 impl<T: DecodeXml> std::ops::Deref for DecodeXmlString<T> {
     type Target = T;
     fn deref(&self) -> &T {

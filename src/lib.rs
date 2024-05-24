@@ -253,7 +253,7 @@ impl SonosDevice {
         .await?;
 
         match result.result {
-            Some(xml) => TrackMetaData::from_didl_str(&xml),
+            Some(list) => Ok(list.into_inner().tracks),
             None => Ok(vec![]),
         }
     }

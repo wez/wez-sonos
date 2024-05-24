@@ -25,6 +25,7 @@ impl VersionedService {
         field_name: &str,
         sv: &StateVariable,
         always_optional: bool,
+        containing_struct_name: &str,
     ) -> String {
         let refined_name = name.replace("A_ARG_TYPE_", "");
 
@@ -33,9 +34,9 @@ impl VersionedService {
             format!("super::{refined_name}")
         } else {
             if sv.data_type == "string" {
-                let target = self.maybe_decode_xml(&refined_name);
+                let target = self.maybe_decode_xml(&refined_name, containing_struct_name);
                 if target == "String" {
-                    self.maybe_decode_xml(field_name)
+                    self.maybe_decode_xml(field_name, containing_struct_name)
                 } else {
                     target
                 }
@@ -59,18 +60,76 @@ impl VersionedService {
         }
     }
 
-    fn maybe_decode_xml(&self, name: &str) -> String {
-        let known_types = ["ZoneGroupState", "TrackMetaData"];
+    fn maybe_decode_xml(&self, name: &str, containing_struct_name: &str) -> String {
+        enum Entry {
+            Name(&'static str),
+            Alias {
+                name: &'static str,
+                type_name: &'static str,
+            },
+            StructField {
+                containing_struct_name: &'static str,
+                name: &'static str,
+                type_name: &'static str,
+            },
+        }
 
-        if known_types.contains(&name) {
+        impl Entry {
+            fn matches(&self, field_name: &str, containing_struct: &str) -> bool {
+                match self {
+                    Self::Name(name) => field_name == *name,
+                    Self::Alias { name, .. } => field_name == *name,
+                    Self::StructField {
+                        containing_struct_name,
+                        name,
+                        ..
+                    } => containing_struct == *containing_struct_name && field_name == *name,
+                }
+            }
+
+            fn type_name(&self) -> &'static str {
+                match self {
+                    Self::Name(type_name)
+                    | Self::Alias { type_name, .. }
+                    | Self::StructField { type_name, .. } => type_name,
+                }
+            }
+        }
+
+        const KNOWN_TYPES: &[Entry] = &[
+            Entry::Name("ZoneGroupState"),
+            Entry::Name("TrackMetaData"),
+            Entry::Alias {
+                name: "CurrentTrackMetaData",
+                type_name: "TrackMetaData",
+            },
+            Entry::StructField {
+                containing_struct_name: "BrowseResponse",
+                name: "Result",
+                type_name: "TrackMetaDataList",
+            },
+        ];
+
+        if let Some(entry) = KNOWN_TYPES
+            .iter()
+            .find(|e| e.matches(name, containing_struct_name))
+        {
             // Use a wrapped version of this type
-            format!("crate::xmlutil::DecodeXmlString<crate::{name}>")
+            format!(
+                "crate::xmlutil::DecodeXmlString<crate::{}>",
+                entry.type_name()
+            )
         } else {
             "String".to_string()
         }
     }
 
-    fn resolve_type_for_param(&self, param: &VersionedParameter, always_optional: bool) -> String {
+    fn resolve_type_for_param(
+        &self,
+        param: &VersionedParameter,
+        always_optional: bool,
+        containing_struct_name: &str,
+    ) -> String {
         let target = match self
             .state_variables
             .get(&param.param.related_state_variable_name)
@@ -80,8 +139,9 @@ impl VersionedService {
                 &param.param.name,
                 sv,
                 false,
+                containing_struct_name,
             ),
-            None => self.maybe_decode_xml(&param.param.name),
+            None => self.maybe_decode_xml(&param.param.name, containing_struct_name),
         };
 
         if param.optional || always_optional {
@@ -297,7 +357,8 @@ use instant_xml::{{FromXml, ToXml}};
                     writeln!(&mut types, "pub struct {request_type_name} {{").ok();
                     for p in &action.inputs {
                         let field_name = to_snake_case(&p.param.name);
-                        let field_type = service.resolve_type_for_param(&p, false);
+                        let field_type =
+                            service.resolve_type_for_param(&p, false, &request_type_name);
 
                         if let Some(doc) = docs
                             .services
@@ -334,7 +395,7 @@ use instant_xml::{{FromXml, ToXml}};
                 writeln!(&mut types, "pub struct {response_type_name} {{").ok();
                 for p in &action.outputs {
                     let field_name = to_snake_case(&p.param.name);
-                    let field_type = service.resolve_type_for_param(&p, true);
+                    let field_type = service.resolve_type_for_param(&p, true, &response_type_name);
                     writeln!(
                         &mut types,
                         "  #[xml(rename=\"{}\", ns(\"\"))]",
@@ -411,7 +472,13 @@ pub struct {service_name}Event {{"
             for (name, sv) in &event_fields {
                 let field_name = to_snake_case(name);
 
-                let field_type = service.resolve_type_for_sv(&name, &name, sv, true);
+                let field_type = service.resolve_type_for_sv(
+                    &name,
+                    &name,
+                    sv,
+                    true,
+                    &format!("{service_name}Event"),
+                );
 
                 writeln!(&mut types, "  pub {field_name}: {field_type},").ok();
             }
@@ -439,7 +506,13 @@ struct {service_name}Property {{
             for (name, sv) in &event_fields {
                 let field_name = to_snake_case(name);
 
-                let field_type = service.resolve_type_for_sv(&name, &name, sv, true);
+                let field_type = service.resolve_type_for_sv(
+                    &name,
+                    &name,
+                    sv,
+                    true,
+                    &format!("{service_name}Event"),
+                );
 
                 writeln!(&mut types, "  #[xml(rename=\"{name}\", ns(\"\"))]",).ok();
                 writeln!(&mut types, "  pub {field_name}: {field_type},").ok();

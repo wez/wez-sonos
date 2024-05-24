@@ -35,6 +35,18 @@ impl DecodeXml for TrackMetaData {
     }
 }
 
+#[derive(Debug, Default, Clone, PartialEq, Eq)]
+pub struct TrackMetaDataList {
+    pub tracks: Vec<TrackMetaData>,
+}
+
+impl DecodeXml for TrackMetaDataList {
+    fn decode_xml(xml: &str) -> Result<Self> {
+        let tracks = TrackMetaData::from_didl_str(xml)?;
+        Ok(Self { tracks })
+    }
+}
+
 const HMS_FACTORS: &[u64] = &[86400, 3600, 60, 1];
 
 fn duration_to_hms(d: Duration) -> String {

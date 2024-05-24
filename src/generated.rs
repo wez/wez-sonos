@@ -2288,7 +2288,7 @@ pub mod content_directory {
     #[xml(rename = "BrowseResponse", ns(SERVICE_TYPE))]
     pub struct BrowseResponse {
         #[xml(rename = "Result", ns(""))]
-        pub result: Option<String>,
+        pub result: Option<crate::xmlutil::DecodeXmlString<crate::TrackMetaDataList>>,
         #[xml(rename = "NumberReturned", ns(""))]
         pub number_returned: Option<u32>,
         #[xml(rename = "TotalMatches", ns(""))]
@@ -4394,7 +4394,7 @@ pub mod queue {
     #[xml(rename = "BrowseResponse", ns(SERVICE_TYPE))]
     pub struct BrowseResponse {
         #[xml(rename = "Result", ns(""))]
-        pub result: Option<String>,
+        pub result: Option<crate::xmlutil::DecodeXmlString<crate::TrackMetaDataList>>,
         #[xml(rename = "NumberReturned", ns(""))]
         pub number_returned: Option<u32>,
         #[xml(rename = "TotalMatches", ns(""))]
@@ -5848,7 +5848,7 @@ pub mod virtual_line_in {
     /// stream that produces these.
     #[derive(Debug, Clone, PartialEq, Default)]
     pub struct VirtualLineInEvent {
-        pub current_track_meta_data: Option<String>,
+        pub current_track_meta_data: Option<crate::xmlutil::DecodeXmlString<crate::TrackMetaData>>,
         pub last_change: Option<String>,
     }
 
@@ -5862,7 +5862,7 @@ pub mod virtual_line_in {
     #[xml(rename="property", ns(crate::upnp::UPNP_EVENT, e=crate::upnp::UPNP_EVENT))]
     struct VirtualLineInProperty {
         #[xml(rename = "CurrentTrackMetaData", ns(""))]
-        pub current_track_meta_data: Option<String>,
+        pub current_track_meta_data: Option<crate::xmlutil::DecodeXmlString<crate::TrackMetaData>>,
         #[xml(rename = "LastChange", ns(""))]
         pub last_change: Option<String>,
     }
