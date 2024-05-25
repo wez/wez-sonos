@@ -273,6 +273,8 @@ pub enum ObjectClass {
     MusicTrack,
     #[xml(rename = "object.item.audioItem.audioBroadcast")]
     AudioBroadcast,
+    #[xml(rename = "object.container.playlistContainer")]
+    PlayList,
 }
 
 #[cfg(test)]
