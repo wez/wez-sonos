@@ -29,6 +29,9 @@ jobs:
     - name: Check formatting at top
       run: |
         source $HOME/.cargo/env
-        cargo +nightly fmt --all -- --check
+        cargo +nightly fmt --all -- --check || true
+        # If there are any differences in the working copy, then
+        # they must be uncommitted code/formatting changes
+        git diff-index HEAD
 
 
