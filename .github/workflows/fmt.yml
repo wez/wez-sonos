@@ -14,11 +14,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - name: "Install Rust"
+      uses: dtolnay/rust-toolchain@nightly
+      with:
+        components: rustfmt
     - name: Codegen
-      run: cd codegen ; cargo run
+      run: |
+        source $HOME/.cargo/env
+        cd codegen ; cargo run
     - name: Check formatting in codegen
-      run: cd codegen ; cargo +nightly fmt --all -- --check
+      run: |
+        source $HOME/.cargo/env
+        cd codegen ; cargo +nightly fmt --all -- --check
     - name: Check formatting at top
-      run: cargo +nightly fmt --all -- --check
+      run: |
+        source $HOME/.cargo/env
+        cargo +nightly fmt --all -- --check
 
 
