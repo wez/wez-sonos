@@ -1,0 +1,24 @@
+name: fmt
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Codegen
+      run: cd codegen ; cargo run
+    - name: Check formatting in codegen
+      run: cd codegen ; cargo +nightly fmt --all -- --check
+    - name: Check formatting at top
+      run: cargo +nightly fmt --all -- --check
+
+
