@@ -10,7 +10,7 @@ check: regenerate
 
 regenerate: src/generated.rs
 
-src/generated.rs: codegen/src/main.rs
+src/generated.rs: codegen/src/main.rs codegen/src/schema.rs codegen/Cargo.toml
 	cd codegen ; cargo run
 	cargo +nightly fmt
 
