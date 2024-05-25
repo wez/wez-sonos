@@ -1,4 +1,3 @@
-use sonos::prelude::*;
 
 #[tokio::main]
 async fn main() -> sonos::Result<()> {

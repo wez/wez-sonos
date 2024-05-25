@@ -2,12 +2,19 @@
 name = "wez-sonos"
 version = "0.1.0"
 edition = "2021"
+repository = "https://github.com/wez/wez-sonos"
+description = "Sonos API client"
+license = "MIT"
+documentation = "https://docs.rs/wez-sonos"
 
+# The package name is wez-sonos to avoid conflict with an old
+# and possibly abandoned package with the name sonos, but the
+# crate name used in code is sonos for convenience and to tone
+# down the potential perception of narcissism in my crate names(!)
 [lib]
 name = "sonos"
 
 [dependencies]
-futures-util = "0.3.30"
 instant-xml = {version="0.4.0", path="../instant-xml/instant-xml"}
 log = "0.4.21"
 reqwest = { version = "0.12.4", default-features = false }
