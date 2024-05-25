@@ -1,4 +1,3 @@
-
 #[tokio::main]
 async fn main() -> sonos::Result<()> {
     env_logger::init();
