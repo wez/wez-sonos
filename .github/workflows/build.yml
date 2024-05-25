@@ -14,8 +14,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+    - name: "Install Rust"
+      uses: dtolnay/rust-toolchain@nightly
+      with:
+        components: rustfmt
     - name: Codegen
-      run: make regenerate
+      run: |
+        source $HOME/.cargo/env
+        cd codegen ; cargo run
+        cargo +nightly fmt
     - name: Build
       run: cargo build
     - name: Run tests
