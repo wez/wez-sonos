@@ -100,6 +100,18 @@ impl VersionedService {
             Entry::Name("ZoneGroupState"),
             Entry::Name("TrackMetaData"),
             Entry::Alias {
+                name: "EnqueuedTransportURIMetaData",
+                type_name: "TrackMetaData",
+            },
+            Entry::Alias {
+                name: "AVTransportURIMetaData",
+                type_name: "TrackMetaData",
+            },
+            Entry::Alias {
+                name: "EnqueuedURIMetaData",
+                type_name: "TrackMetaData",
+            },
+            Entry::Alias {
                 name: "CurrentTrackMetaData",
                 type_name: "TrackMetaData",
             },
@@ -226,22 +238,41 @@ struct ActionDocs {
     params: BTreeMap<String, String>,
 }
 
+const R_NS: &str = "urn:schemas-rinconnetworks-com:metadata-1-0/";
+
 struct LastMeta {
     service_name: &'static str,
     ns: &'static str,
     root_object: &'static str,
+    extra_ns: &'static [(&'static str, &'static str)],
 }
 
 const LAST_NS: &[LastMeta] = &[
+    // FIXME: there are some elements in an r: namespace
     LastMeta {
         service_name: "AVTransport",
         ns: "urn:schemas-upnp-org:metadata-1-0/AVT/",
         root_object: "InstanceID",
+        extra_ns: &[
+            ("NextTrackURI", R_NS),
+            ("EnqueuedTransportURI", R_NS),
+            ("EnqueuedTransportURIMetaData", R_NS),
+            ("NextTrackMetaData", R_NS),
+            ("CurrentValidPlayModes", R_NS),
+            ("DirectControlClientID", R_NS),
+            ("DirectControlIsSuspended", R_NS),
+            ("DirectControlAccountID", R_NS),
+            ("SleepTimerGeneration", R_NS),
+            ("AlarmRunning", R_NS),
+            ("SnoozeRunning", R_NS),
+            ("RestartPending", R_NS),
+        ],
     },
     LastMeta {
         service_name: "Queue",
         ns: "urn:schemas-sonos-com:metadata-1-0/Queue/",
         root_object: "QueueID",
+        extra_ns: &[],
     },
     // FIXME: There are things like `<Volume channel="RF" val="100"/><Mute
     // channel="Master" val="0"/>` in the RCS data, that we cannot
@@ -250,6 +281,7 @@ const LAST_NS: &[LastMeta] = &[
         service_name: "RenderingControl",
         ns: "urn:schemas-upnp-org:metadata-1-0/RCS/",
         root_object: "InstanceID",
+        extra_ns: &[],
     },
 ];
 
@@ -647,11 +679,18 @@ struct {service_name}LastChangeRootObject {{
                     )
                     .ok();
 
+                    let field_ns = last_change
+                        .extra_ns
+                        .iter()
+                        .find(|(element, _ns)| *element == name)
+                        .map(|(_element, ns)| format!("\"{ns}\""))
+                        .unwrap_or_else(|| "LAST_CHANGE_NS".to_string());
+
                     writeln!(
                         &mut attributes,
                         r#"
 #[derive(FromXml)]
-#[xml(rename="{name}", ns(LAST_CHANGE_NS))]
+#[xml(rename="{name}", ns({field_ns}))]
 #[allow(non_camel_case_types)]
 struct {service_name}LastChange{name} {{
     #[xml(attribute)]

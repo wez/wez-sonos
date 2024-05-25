@@ -141,7 +141,10 @@ impl SonosDevice {
     pub async fn get_zone_group_state(&self) -> Result<Vec<ZoneGroup>> {
         let state = <Self as ZoneGroupTopology>::get_zone_group_state(self).await?;
         Ok(match state.zone_group_state {
-            Some(state) => state.0.groups,
+            Some(state) => state
+                .into_inner()
+                .map(|s| s.groups)
+                .unwrap_or_else(Vec::new),
             None => vec![],
         })
     }
@@ -173,7 +176,7 @@ impl SonosDevice {
             self,
             av_transport::SetPlayModeRequest {
                 instance_id: 0,
-                new_play_mode,
+                new_play_mode: new_play_mode,
             },
         )
         .await
@@ -189,9 +192,7 @@ impl SonosDevice {
             av_transport::SetAvTransportUriRequest {
                 instance_id: 0,
                 current_uri: uri.to_string(),
-                current_uri_meta_data: metadata
-                    .map(|m| m.to_didl_string())
-                    .unwrap_or_else(String::new),
+                current_uri_meta_data: metadata.into(),
             },
         )
         .await
@@ -207,9 +208,7 @@ impl SonosDevice {
             av_transport::AddUriToQueueRequest {
                 instance_id: 0,
                 enqueued_uri: uri.to_string(),
-                enqueued_uri_meta_data: metadata
-                    .map(|m| m.to_didl_string())
-                    .unwrap_or_else(String::new),
+                enqueued_uri_meta_data: metadata.into(),
                 desired_first_track_number_enqueued: 0,
                 enqueue_as_next: true,
             },
@@ -227,9 +226,7 @@ impl SonosDevice {
             av_transport::AddUriToQueueRequest {
                 instance_id: 0,
                 enqueued_uri: uri.to_string(),
-                enqueued_uri_meta_data: metadata
-                    .map(|m| m.to_didl_string())
-                    .unwrap_or_else(String::new),
+                enqueued_uri_meta_data: metadata.into(),
                 desired_first_track_number_enqueued: 0,
                 enqueue_as_next: false,
             },
@@ -246,14 +243,14 @@ impl SonosDevice {
             self,
             queue::BrowseRequest {
                 queue_id: 0,
-                starting_index,
-                requested_count,
+                starting_index: starting_index,
+                requested_count: requested_count,
             },
         )
         .await?;
 
         match result.result {
-            Some(list) => Ok(list.into_inner().tracks),
+            Some(list) => Ok(list.into_inner().map(|i| i.tracks).unwrap_or_else(Vec::new)),
             None => Ok(vec![]),
         }
     }

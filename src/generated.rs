@@ -65,7 +65,7 @@ pub mod av_transport {
         #[xml(rename = "EnqueuedURI", ns(""))]
         pub enqueued_uri: String,
         #[xml(rename = "EnqueuedURIMetaData", ns(""))]
-        pub enqueued_uri_meta_data: String,
+        pub enqueued_uri_meta_data: DecodeXmlString<crate::TrackMetaData>,
         /// use `0` to add at the end or `1` to insert at the beginning
         #[xml(rename = "DesiredFirstTrackNumberEnqueued", ns(""))]
         pub desired_first_track_number_enqueued: u32,
@@ -103,7 +103,7 @@ pub mod av_transport {
         #[xml(rename = "EnqueuedURI", ns(""))]
         pub enqueued_uri: String,
         #[xml(rename = "EnqueuedURIMetaData", ns(""))]
-        pub enqueued_uri_meta_data: String,
+        pub enqueued_uri_meta_data: DecodeXmlString<crate::TrackMetaData>,
         #[xml(rename = "AddAtIndex", ns(""))]
         pub add_at_index: u32,
     }
@@ -175,7 +175,7 @@ pub mod av_transport {
         #[xml(rename = "CurrentURI", ns(""))]
         pub current_uri: String,
         #[xml(rename = "CurrentURIMetaData", ns(""))]
-        pub current_uri_meta_data: String,
+        pub current_uri_meta_data: DecodeXmlString<crate::TrackMetaData>,
         #[xml(rename = "SleepTimerState", ns(""))]
         pub sleep_timer_state: String,
         #[xml(rename = "AlarmState", ns(""))]
@@ -202,7 +202,7 @@ pub mod av_transport {
         #[xml(rename = "CurrentURI", ns(""))]
         pub current_uri: String,
         #[xml(rename = "CurrentURIMetaData", ns(""))]
-        pub current_uri_meta_data: String,
+        pub current_uri_meta_data: DecodeXmlString<crate::TrackMetaData>,
         #[xml(rename = "SleepTimerState", ns(""))]
         pub sleep_timer_state: String,
         #[xml(rename = "AlarmState", ns(""))]
@@ -265,7 +265,7 @@ pub mod av_transport {
         #[xml(rename = "EnqueuedURI", ns(""))]
         pub enqueued_uri: String,
         #[xml(rename = "EnqueuedURIMetaData", ns(""))]
-        pub enqueued_uri_meta_data: String,
+        pub enqueued_uri_meta_data: DecodeXmlString<crate::TrackMetaData>,
     }
 
     #[derive(FromXml, Debug, Clone, PartialEq)]
@@ -392,7 +392,7 @@ pub mod av_transport {
         #[xml(rename = "CurrentURI", ns(""))]
         pub current_uri: Option<String>,
         #[xml(rename = "CurrentURIMetaData", ns(""))]
-        pub current_uri_meta_data: Option<String>,
+        pub current_uri_meta_data: Option<DecodeXmlString<crate::TrackMetaData>>,
         #[xml(rename = "NextURI", ns(""))]
         pub next_uri: Option<String>,
         #[xml(rename = "NextURIMetaData", ns(""))]
@@ -692,7 +692,7 @@ pub mod av_transport {
         #[xml(rename = "ProgramURI", ns(""))]
         pub program_uri: String,
         #[xml(rename = "ProgramMetaData", ns(""))]
-        pub program_meta_data: String,
+        pub program_meta_data: DecodeXmlString<crate::TrackMetaData>,
         #[xml(rename = "PlayMode", ns(""))]
         pub play_mode: super::CurrentPlayMode,
         #[xml(rename = "Volume", ns(""))]
@@ -751,7 +751,7 @@ pub mod av_transport {
         pub current_uri: String,
         /// Track Metadata, see MetadataHelper.GuessTrack to guess based on track uri
         #[xml(rename = "CurrentURIMetaData", ns(""))]
-        pub current_uri_meta_data: String,
+        pub current_uri_meta_data: DecodeXmlString<crate::TrackMetaData>,
     }
 
     #[derive(ToXml, Debug, Clone, PartialEq, Default)]
@@ -802,7 +802,7 @@ pub mod av_transport {
         #[xml(rename = "ProgramURI", ns(""))]
         pub program_uri: String,
         #[xml(rename = "ProgramMetaData", ns(""))]
-        pub program_meta_data: String,
+        pub program_meta_data: DecodeXmlString<crate::TrackMetaData>,
         #[xml(rename = "Volume", ns(""))]
         pub volume: u16,
         #[xml(rename = "IncludeLinkedZones", ns(""))]
@@ -864,7 +864,7 @@ pub mod av_transport {
     #[derive(Debug, Clone, PartialEq, Default)]
     pub struct AVTransportLastChange {
         pub av_transport_uri: Option<String>,
-        pub av_transport_uri_meta_data: Option<String>,
+        pub av_transport_uri_meta_data: Option<DecodeXmlString<crate::TrackMetaData>>,
         pub alarm_include_linked_zones: Option<bool>,
         pub alarm_state: Option<String>,
         pub alarm_volume: Option<u16>,
@@ -917,7 +917,7 @@ pub mod av_transport {
         pub direct_control_client_id: Option<String>,
         pub direct_control_is_suspended: Option<bool>,
         pub enqueued_transport_uri: Option<String>,
-        pub enqueued_transport_uri_meta_data: Option<String>,
+        pub enqueued_transport_uri_meta_data: Option<DecodeXmlString<crate::TrackMetaData>>,
         pub muse_sessions: Option<String>,
         pub next_av_transport_uri: Option<String>,
         pub next_av_transport_uri_meta_data: Option<String>,
@@ -958,7 +958,7 @@ pub mod av_transport {
     #[allow(non_camel_case_types)]
     struct AVTransportLastChangeAVTransportURIMetaData {
         #[xml(attribute)]
-        val: Option<String>,
+        val: Option<DecodeXmlString<crate::TrackMetaData>>,
     }
 
     #[derive(FromXml)]
@@ -1250,7 +1250,10 @@ pub mod av_transport {
     }
 
     #[derive(FromXml)]
-    #[xml(rename = "AlarmRunning", ns(LAST_CHANGE_NS))]
+    #[xml(
+        rename = "AlarmRunning",
+        ns("urn:schemas-rinconnetworks-com:metadata-1-0/")
+    )]
     #[allow(non_camel_case_types)]
     struct AVTransportLastChangeAlarmRunning {
         #[xml(attribute)]
@@ -1338,7 +1341,10 @@ pub mod av_transport {
     }
 
     #[derive(FromXml)]
-    #[xml(rename = "CurrentValidPlayModes", ns(LAST_CHANGE_NS))]
+    #[xml(
+        rename = "CurrentValidPlayModes",
+        ns("urn:schemas-rinconnetworks-com:metadata-1-0/")
+    )]
     #[allow(non_camel_case_types)]
     struct AVTransportLastChangeCurrentValidPlayModes {
         #[xml(attribute)]
@@ -1346,7 +1352,10 @@ pub mod av_transport {
     }
 
     #[derive(FromXml)]
-    #[xml(rename = "DirectControlAccountID", ns(LAST_CHANGE_NS))]
+    #[xml(
+        rename = "DirectControlAccountID",
+        ns("urn:schemas-rinconnetworks-com:metadata-1-0/")
+    )]
     #[allow(non_camel_case_types)]
     struct AVTransportLastChangeDirectControlAccountID {
         #[xml(attribute)]
@@ -1354,7 +1363,10 @@ pub mod av_transport {
     }
 
     #[derive(FromXml)]
-    #[xml(rename = "DirectControlClientID", ns(LAST_CHANGE_NS))]
+    #[xml(
+        rename = "DirectControlClientID",
+        ns("urn:schemas-rinconnetworks-com:metadata-1-0/")
+    )]
     #[allow(non_camel_case_types)]
     struct AVTransportLastChangeDirectControlClientID {
         #[xml(attribute)]
@@ -1362,7 +1374,10 @@ pub mod av_transport {
     }
 
     #[derive(FromXml)]
-    #[xml(rename = "DirectControlIsSuspended", ns(LAST_CHANGE_NS))]
+    #[xml(
+        rename = "DirectControlIsSuspended",
+        ns("urn:schemas-rinconnetworks-com:metadata-1-0/")
+    )]
     #[allow(non_camel_case_types)]
     struct AVTransportLastChangeDirectControlIsSuspended {
         #[xml(attribute)]
@@ -1370,7 +1385,10 @@ pub mod av_transport {
     }
 
     #[derive(FromXml)]
-    #[xml(rename = "EnqueuedTransportURI", ns(LAST_CHANGE_NS))]
+    #[xml(
+        rename = "EnqueuedTransportURI",
+        ns("urn:schemas-rinconnetworks-com:metadata-1-0/")
+    )]
     #[allow(non_camel_case_types)]
     struct AVTransportLastChangeEnqueuedTransportURI {
         #[xml(attribute)]
@@ -1378,11 +1396,14 @@ pub mod av_transport {
     }
 
     #[derive(FromXml)]
-    #[xml(rename = "EnqueuedTransportURIMetaData", ns(LAST_CHANGE_NS))]
+    #[xml(
+        rename = "EnqueuedTransportURIMetaData",
+        ns("urn:schemas-rinconnetworks-com:metadata-1-0/")
+    )]
     #[allow(non_camel_case_types)]
     struct AVTransportLastChangeEnqueuedTransportURIMetaData {
         #[xml(attribute)]
-        val: Option<String>,
+        val: Option<DecodeXmlString<crate::TrackMetaData>>,
     }
 
     #[derive(FromXml)]
@@ -1410,7 +1431,10 @@ pub mod av_transport {
     }
 
     #[derive(FromXml)]
-    #[xml(rename = "NextTrackMetaData", ns(LAST_CHANGE_NS))]
+    #[xml(
+        rename = "NextTrackMetaData",
+        ns("urn:schemas-rinconnetworks-com:metadata-1-0/")
+    )]
     #[allow(non_camel_case_types)]
     struct AVTransportLastChangeNextTrackMetaData {
         #[xml(attribute)]
@@ -1418,7 +1442,10 @@ pub mod av_transport {
     }
 
     #[derive(FromXml)]
-    #[xml(rename = "NextTrackURI", ns(LAST_CHANGE_NS))]
+    #[xml(
+        rename = "NextTrackURI",
+        ns("urn:schemas-rinconnetworks-com:metadata-1-0/")
+    )]
     #[allow(non_camel_case_types)]
     struct AVTransportLastChangeNextTrackURI {
         #[xml(attribute)]
@@ -1506,7 +1533,10 @@ pub mod av_transport {
     }
 
     #[derive(FromXml)]
-    #[xml(rename = "RestartPending", ns(LAST_CHANGE_NS))]
+    #[xml(
+        rename = "RestartPending",
+        ns("urn:schemas-rinconnetworks-com:metadata-1-0/")
+    )]
     #[allow(non_camel_case_types)]
     struct AVTransportLastChangeRestartPending {
         #[xml(attribute)]
@@ -1514,7 +1544,10 @@ pub mod av_transport {
     }
 
     #[derive(FromXml)]
-    #[xml(rename = "SleepTimerGeneration", ns(LAST_CHANGE_NS))]
+    #[xml(
+        rename = "SleepTimerGeneration",
+        ns("urn:schemas-rinconnetworks-com:metadata-1-0/")
+    )]
     #[allow(non_camel_case_types)]
     struct AVTransportLastChangeSleepTimerGeneration {
         #[xml(attribute)]
@@ -1522,7 +1555,10 @@ pub mod av_transport {
     }
 
     #[derive(FromXml)]
-    #[xml(rename = "SnoozeRunning", ns(LAST_CHANGE_NS))]
+    #[xml(
+        rename = "SnoozeRunning",
+        ns("urn:schemas-rinconnetworks-com:metadata-1-0/")
+    )]
     #[allow(non_camel_case_types)]
     struct AVTransportLastChangeSnoozeRunning {
         #[xml(attribute)]
@@ -5348,7 +5384,7 @@ pub mod queue {
         #[xml(rename = "EnqueuedURI", ns(""))]
         pub enqueued_uri: String,
         #[xml(rename = "EnqueuedURIMetaData", ns(""))]
-        pub enqueued_uri_meta_data: String,
+        pub enqueued_uri_meta_data: DecodeXmlString<crate::TrackMetaData>,
         #[xml(rename = "DesiredFirstTrackNumberEnqueued", ns(""))]
         pub desired_first_track_number_enqueued: u32,
         #[xml(rename = "EnqueueAsNext", ns(""))]

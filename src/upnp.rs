@@ -327,6 +327,10 @@ pub trait DecodeXml: Send {
         Self: Sized;
 }
 
+pub trait EncodeXml {
+    fn encode_xml(&self) -> std::result::Result<String, instant_xml::Error>;
+}
+
 /// Manages a live subscription to an event stream for a service.
 /// While this object is live, the event stream will be renewed
 /// every minute.

@@ -1,4 +1,4 @@
-use crate::{DecodeXml, Error, Result};
+use crate::{DecodeXml, EncodeXml, Error, Result};
 use instant_xml::{FromXml, ToXml};
 use std::time::Duration;
 
@@ -35,6 +35,12 @@ impl DecodeXml for TrackMetaData {
     }
 }
 
+impl EncodeXml for TrackMetaData {
+    fn encode_xml(&self) -> std::result::Result<String, instant_xml::Error> {
+        Ok(self.to_didl_string())
+    }
+}
+
 #[derive(Debug, Default, Clone, PartialEq, Eq)]
 pub struct TrackMetaDataList {
     pub tracks: Vec<TrackMetaData>,
@@ -44,6 +50,13 @@ impl DecodeXml for TrackMetaDataList {
     fn decode_xml(xml: &str) -> Result<Self> {
         let tracks = TrackMetaData::from_didl_str(xml)?;
         Ok(Self { tracks })
+    }
+}
+
+impl EncodeXml for TrackMetaDataList {
+    fn encode_xml(&self) -> std::result::Result<String, instant_xml::Error> {
+        let tracks: Vec<_> = self.tracks.iter().map(|t| t.to_didl_string()).collect();
+        Ok(tracks.join(""))
     }
 }
 

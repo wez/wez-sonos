@@ -8,7 +8,9 @@ test:
 check: regenerate
 	cargo check
 
-regenerate: codegen/src/main.rs
+regenerate: src/generated.rs
+
+src/generated.rs: codegen/src/main.rs
 	cd codegen ; cargo run
 	cargo +nightly fmt
 
