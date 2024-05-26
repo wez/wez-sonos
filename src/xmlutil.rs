@@ -33,7 +33,10 @@ where
         match deserializer.take_str()? {
             Some(value) => {
                 // eprintln!("decode: {value}");
-                if !value.is_empty() {
+
+                let is_empty = value.trim().is_empty() || value == "NOT_IMPLEMENTED";
+
+                if !is_empty {
                     let parsed = T::decode_xml(&value).map_err(|err| {
                         instant_xml::Error::Other(format!(
                             "failed to decode_xml for {field}: `{err:#}` {value}"
