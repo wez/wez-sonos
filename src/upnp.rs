@@ -9,7 +9,7 @@ use url::Host;
 
 const UPNP_DEVICE: &str = "urn:schemas-upnp-org:device-1-0";
 
-#[derive(Debug, FromXml)]
+#[derive(Debug, FromXml, Clone)]
 #[xml(rename = "device", ns(UPNP_DEVICE))]
 pub struct DeviceSpec {
     #[xml(rename = "friendlyName")]
@@ -65,13 +65,13 @@ impl DeviceSpec {
     }
 }
 
-#[derive(Debug, FromXml)]
+#[derive(Debug, FromXml, Clone)]
 #[xml(rename = "serviceList", ns(UPNP_DEVICE))]
 struct ServiceList {
     pub services: Vec<Service>,
 }
 
-#[derive(Debug, FromXml)]
+#[derive(Debug, FromXml, Clone)]
 #[xml(rename = "deviceList", ns(UPNP_DEVICE))]
 struct DeviceList {
     pub devices: Vec<DeviceSpec>,
@@ -83,7 +83,7 @@ struct Root {
     device: DeviceSpec,
 }
 
-#[derive(Debug, FromXml)]
+#[derive(Debug, FromXml, Clone)]
 #[xml(rename = "service", ns(UPNP_DEVICE))]
 pub struct Service {
     #[xml(rename = "serviceType")]
@@ -203,7 +203,7 @@ async fn process_subscription<T: DecodeXml + 'static>(
             Err(_) => {
                 log::debug!("time to renew!");
                 // Time to renew subscription
-                let renew = match dbg!(tx.try_send(SubscriptionMessage::Ping)) {
+                let renew = match tx.try_send(SubscriptionMessage::Ping) {
                     Ok(_) | Err(tokio::sync::mpsc::error::TrySendError::Full(_)) => true,
                     Err(tokio::sync::mpsc::error::TrySendError::Closed(_)) => {
                         // It's dead; don't bother renewing
@@ -211,7 +211,7 @@ async fn process_subscription<T: DecodeXml + 'static>(
                     }
                 };
 
-                dbg!(renew_or_cancel_sub(&sub_url, renew, &sid).await)?;
+                renew_or_cancel_sub(&sub_url, renew, &sid).await?;
 
                 if renew {
                     deadline = tokio::time::Instant::now()

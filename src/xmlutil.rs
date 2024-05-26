@@ -33,12 +33,14 @@ where
         match deserializer.take_str()? {
             Some(value) => {
                 // eprintln!("decode: {value}");
-                let parsed = T::decode_xml(&value).map_err(|err| {
-                    instant_xml::Error::Other(format!(
-                        "failed to decode_xml for {field}: `{err:#}` {value}"
-                    ))
-                })?;
-                target.replace(DecodeXmlString(Some(parsed)));
+                if !value.is_empty() {
+                    let parsed = T::decode_xml(&value).map_err(|err| {
+                        instant_xml::Error::Other(format!(
+                            "failed to decode_xml for {field}: `{err:#}` {value}"
+                        ))
+                    })?;
+                    target.replace(DecodeXmlString(Some(parsed)));
+                }
                 Ok(())
             }
             None => {

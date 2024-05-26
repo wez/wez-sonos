@@ -62,7 +62,7 @@ impl EncodeXml for TrackMetaDataList {
 
 const HMS_FACTORS: &[u64] = &[86400, 3600, 60, 1];
 
-fn duration_to_hms(d: Duration) -> String {
+pub fn duration_to_hms(d: Duration) -> String {
     use std::fmt::Write;
     let mut seconds_total = d.as_secs();
     let mut result = String::new();
@@ -87,7 +87,7 @@ fn duration_to_hms(d: Duration) -> String {
     result
 }
 
-fn hms_to_duration(hms: &str) -> Duration {
+pub fn hms_to_duration(hms: &str) -> Duration {
     let mut result = Duration::ZERO;
 
     for (field, factor) in hms.split(':').rev().zip(HMS_FACTORS.iter().rev()) {
@@ -275,6 +275,8 @@ pub enum ObjectClass {
     AudioBroadcast,
     #[xml(rename = "object.container.playlistContainer")]
     PlayList,
+    #[xml(rename = "object.container")]
+    Container,
 }
 
 #[cfg(test)]
@@ -386,6 +388,14 @@ DidlLite {
 }
 "#
         );
+    }
+
+    #[test]
+    fn test_empty_album_art() {
+        let input = r#"<DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/" xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/" xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/"><item id="00080000A%3aTRACKS" parentID="-1" restricted="true"><dc:title>Tracks</dc:title><upnp:class>object.container</upnp:class><desc id="cdudn" nameSpace="urn:schemas-rinconnetworks-com:metadata-1-0/"></desc><upnp:albumArtURI></upnp:albumArtURI></item></DIDL-Lite>"#;
+
+        let didl: DidlLite = instant_xml::from_str(&input).unwrap();
+        k9::snapshot!(didl);
     }
 
     #[test]

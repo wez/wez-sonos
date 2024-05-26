@@ -86,7 +86,7 @@ impl Error {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct SonosDevice {
     url: Url,
     device: DeviceSpec,
@@ -164,6 +164,11 @@ impl SonosDevice {
             },
         )
         .await
+    }
+
+    /// pause playback
+    pub async fn pause(&self) -> Result<()> {
+        <Self as AVTransport>::pause(self, av_transport::PauseRequest { instance_id: 0 }).await
     }
 
     /// Clears the queue
@@ -253,6 +258,10 @@ impl SonosDevice {
             Some(list) => Ok(list.into_inner().map(|i| i.tracks).unwrap_or_else(Vec::new)),
             None => Ok(vec![]),
         }
+    }
+
+    pub fn url(&self) -> &Url {
+        &self.url
     }
 }
 
