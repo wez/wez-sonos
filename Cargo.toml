@@ -15,8 +15,8 @@ documentation = "https://docs.rs/wez-sonos"
 name = "sonos"
 
 [dependencies]
-instant-xml = {version="0.4.0", path="../instant-xml/instant-xml"}
-#instant-xml = {version="0.4.0", git="https://github.com/wez/instant-xml" }
+#instant-xml = {version="0.4.0", path="../instant-xml/instant-xml"}
+instant-xml = {version="0.4.0", git="https://github.com/wez/instant-xml", branch="empty" }
 log = "0.4.21"
 reqwest = { version = "0.12.4", default-features = false }
 tokio = { version = "1.37.0", features = ["net", "io-util"] }

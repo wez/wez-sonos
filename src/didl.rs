@@ -395,7 +395,40 @@ DidlLite {
         let input = r#"<DIDL-Lite xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:upnp="urn:schemas-upnp-org:metadata-1-0/upnp/" xmlns:r="urn:schemas-rinconnetworks-com:metadata-1-0/" xmlns="urn:schemas-upnp-org:metadata-1-0/DIDL-Lite/"><item id="00080000A%3aTRACKS" parentID="-1" restricted="true"><dc:title>Tracks</dc:title><upnp:class>object.container</upnp:class><desc id="cdudn" nameSpace="urn:schemas-rinconnetworks-com:metadata-1-0/"></desc><upnp:albumArtURI></upnp:albumArtURI></item></DIDL-Lite>"#;
 
         let didl: DidlLite = instant_xml::from_str(&input).unwrap();
-        k9::snapshot!(didl);
+        k9::snapshot!(
+            didl,
+            r#"
+DidlLite {
+    item: [
+        UpnpItem {
+            id: "00080000A%3aTRACKS",
+            parent_id: "-1",
+            restricted: true,
+            res: None,
+            duration: None,
+            album_art: Some(
+                AlbumArtUri {
+                    uri: "",
+                },
+            ),
+            album_title: None,
+            artist: None,
+            creator: None,
+            title: Some(
+                Title {
+                    title: "Tracks",
+                },
+            ),
+            class: Some(
+                Container,
+            ),
+            mime_type: None,
+            queue_item_id: None,
+        },
+    ],
+}
+"#
+        );
     }
 
     #[test]
