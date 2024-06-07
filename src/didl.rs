@@ -112,7 +112,7 @@ impl TrackMetaData {
                 duration: None,
                 id: "-1".to_string(),
                 parent_id: "-1".to_string(),
-                restricted: true,
+                restricted: Some(true),
                 res: Some(Res {
                     // Note that this assumes that the URL is an HTTP URL
                     protocol_info: Some(format!(
@@ -184,7 +184,7 @@ pub struct UpnpItem {
     #[xml(attribute, rename = "parentID")]
     pub parent_id: String,
     #[xml(attribute)]
-    pub restricted: bool,
+    pub restricted: Option<bool>,
 
     pub res: Option<Res>,
     pub duration: Option<UpnpDuration>,
@@ -308,7 +308,7 @@ mod test {
                     url: "http://track.mp3".to_string(),
                 }),
                 duration: None,
-                restricted: true,
+                restricted: Some(true),
                 title: Some(Title {
                     title: "Track Title".to_string(),
                 }),
@@ -332,7 +332,9 @@ DidlLite {
         UpnpItem {
             id: "1",
             parent_id: "0",
-            restricted: true,
+            restricted: Some(
+                true,
+            ),
             res: Some(
                 Res {
                     protocol_info: Some(
