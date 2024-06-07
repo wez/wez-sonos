@@ -1980,7 +1980,7 @@ impl<'xml> instant_xml::FromXml<'xml> for SeekMode {
         deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
     ) -> std::result::Result<(), instant_xml::Error> {
         if into.is_some() {
-            return Err(instant_xml::Error::DuplicateValue);
+            return Err(instant_xml::Error::DuplicateValue(field));
         }
 
         match deserializer.take_str()? {
@@ -2075,7 +2075,7 @@ impl<'xml> instant_xml::FromXml<'xml> for CurrentPlayMode {
         deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
     ) -> std::result::Result<(), instant_xml::Error> {
         if into.is_some() {
-            return Err(instant_xml::Error::DuplicateValue);
+            return Err(instant_xml::Error::DuplicateValue(field));
         }
 
         match deserializer.take_str()? {
@@ -2158,7 +2158,7 @@ impl<'xml> instant_xml::FromXml<'xml> for PlaybackStorageMedium {
         deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
     ) -> std::result::Result<(), instant_xml::Error> {
         if into.is_some() {
-            return Err(instant_xml::Error::DuplicateValue);
+            return Err(instant_xml::Error::DuplicateValue(field));
         }
 
         match deserializer.take_str()? {
@@ -2247,7 +2247,7 @@ impl<'xml> instant_xml::FromXml<'xml> for TransportState {
         deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
     ) -> std::result::Result<(), instant_xml::Error> {
         if into.is_some() {
-            return Err(instant_xml::Error::DuplicateValue);
+            return Err(instant_xml::Error::DuplicateValue(field));
         }
 
         match deserializer.take_str()? {
@@ -2722,7 +2722,7 @@ impl<'xml> instant_xml::FromXml<'xml> for AlarmPlayMode {
         deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
     ) -> std::result::Result<(), instant_xml::Error> {
         if into.is_some() {
-            return Err(instant_xml::Error::DuplicateValue);
+            return Err(instant_xml::Error::DuplicateValue(field));
         }
 
         match deserializer.take_str()? {
@@ -2811,7 +2811,7 @@ impl<'xml> instant_xml::FromXml<'xml> for Recurrence {
         deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
     ) -> std::result::Result<(), instant_xml::Error> {
         if into.is_some() {
-            return Err(instant_xml::Error::DuplicateValue);
+            return Err(instant_xml::Error::DuplicateValue(field));
         }
 
         match deserializer.take_str()? {
@@ -3204,7 +3204,7 @@ impl<'xml> instant_xml::FromXml<'xml> for ConnectionStatus {
         deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
     ) -> std::result::Result<(), instant_xml::Error> {
         if into.is_some() {
-            return Err(instant_xml::Error::DuplicateValue);
+            return Err(instant_xml::Error::DuplicateValue(field));
         }
 
         match deserializer.take_str()? {
@@ -3287,7 +3287,7 @@ impl<'xml> instant_xml::FromXml<'xml> for Direction {
         deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
     ) -> std::result::Result<(), instant_xml::Error> {
         if into.is_some() {
-            return Err(instant_xml::Error::DuplicateValue);
+            return Err(instant_xml::Error::DuplicateValue(field));
         }
 
         match deserializer.take_str()? {
@@ -3762,7 +3762,7 @@ impl<'xml> instant_xml::FromXml<'xml> for BrowseFlag {
         deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
     ) -> std::result::Result<(), instant_xml::Error> {
         if into.is_some() {
-            return Err(instant_xml::Error::DuplicateValue);
+            return Err(instant_xml::Error::DuplicateValue(field));
         }
 
         match deserializer.take_str()? {
@@ -4495,7 +4495,7 @@ impl<'xml> instant_xml::FromXml<'xml> for ButtonLockState {
         deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
     ) -> std::result::Result<(), instant_xml::Error> {
         if into.is_some() {
-            return Err(instant_xml::Error::DuplicateValue);
+            return Err(instant_xml::Error::DuplicateValue(field));
         }
 
         match deserializer.take_str()? {
@@ -4578,7 +4578,7 @@ impl<'xml> instant_xml::FromXml<'xml> for LEDState {
         deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
     ) -> std::result::Result<(), instant_xml::Error> {
         if into.is_some() {
-            return Err(instant_xml::Error::DuplicateValue);
+            return Err(instant_xml::Error::DuplicateValue(field));
         }
 
         match deserializer.take_str()? {
@@ -5094,7 +5094,7 @@ impl<'xml> instant_xml::FromXml<'xml> for IRRepeaterState {
         deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
     ) -> std::result::Result<(), instant_xml::Error> {
         if into.is_some() {
-            return Err(instant_xml::Error::DuplicateValue);
+            return Err(instant_xml::Error::DuplicateValue(field));
         }
 
         match deserializer.take_str()? {
@@ -5177,7 +5177,7 @@ impl<'xml> instant_xml::FromXml<'xml> for LEDFeedbackState {
         deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
     ) -> std::result::Result<(), instant_xml::Error> {
         if into.is_some() {
-            return Err(instant_xml::Error::DuplicateValue);
+            return Err(instant_xml::Error::DuplicateValue(field));
         }
 
         match deserializer.take_str()? {
@@ -7095,7 +7095,7 @@ impl<'xml> instant_xml::FromXml<'xml> for Channel {
         deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
     ) -> std::result::Result<(), instant_xml::Error> {
         if into.is_some() {
-            return Err(instant_xml::Error::DuplicateValue);
+            return Err(instant_xml::Error::DuplicateValue(field));
         }
 
         match deserializer.take_str()? {
@@ -7184,7 +7184,7 @@ impl<'xml> instant_xml::FromXml<'xml> for MuteChannel {
         deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
     ) -> std::result::Result<(), instant_xml::Error> {
         if into.is_some() {
-            return Err(instant_xml::Error::DuplicateValue);
+            return Err(instant_xml::Error::DuplicateValue(field));
         }
 
         match deserializer.take_str()? {
@@ -7270,7 +7270,7 @@ impl<'xml> instant_xml::FromXml<'xml> for RampType {
         deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
     ) -> std::result::Result<(), instant_xml::Error> {
         if into.is_some() {
-            return Err(instant_xml::Error::DuplicateValue);
+            return Err(instant_xml::Error::DuplicateValue(field));
         }
 
         match deserializer.take_str()? {
@@ -8072,7 +8072,7 @@ impl<'xml> instant_xml::FromXml<'xml> for UnresponsiveDeviceActionType {
         deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
     ) -> std::result::Result<(), instant_xml::Error> {
         if into.is_some() {
-            return Err(instant_xml::Error::DuplicateValue);
+            return Err(instant_xml::Error::DuplicateValue(field));
         }
 
         match deserializer.take_str()? {
@@ -8155,7 +8155,7 @@ impl<'xml> instant_xml::FromXml<'xml> for UpdateType {
         deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
     ) -> std::result::Result<(), instant_xml::Error> {
         if into.is_some() {
-            return Err(instant_xml::Error::DuplicateValue);
+            return Err(instant_xml::Error::DuplicateValue(field));
         }
 
         match deserializer.take_str()? {

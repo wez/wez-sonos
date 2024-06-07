@@ -407,7 +407,9 @@ DidlLite {
         UpnpItem {
             id: "00080000A%3aTRACKS",
             parent_id: "-1",
-            restricted: true,
+            restricted: Some(
+                true,
+            ),
             res: None,
             duration: None,
             album_art: Some(

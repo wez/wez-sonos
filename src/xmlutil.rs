@@ -27,7 +27,7 @@ where
         deserializer: &mut Deserializer<'cx, '_>,
     ) -> std::result::Result<(), instant_xml::Error> {
         if target.is_some() {
-            return Err(instant_xml::Error::DuplicateValue);
+            return Err(instant_xml::Error::DuplicateValue(field));
         }
 
         match deserializer.take_str()? {

@@ -853,7 +853,7 @@ impl<'xml> instant_xml::FromXml<'xml> for {enum_name} {{
         deserializer: &mut instant_xml::Deserializer<'cx, 'xml>,
         ) -> std::result::Result<(), instant_xml::Error> {{
         if into.is_some() {{
-            return Err(instant_xml::Error::DuplicateValue);
+            return Err(instant_xml::Error::DuplicateValue(field));
         }}
 
         match deserializer.take_str()? {{
