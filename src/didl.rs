@@ -115,10 +115,10 @@ impl TrackMetaData {
                 restricted: true,
                 res: Some(Res {
                     // Note that this assumes that the URL is an HTTP URL
-                    protocol_info: format!(
+                    protocol_info: Some(format!(
                         "http-get:*:{}",
                         self.mime_type.as_deref().unwrap_or("audio/mpeg")
-                    ),
+                    )),
                     duration: self
                         .duration
                         .map(duration_to_hms)
@@ -161,7 +161,7 @@ impl TrackMetaData {
                     .map(|r| r.url.to_string())
                     .unwrap_or_else(String::new),
                 mime_type: item.res.as_ref().and_then(|r| {
-                    let fields: Vec<&str> = r.protocol_info.split(':').collect();
+                    let fields: Vec<&str> = r.protocol_info.as_ref()?.split(':').collect();
                     fields.get(2).map(|mime_type| mime_type.to_string())
                 }),
             });
@@ -202,7 +202,7 @@ pub struct UpnpItem {
 #[xml(rename = "res", ns(XMLNS_DIDL_LITE))]
 pub struct Res {
     #[xml(attribute, rename = "protocolInfo")]
-    pub protocol_info: String,
+    pub protocol_info: Option<String>,
     #[xml(attribute)]
     pub duration: String,
     #[xml(direct)]
@@ -303,7 +303,7 @@ mod test {
                 id: "-1".to_string(),
                 parent_id: "-1".to_string(),
                 res: Some(Res {
-                    protocol_info: "http-get:*:audio/mpeg".to_string(),
+                    protocol_info: Some("http-get:*:audio/mpeg".to_string()),
                     duration: "0:30:31".to_string(),
                     url: "http://track.mp3".to_string(),
                 }),
@@ -335,7 +335,9 @@ DidlLite {
             restricted: true,
             res: Some(
                 Res {
-                    protocol_info: "http-get:*:audio/flac:DLNA.ORG_PN=FLAC;DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=0d500000000000000000000000000000",
+                    protocol_info: Some(
+                        "http-get:*:audio/flac:DLNA.ORG_PN=FLAC;DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=0d500000000000000000000000000000",
+                    ),
                     duration: "1:12:44.000",
                     url: "http://192.168.1.214:8097/single/RINCON_XXX/51f8b02b9d3b4a88b97dd385ba2b572b.flac?ts=1716507641",
                 },
