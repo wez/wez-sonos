@@ -12,7 +12,6 @@ async fn main() -> sonos::Result<()> {
                 }
             }
             Err(err) => {
-                // log::error!("device: {device:#?}");
                 log::error!("{:?} {err:#}", device.device_spec().model_description);
             }
         }

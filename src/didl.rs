@@ -62,6 +62,8 @@ impl EncodeXml for TrackMetaDataList {
 
 const HMS_FACTORS: &[u64] = &[86400, 3600, 60, 1];
 
+/// Convert a `Duration` into a string of the form `HH:MM:SS`,
+/// which is used in parts of UPNP to represent a duration.
 pub fn duration_to_hms(d: Duration) -> String {
     use std::fmt::Write;
     let mut seconds_total = d.as_secs();
@@ -87,6 +89,7 @@ pub fn duration_to_hms(d: Duration) -> String {
     result
 }
 
+/// Convert a string of the form `HH:MM:SS` into a Duration.
 pub fn hms_to_duration(hms: &str) -> Duration {
     let mut result = Duration::ZERO;
 

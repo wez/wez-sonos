@@ -327,6 +327,7 @@ pub trait DecodeXml: Send {
         Self: Sized;
 }
 
+/// A helper trait for encoding types into an XML representation
 pub trait EncodeXml {
     fn encode_xml(&self) -> std::result::Result<String, instant_xml::Error>;
 }
