@@ -122,10 +122,7 @@ impl TrackMetaData {
                         "http-get:*:{}",
                         self.mime_type.as_deref().unwrap_or("audio/mpeg")
                     )),
-                    duration: self
-                        .duration
-                        .map(duration_to_hms)
-                        .unwrap_or_else(String::new),
+                    duration: self.duration.map(duration_to_hms),
                     url: self.url.to_string(),
                 }),
                 title: Some(Title {
@@ -156,7 +153,10 @@ impl TrackMetaData {
                 title: item.title.map(|a| a.title).unwrap_or_else(String::new),
                 duration: match item.duration {
                     Some(d) => Some(Duration::from_secs(d.duration)),
-                    None => item.res.as_ref().map(|r| hms_to_duration(&r.duration)),
+                    None => item
+                        .res
+                        .as_ref()
+                        .and_then(|r| r.duration.as_ref().map(|s| hms_to_duration(s))),
                 },
                 url: item
                     .res
@@ -207,7 +207,7 @@ pub struct Res {
     #[xml(attribute, rename = "protocolInfo")]
     pub protocol_info: Option<String>,
     #[xml(attribute)]
-    pub duration: String,
+    pub duration: Option<String>,
     #[xml(direct)]
     pub url: String,
 }
@@ -280,6 +280,8 @@ pub enum ObjectClass {
     PlayList,
     #[xml(rename = "object.container")]
     Container,
+    #[xml(rename = "object.item")]
+    Item,
 }
 
 #[cfg(test)]
