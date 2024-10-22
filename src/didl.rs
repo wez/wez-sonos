@@ -309,7 +309,7 @@ mod test {
                 parent_id: "-1".to_string(),
                 res: Some(Res {
                     protocol_info: Some("http-get:*:audio/mpeg".to_string()),
-                    duration: "0:30:31".to_string(),
+                    duration: Some("0:30:31".to_string()),
                     url: "http://track.mp3".to_string(),
                 }),
                 duration: None,
@@ -345,7 +345,9 @@ DidlLite {
                     protocol_info: Some(
                         "http-get:*:audio/flac:DLNA.ORG_PN=FLAC;DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=0d500000000000000000000000000000",
                     ),
-                    duration: "1:12:44.000",
+                    duration: Some(
+                        "1:12:44.000",
+                    ),
                     url: "http://192.168.1.214:8097/single/RINCON_XXX/51f8b02b9d3b4a88b97dd385ba2b572b.flac?ts=1716507641",
                 },
             ),
