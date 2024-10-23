@@ -229,6 +229,17 @@ impl SonosDevice {
         <Self as AVTransport>::pause(self, av_transport::PauseRequest { instance_id: 0 }).await
     }
 
+    /// Skip to the next track
+    pub async fn next(&self) -> Result<()> {
+        <Self as AVTransport>::next(self, av_transport::NextRequest { instance_id: 0 }).await
+    }
+
+    /// Skip to the previous track
+    pub async fn previous(&self) -> Result<()> {
+        <Self as AVTransport>::previous(self, av_transport::PreviousRequest { instance_id: 0 })
+            .await
+    }
+
     /// Clears the queue
     pub async fn queue_clear(&self) -> Result<()> {
         <Self as AVTransport>::remove_all_tracks_from_queue(self, Default::default()).await
