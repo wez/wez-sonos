@@ -58,6 +58,8 @@ pub enum Error {
     MoreThanOneTrackMetaData,
     #[error("LastChange format unexpected {0}")]
     LastChangeFormatUnexpected(String),
+    #[error("Device reports None for volume")]
+    VolumeNone,
 }
 
 impl Error {
@@ -147,6 +149,62 @@ impl SonosDevice {
                 .unwrap_or_else(Vec::new),
             None => vec![],
         })
+    }
+
+    /// Sets the mute state for the master sound channel
+    pub async fn set_mute(&self, mute: bool) -> Result<()> {
+        <Self as RenderingControl>::set_mute(
+            self,
+            rendering_control::SetMuteRequest {
+                instance_id: 0,
+                channel: MuteChannel::Master,
+                desired_mute: mute,
+            },
+        )
+        .await
+    }
+
+    /// Returns the mute state for the master sound channel
+    pub async fn get_mute(&self) -> Result<bool> {
+        <Self as RenderingControl>::get_mute(
+            self,
+            rendering_control::GetMuteRequest {
+                instance_id: 0,
+                channel: MuteChannel::Master,
+            },
+        )
+        .await?
+        .current_mute
+        .ok_or(Error::VolumeNone)
+    }
+
+    /// Sets the volume of master sound channel.
+    /// volume is in the range 0-100
+    pub async fn set_volume(&self, volume: u16) -> Result<()> {
+        <Self as RenderingControl>::set_volume(
+            self,
+            rendering_control::SetVolumeRequest {
+                instance_id: 0,
+                channel: Channel::Master,
+                desired_volume: volume,
+            },
+        )
+        .await
+    }
+
+    /// Gets the volume of the master sound channel.
+    /// Returned volume is in the range 0-100
+    pub async fn get_volume(&self) -> Result<u16> {
+        <Self as RenderingControl>::get_volume(
+            self,
+            rendering_control::GetVolumeRequest {
+                instance_id: 0,
+                channel: Channel::Master,
+            },
+        )
+        .await?
+        .current_volume
+        .ok_or(Error::VolumeNone)
     }
 
     /// Stops playback
