@@ -20,7 +20,7 @@ instant-xml = "0.5"
 log = "0.4.21"
 reqwest = { version = "0.12.4", default-features = false }
 tokio = { version = "1.37.0", features = ["net", "io-util"] }
-thiserror = "1.0.61"
+thiserror = "2.0.6"
 url = "2.5.0"
 httparse = "1.8.0"
 
