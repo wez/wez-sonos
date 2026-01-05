@@ -15,10 +15,10 @@ documentation = "https://docs.rs/wez-sonos"
 name = "sonos"
 
 [dependencies]
-instant-xml = "0.5"
+instant-xml = "0.6"
 #instant-xml = {git="https://github.com/wez/instant-xml", branch="empty" }
 log = "0.4.21"
-reqwest = { version = "0.12.4", default-features = false }
+reqwest = { version = "0.13.1", default-features = false }
 tokio = { version = "1.37.0", features = ["net", "io-util"] }
 thiserror = "2.0.7"
 url = "2.5.0"
