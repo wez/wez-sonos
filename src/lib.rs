@@ -60,6 +60,8 @@ pub enum Error {
     LastChangeFormatUnexpected(String),
     #[error("Device reports None for volume")]
     VolumeNone,
+    #[error("Device missing from zone groups")]
+    ZoneGroupMemberMissing,
 }
 
 impl Error {
@@ -272,6 +274,14 @@ impl SonosDevice {
         .await
     }
 
+    /// Tells a device to use its own local queue.
+    /// This is useful for example when a device first powers on and doesn't yet
+    /// have a proper transport uri that can be used for queuing tracks.
+    pub async fn set_queue_to_self(&self) -> Result<()> {
+        self.set_av_transport_uri(&format!("x-rincon-queue:{}#0", self.uuid().await?), None)
+            .await
+    }
+
     pub async fn queue_prepend(
         &self,
         uri: &str,
@@ -331,6 +341,19 @@ impl SonosDevice {
 
     pub fn url(&self) -> &Url {
         &self.url
+    }
+
+    // Returns the uuid of a device
+    pub async fn uuid(&self) -> Result<String> {
+        let uuid = self
+            .get_zone_group_state()
+            .await?
+            .into_iter()
+            .flat_map(|zone_group| zone_group.members)
+            .find(|member| member.location == self.url.as_str())
+            .map(|member| member.uuid);
+
+        uuid.ok_or(Error::ZoneGroupMemberMissing)
     }
 }
 
