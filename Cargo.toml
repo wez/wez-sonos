@@ -15,7 +15,7 @@ documentation = "https://docs.rs/wez-sonos"
 name = "sonos"
 
 [dependencies]
-instant-xml = "0.6"
+instant-xml = "0.7"
 #instant-xml = {git="https://github.com/wez/instant-xml", branch="empty" }
 log = "0.4.21"
 reqwest = { version = "0.13.1", default-features = false }
